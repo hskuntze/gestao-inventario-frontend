@@ -1,0 +1,53 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+}
+
+/* --- TEMA ESCURO --- */
+:root {
+  --bg-color: #121212;
+  --text-color: #e7e7e7;
+  --text-input-color: #76787c;
+  --border-input-color: #6a6b6e;
+  --border-color: #6a6b6e;
+  --submit-button-color: #3B82F6;
+  --button-color: #384152;
+}
+
+/* --- TEMA CLARO --- */
+[data-theme="light"] {
+  --bg-color: #fff;
+  --text-color: #333;
+  --text-input-color: #3d3d3d;
+  --border-input-color: #8e8e8f;
+  --border-color: #8e8e8f;
+  --submit-button-color: #112c57;
+  --button-color: #a1a1a1;
+}
+
+#root {
+  max-height: 100vh;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+a,
+a:hover {
+  text-decoration: none;
+  color: unset;
+}
+
+button {
+  border: unset;
+  background-color: unset;
+  color: unset;
+  margin: unset;
+  padding: unset;
+}
