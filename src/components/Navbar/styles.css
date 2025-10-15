@@ -1,44 +1,95 @@
 .navbar-container {
-  display: flex;
-  justify-content: space-between;
-  height: 69px;
-  border-bottom: 1px solid var(--border-color);
-}
+    display: flex;
+    justify-content: space-between;
+    height: 69px;
+    border-bottom: 2px solid var(--border-color);
+    width: 100vw;
+    margin: 0 auto;
+  }
 
-.navbar-div-left {
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-}
+  .navbar-div-left {
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+  }
 
-.navbar-div-left i {
-  color: #007aff;
-  font-size: 30px;
-}
+  .navbar-div-left i {
+    color: #007aff;
+    font-size: 30px;
+  }
 
-.navbar-div-right {
-  display: flex;
-  align-items: center;
-  padding-right: 20px;
-}
+  .navbar-div-right {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+  }
 
-.navbar-div-left h5 {
-  font-size: 30px;
-  margin: auto 0 auto 10px;
-}
+  .navbar-div-left h5 {
+    font-size: 13px;
+    margin-left: 10px;
+  }
 
-.nav-icon {
-  width: auto;
-  height: 45px;
-  margin: auto;
-}
+  .nav-icon {
+    width: auto;
+    height: 45px;
+    margin: auto;
+  }
 
-.navbar-button {
-  width: 40px;
-  height: 40px;
-  background-color: var(--button-color);
-  color: var(--text-color);
-  font-size: 20px;
-  margin: 0 5px;
-  border-radius: 10px;
+  .navbar-button {
+    width: 40px;
+    height: 40px;
+    background-color: var(--button-color);
+    color: var(--text-color);
+    font-size: 20px;
+    margin: 0 5px;
+    border-radius: 10px;
+  }
+
+@media (min-width: 576px) {
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    height: 69px;
+    border-bottom: 2px solid var(--border-color);
+    width: 87vw;
+    margin: 0 auto;
+  }
+
+  .navbar-div-left {
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+  }
+
+  .navbar-div-left i {
+    color: #007aff;
+    font-size: 30px;
+  }
+
+  .navbar-div-right {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+  }
+
+  .navbar-div-left h5 {
+    font-size: 30px;
+    margin: auto 0 auto 10px;
+  }
+
+  .nav-icon {
+    width: auto;
+    height: 45px;
+    margin: auto;
+  }
+
+  .navbar-button {
+    width: 40px;
+    height: 40px;
+    background-color: var(--button-color);
+    color: var(--text-color);
+    font-size: 20px;
+    margin: 0 5px;
+    border-radius: 10px;
+  }
 }

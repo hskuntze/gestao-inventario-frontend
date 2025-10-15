@@ -8,24 +8,36 @@
 
 /* --- TEMA ESCURO --- */
 :root {
-  --bg-color: #121212;
   --text-color: #e7e7e7;
+  --text-info-color: #9BA6B1;
   --text-input-color: #76787c;
   --border-input-color: #6a6b6e;
-  --border-color: #6a6b6e;
-  --submit-button-color: #3B82F6;
-  --button-color: #384152;
+  --border-color: #404349;
+  --submit-button-color: #007AFF;
+  --submit-button-hover-color: #1c86f8;
+  --button-color: #3C414D;
+  --button-hover-color: #4d5361;
+  --bg-color: #121212;
+  --bg-progress-bar: #39414D;
+  --bg-progress-fill: #007DFE;
+  --bg-card: #1D2228;
 }
 
 /* --- TEMA CLARO --- */
 [data-theme="light"] {
-  --bg-color: #fff;
   --text-color: #333;
+  --text-info-color: #9BA6B1;
   --text-input-color: #3d3d3d;
   --border-input-color: #8e8e8f;
   --border-color: #8e8e8f;
   --submit-button-color: #112c57;
+  --submit-button-hover-color: #1d3d72;
   --button-color: #a1a1a1;
+  --button-hover-color: #c0c0c0;
+  --bg-color: #fff;
+  --bg-progress-bar: #b4b4b4;
+  --bg-progress-fill: #0da621;
+  --bg-card: #d3d3d3;
 }
 
 #root {
@@ -36,6 +48,8 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
+  margin: 0;
+  padding: 0;
 }
 
 a,
