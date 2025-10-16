@@ -68,7 +68,7 @@ const Auth = () => {
             type="text"
             id="login-username"
             placeholder="Nome de usuário do SAFE"
-            className="input-element login-input"
+            className={`input-element login-input ${errors.username ? "input-error" : ""}`}
             {...register("username", {
               required: "Campo obrigatório",
             })}
@@ -81,7 +81,7 @@ const Auth = () => {
             type={show ? "text" : "password"}
             id="login-password"
             placeholder="Sua senha do SAFE"
-            className="input-element login-input"
+            className={`input-element login-input ${errors.password ? "input-error" : ""}`}
             {...register("password", {
               required: "Campo obrigatório",
             })}
@@ -92,7 +92,9 @@ const Auth = () => {
           <div className="invalid-feedback d-block div-erro">{errors.password?.message}</div>
         </div>
         {loading ? (
-          <Loader />
+          <div className="loading-div">
+            <Loader />
+          </div>
         ) : (
           <>
             <div className="login-input-group">

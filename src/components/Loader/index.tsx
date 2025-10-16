@@ -1,13 +1,12 @@
-import PropagateLoader from "react-spinner";
+import { PropagateLoader } from "react-spinners";
 
 interface Props {
-  width?: string;
-  height?: string;
+  loading?: boolean;
 }
 
-const Loader = ({ height, width }: Props) => {
+const Loader = ({ loading }: Props) => {
   return (
-    <PropagateLoader />
+    <PropagateLoader color="#007AFF" loading={true} size={10}  />
   );
 };
 

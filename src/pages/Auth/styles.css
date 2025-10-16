@@ -87,6 +87,10 @@
   font-size: 20px;
 }
 
+.input-error {
+  border: 1px solid var(--border-error-color);
+}
+
 @media (min-width: 576px) {
   .login-welcome {
     width: 100%;
@@ -107,7 +111,8 @@
 
   .login-input-group {
     width: 90%;
-    height: 80px;
+    min-height: 80px;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
