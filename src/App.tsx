@@ -1,6 +1,6 @@
+import './App.css';
 import "bootstrap/dist/js/bootstrap.bundle";
 import "react-toastify/ReactToastify.css";
-import './App.css';
 import { useState } from 'react';
 import { AuthContext, AuthContextData } from "@/utils/contexts/AuthContext";
 import { UserContext, UserContextData } from "@/utils/contexts/UserContext";

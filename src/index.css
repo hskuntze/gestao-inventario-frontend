@@ -1,6 +1,21 @@
+.auto-width {
+  width: auto !important;
+}
+
+.pd-1 {
+  padding: 2px !important;
+}
+
+.pd-2 {
+  padding: 4px !important;
+}
+
+.pd-3 {
+  padding: 8px !important;
+}
+
 .input-element {
   height: 45px;
-  width: 100%;
   background-color: var(--bg-color);
   color: var(--text-input-color);
   border: 1px solid var(--border-input-color);
@@ -10,12 +25,95 @@
 }
 
 .button {
+  border-radius: 10px;
+  cursor: pointer;
   width: 100%;
   height: 45px;
-  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  transition: background-color 0.3s ease-in-out;
 }
 
 .submit-button {
   background-color: var(--submit-button-color);
   color: var(--text-color);
+}
+
+.submit-button:hover {
+  background-color: var(--submit-button-hover-color);
+}
+
+.general-button {
+  background-color: var(--button-color);
+  color: var(--text-color);
+}
+
+.general-button:hover {
+  background-color: var(--button-hover-color);
+}
+
+.loading-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.div-erro {
+  padding-top: 5px;
+  font-size: 10px;
+  color: var(--text-error-color);
+}
+
+.skeleton-card-container {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  margin-top: 15px;
+  border: 1px solid var(--skeleton-gradient);
+
+  overflow: hidden; /* evita que a faixa saia da div */
+
+  /* fundo cinza fixo */
+  background-color: var(--skeleton-loading);
+  position: relative;
+}
+
+.skeleton-card-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -11%; /* começa fora da tela */
+  width: 32%;
+  height: 100%;
+
+  background: linear-gradient(90deg, var(--skeleton-loading) 0%, var(--skeleton-gradient) 50%, var(--skeleton-loading) 100%);
+
+  animation: shimmer-slide 1s infinite linear;
+  opacity: 0.5; /* opcional, para suavizar */
+  border-radius: inherit;
+}
+
+/* animação da faixa se movendo */
+@keyframes shimmer-slide {
+  0% {
+    left: -10%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@media (min-width: 576px) {
+  .pd-1 {
+    padding: 5px !important;
+  }
+
+  .pd-2 {
+    padding: 10px !important;
+  }
+
+  .pd-3 {
+    padding: 15px !important;
+  }
 }

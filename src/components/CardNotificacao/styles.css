@@ -1,0 +1,119 @@
+.card-notificacao-container {
+  width: fit-content;
+  height: 80px;
+  padding: 5px 10px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.card-notificacao-container:first-of-type {
+  margin-top: 15px;
+}
+
+.card-icon {
+  background-color: #173455;
+  width: 65px;
+  height: 65px;
+  min-width: 65px;
+  min-height: 65px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-icon i {
+  font-size: 35px;
+  color: #087fff;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+  margin-right: 7px;
+  max-width: calc(100% - 20px);
+}
+
+.card-title {
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.015em;
+  color: var(--text-color);
+  margin-bottom: 5px;
+  max-height: 45px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-message {
+  font-weight: 300;
+  font-size: 12px;
+  letter-spacing: 0.017em;
+  max-height: 45px;
+  max-width: 100%;
+  color: var(--text-info-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 992px) {
+  .card-notificacao-container {
+    width: 100%;
+    height: 80px;
+    padding: 10px 0 10px 15px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .card-notificacao-container:first-of-type {
+    margin-top: 15px;
+  }
+
+  .card-icon {
+    background-color: #173455;
+    width: 65px;
+    height: 65px;
+    min-width: 65px;
+    min-height: 65px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-icon i {
+    font-size: 35px;
+    color: #087fff;
+  }
+
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 25px;
+  }
+
+  .card-title {
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: 0.015em;
+    color: var(--text-color);
+    margin-bottom: 5px;
+  }
+
+  .card-message {
+    font-weight: 300;
+    font-size: 15px;
+    letter-spacing: 0.017em;
+    color: var(--text-info-color);
+  }
+}

@@ -1,0 +1,49 @@
+.cn-skeleton-size {
+  width: calc(100% - 15px);
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 10px 0 10px 15px;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.cn-skeleton-icon {
+  width: 65px;
+  height: 65px;
+
+  background-color: var(--skeleton-element);
+  z-index: 3;
+  border-radius: 10px;
+}
+
+.cn-skeleton-title {
+  width: 200px;
+  height: 23px;
+
+  background-color: var(--skeleton-element);
+  z-index: 3;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.cn-skeleton-message {
+  width: 180px;
+  height: 19px;
+
+  background-color: var(--skeleton-element);
+  z-index: 3;
+  border-radius: 10px;
+}
+
+@media (min-width: 992px) {
+  .cn-skeleton-title {
+    width: 485px;
+  }
+
+  .cn-skeleton-message {
+    width: 475px;
+  }
+}
