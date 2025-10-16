@@ -28,7 +28,7 @@
     "react-hook-form": "^7.65.0",
     "react-router-dom": "^7.9.4",
     "react-scripts": "5.0.1",
-    "react-spinner": "^0.2.7",
+    "react-spinners": "^0.17.0",
     "react-toastify": "^11.0.5",
     "sass": "^1.93.2",
     "typescript": "^4.9.5",

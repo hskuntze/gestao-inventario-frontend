@@ -1,9 +1,11 @@
+import { CategoriaType } from "@/types/categoria";
 import "./styles.css";
+import { TipoAtivoType } from "@/types/tipoativo";
 
 interface Props {
   idAtivo: number;
-  tipoAtivo: "TANGIVEL" | "INTANGIVEL" | "TANGIVEL_MANUTENCAO";
-  categoria: "ACESSORIO" | "ELETRONICO" | "EPI" | "INFORMATICA" | "MOBILIARIO" | "SOFTWARE";
+  tipoAtivo: TipoAtivoType;
+  categoria: CategoriaType;
   mensagem: string;
 }
 
@@ -20,7 +22,7 @@ const CardAtivoRecente = ({ idAtivo, mensagem, categoria, tipoAtivo }: Props) =>
   return (
     <div className="card-ativo-recente-container">
       <div className="card-icon-white">
-        <i className={iconeAtivo[categoria]} />
+        <i className={iconeAtivo[categoria.nome]} />
       </div>
       <div className="card-info">
         <span className="card-title">{mensagem}</span>

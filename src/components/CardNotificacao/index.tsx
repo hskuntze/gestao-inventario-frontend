@@ -1,8 +1,9 @@
+import { TipoAtivoType } from "@/types/tipoativo";
 import "./styles.css";
 
 interface Props {
   idAtivo: number;
-  tipoAtivo: "TANGIVEL" | "INTANGIVEL" | "TANGIVEL_MANUTENCAO";
+  tipoAtivo: TipoAtivoType;
   titulo: string;
   mensagem: string;
   tipo: "MANUTENCAO" | "GARANTIA" | "OUTRO";
