@@ -3,6 +3,7 @@ import { isAuthenticated } from "@/utils/auth";
 import Navbar from "@/components/Navbar";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
+import Ativo from "./pages/Ativo";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -20,6 +21,7 @@ const Routes = () => {
           <Route path="/" element={<Navigate to="/gestao-inventario" />} />
           <Route path="/gestao-inventario/*" element={<Auth />} />
           {isAuthenticated() && <Route path="/gestao-inventario" element={<Home />} />}
+          <Route path="/gestao-inventario/ativo/*" element={<Ativo />} />
         </Switch>
       </main>
     </BrowserRouter>

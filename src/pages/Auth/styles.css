@@ -88,7 +88,7 @@
 }
 
 .input-error {
-  border: 1px solid var(--border-error-color);
+  border: 1px solid var(--border-error-color) !important;
 }
 
 @media (min-width: 576px) {

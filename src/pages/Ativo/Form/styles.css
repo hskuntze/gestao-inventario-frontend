@@ -1,0 +1,95 @@
+.page {
+  max-width: 87vw;
+  margin: 20px auto 0 auto;
+}
+
+.page-header h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--white-text);
+}
+
+.page-body {
+  margin-bottom: 20px;
+}
+
+.select-tipo-ativo select {
+  background-color: var(--bg-card);
+}
+
+.ativo-form-container {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto 0 auto;
+}
+
+.form-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  margin-top: 20px;
+}
+
+.div-input-formulario {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 20px 0 0;
+  width: calc(50% - 20px);
+}
+
+.div-input-formulario.text-area-formulario {
+  width: 100%;
+}
+
+.div-input-formulario span {
+  color: var(--text-input-label);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.015rem;
+}
+
+.div-input-formulario select, .select-tipo-ativo select {
+  appearance: none; /* remove seta padrão */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239e9e9e' class='bi bi-chevron-down' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center; /* controla a distância da seta */
+  background-size: 16px;
+
+  width: 100%;
+}
+
+.input-formulario {
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  color: var(--white-text);
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 0;
+  margin-top: 12px;
+  width: calc(100% - 20px);
+  min-height: 50px;
+}
+
+.input-full-width {
+  width: 100%;
+}
+
+.text-area-formulario textarea {
+  padding-top: 10px;
+}
+
+.form-buttons {
+  width: 140px;
+  margin-top: 20px;
+  margin-right: 20px;
+}

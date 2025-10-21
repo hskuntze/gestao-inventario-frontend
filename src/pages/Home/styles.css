@@ -71,7 +71,7 @@
     margin-top: 0;
   }
 
-  .home-section button {
+  .home-section button, .home-section a {
     margin-right: 10px;
   }
 

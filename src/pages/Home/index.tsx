@@ -10,6 +10,7 @@ import CardAtivoRecente from "@/components/CardAtivoRecente";
 import CNSkeletonLoader from "@/components/CardNotificacao/CNSkeletonLoader";
 import CAQSkeletonLoader from "@/components/CardAtivoQtd/CAQSkeletonLoader";
 import CARSkeletonLoader from "@/components/CardAtivoRecente/CARSkeletonLoader";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
@@ -56,9 +57,11 @@ const Home = () => {
   return (
     <div className="home-container">
       <section className="home-section">
-        <button type="button" className="button submit-button auto-width pd-2">
-          Adicionar Ativo
-        </button>
+        <Link to={"/gestao-inventario/ativo/formulario/create"}>
+          <button type="button" className="button submit-button auto-width pd-2">
+            Adicionar Ativo
+          </button>
+        </Link>
         <button type="button" className="button general-button auto-width pd-2">
           Gerar Relatório
         </button>
