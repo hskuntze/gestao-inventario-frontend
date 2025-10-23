@@ -25,16 +25,18 @@
   --bg-progress-bar: #39414d;
   --bg-progress-fill: #007dfe;
   --bg-card: #1d2228;
+  --bg-no-data: #df2929;
   --skeleton-loading: #1d2228;
   --skeleton-gradient: #3E4957;
   --skeleton-element: rgb(62, 67, 75);
+  --hist-line: #ffffff1f;
 }
 
 /* --- TEMA CLARO --- */
 [data-theme="light"] {
   --white-text: #111;
   --text-color: #333;
-  --text-info-color: #9ba6b1;
+  --text-info-color: #7f8185;
   --text-input-color: #3d3d3d;
   --text-error-color: #d8262c;
   --border-input-color: #8e8e8f;
@@ -48,8 +50,10 @@
   --bg-progress-bar: #b4b4b4;
   --bg-progress-fill: #0da621;
   --bg-card: #d3d3d3;
+  --bg-no-data: #e06969;
   --skeleton-loading: #c2c2c2;
   --skeleton-gradient: #dfdfdf;
+  --hist-line: #0000001f;
 }
 
 #root {
@@ -68,8 +72,6 @@ a,
 a:hover {
   text-decoration: none;
   color: unset;
-  padding: 0;
-  margin: 0;
 }
 
 button {

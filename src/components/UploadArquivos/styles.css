@@ -1,5 +1,10 @@
 .upload-card {
   margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  width: 100%;
+  position: relative;
 }
 
 .upload-dropzone {
@@ -12,6 +17,7 @@
   margin-bottom: 15px;
   display: flex;
   flex-direction: column;
+  width: calc(100% - 54px);
 }
 
 .upload-dropzone.drag-over {
@@ -109,4 +115,12 @@
 
 .file-remove:hover {
   color: #ff4444;
+}
+
+.upload-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
 }

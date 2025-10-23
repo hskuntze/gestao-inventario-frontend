@@ -1,0 +1,52 @@
+.historico-container {
+  width: 100%;
+  display: flex;
+  margin-top: 15px;
+}
+
+.historico-icon {
+  margin-right: 7px;
+  z-index: 1;
+}
+
+.historico-icon i {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.historico-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.historico-content-title {
+  font-size: 15px;
+}
+
+.historico-content-info {
+  font-size: 11px;
+  color: var(--text-info-color);
+  margin-top: 2px;
+}
+
+.registro-icon {
+  background-color: #0583f2;
+}
+
+.atualizacao-icon {
+  background-color: #f2b705;
+}
+
+.atribuicao-icon {
+  background-color: #29a63c;
+}
+
+.historico-container:last-child::before {
+  display: none;
+}

@@ -33,8 +33,12 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivo
   const { control, handleSubmit, setValue, watch } = useForm<FormData>();
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const files = watch("file");
+
+  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
+  const ALLOWED_TYPES = ["image/jpg", "image/jpeg", "image/png", "image/gif", "application/pdf"];
 
   // Gera previews quando o usuário seleciona novos arquivos
   useEffect(() => {
@@ -50,12 +54,33 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivo
 
   useEffect(() => {
     if (!files) return;
-    const newPreviews = Array.from(files).map((file) => ({
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    Array.from(files).forEach((file) => {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        errors.push(`Tipo de arquivo não permitido: ${file.name}`);
+      } else if (file.size > MAX_FILE_SIZE) {
+        errors.push(`Arquivo muito grande (máx. 1 MB): ${file.name}`);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (errors.length > 0) {
+      setErrorMessage(errors.join("\n"));
+    } else {
+      setErrorMessage(null);
+    }
+
+    const newPreviews = validFiles.map((file) => ({
       name: file.name,
       url: URL.createObjectURL(file),
       size: file.size,
       isNew: true,
     }));
+
     setFilePreviews((prev) => [...prev, ...newPreviews]);
   }, [files]);
 
@@ -96,7 +121,6 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivo
 
       try {
         const response = await requestBackend(requestParams);
-        console.log(response.status);
         //if (!response.status) throw new Error(`Erro ao enviar ${file.name}`);
       } catch (error) {
         console.error(error);
@@ -142,11 +166,20 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivo
           <Controller
             name="file"
             control={control}
-            render={({ field }) => <input type="file" multiple onChange={(e) => field.onChange(e.target.files)} hidden />}
+            render={({ field }) => (
+              <input type="file" multiple onChange={(e) => field.onChange(e.target.files)} accept=".jpg,.jpeg,.png,.gif,.pdf" hidden />
+            )}
           />
           <span>procure em seus arquivos</span>
         </label>
       </div>
+
+      {errorMessage && (
+        <div className="upload-error">
+          <strong>⚠️ Erro nos arquivos:</strong>
+          <pre>{errorMessage}</pre>
+        </div>
+      )}
 
       {/* Lista de arquivos */}
       <div className="upload-file-list">

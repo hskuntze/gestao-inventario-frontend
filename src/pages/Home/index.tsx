@@ -31,8 +31,6 @@ const Home = () => {
     return "Desconhecido";
   }
 
-  console.log(getOS());
-
   useEffect(() => {
     //setLoading(true);
 

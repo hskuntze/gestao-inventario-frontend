@@ -6,7 +6,7 @@
 .home-section {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   margin-top: 30px;
   margin-bottom: 20px;
   margin-left: 5px;
@@ -18,7 +18,7 @@
 }
 
 .home-section button {
-  margin-right: 10px;
+  margin-right: 0;
 }
 
 .home-section button:last-of-type {

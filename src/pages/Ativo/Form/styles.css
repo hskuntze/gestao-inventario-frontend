@@ -17,14 +17,6 @@
   background-color: var(--bg-card);
 }
 
-.ativo-form-container {
-  background-color: var(--bg-card);
-  color: var(--text-color);
-  border-radius: 10px;
-  padding: 20px;
-  margin: 20px auto 0 auto;
-}
-
 .form-title {
   font-size: 22px;
   font-weight: 700;
@@ -55,7 +47,8 @@
   letter-spacing: 0.015rem;
 }
 
-.div-input-formulario select, .select-tipo-ativo select {
+.div-input-formulario select,
+.select-tipo-ativo select {
   appearance: none; /* remove seta padrão */
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -92,4 +85,136 @@
   width: 140px;
   margin-top: 20px;
   margin-right: 20px;
+}
+
+.no-info {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--text-info-color);
+  font-style: italic;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.voltar-button {
+  background-color: #fa8a01;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+}
+
+.voltar-button:hover {
+  background-color: #bb6905;
+}
+
+.qr-image {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.print-button {
+  margin-bottom: 10px;
+  background-color: var(--submit-button-color);
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  transition: background-color 0.45s ease-in-out;
+  cursor: pointer;
+}
+
+.print-button:hover {
+  background-color: var(--submit-button-hover-color);
+}
+
+.print-qr-code-icon {
+  font-size: 21px;
+  margin-left: 3px;
+}
+
+@media (min-width: 992px) {
+  .page-content {
+    display: flex;
+    width: 100%;
+  }
+
+  .page-body {
+    width: 75%;
+  }
+
+  .page-side-section {
+    margin-left: 20px;
+    width: 25%;
+  }
+
+  .historico-body {
+    position: relative;
+  }
+
+  .historico-body::before {
+    content: "";
+    position: absolute;
+    left: 14px; /* centro da linha: metade de padding-left (ajuste se mudar) */
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background-color: var(--hist-line); /* cor sutil para tema escuro */
+    border-radius: 2px;
+    z-index: 0;
+  }
+}
+
+@media print {
+  /* Oculta todo o resto da tela */
+  body * {
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Mostra apenas o contêiner do QR Code */
+  .qr-container,
+  .qr-container * {
+    visibility: visible;
+  }
+
+  /* Centraliza o QR Code na folha */
+  .qr-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    background: white; /* evita fundo colorido */
+    page-break-after: avoid;
+    page-break-before: avoid;
+  }
+
+  /* Remove margens padrão da impressora */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  /* Oculta o botão de impressão */
+  .qr-container .print-button {
+    display: none !important;
+  }
 }

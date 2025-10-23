@@ -94,6 +94,30 @@
   border-radius: inherit;
 }
 
+.w-100 {
+  width: 100% !important;
+}
+
+.w-75 {
+  width: 75% !important;
+}
+
+.w-50 {
+  width: 50% !important;
+}
+
+.content-container {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto 0 auto;
+}
+
+.delete-button {
+  color: #d81313;
+}
+
 /* animação da faixa se movendo */
 @keyframes shimmer-slide {
   0% {
