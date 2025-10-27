@@ -1,15 +1,19 @@
+import { AreaType } from "./area";
+import { FornecedorType } from "./fornecedor";
 import { Imagem } from "./imagem";
+import { LocalizacaoType } from "./localizacao";
+import { UsuarioResponsavelType } from "./usuario_responsavel";
 
 export type AtivoType = {
   id: number;
   idPatrimonial: string;
+  gerarIdPatrimonial: boolean;
   categoria: string;
   descricao: string;
-  area: string;
-  localizacao: string;
-  responsavel: string;
-  usuarioResponsavel: string;
-  fornecedor: string;
+  area: AreaType;
+  localizacao: LocalizacaoType;
+  usuarioResponsavel: UsuarioResponsavelType;
+  fornecedor: FornecedorType;
   dataAquisicao: string;
   codigoSerie: string;
   observacoes: string;

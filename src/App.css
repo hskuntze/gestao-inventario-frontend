@@ -11,6 +11,7 @@
   --white-text: #fff;
   --text-color: #e7e7e7;
   --text-info-color: #9ba6b1;
+  --text-disabled-color: #727375;
   --text-input-color: #76787c;
   --text-error-color: #e60109;
   --text-input-label: #9E9E9E;
@@ -18,7 +19,7 @@
   --border-color: #404349;
   --border-error-color: #e60109;
   --submit-button-color: #007aff;
-  --submit-button-hover-color: #1c86f8;
+  --submit-button-hover-color: #1877dd;
   --button-color: #3c414d;
   --button-hover-color: #4d5361;
   --bg-color: #121212;
@@ -26,6 +27,8 @@
   --bg-progress-fill: #007dfe;
   --bg-card: #1d2228;
   --bg-no-data: #df2929;
+  --bg-filter-input: #2a2a2a;
+  --bg-disabled-field: #222121;
   --skeleton-loading: #1d2228;
   --skeleton-gradient: #3E4957;
   --skeleton-element: rgb(62, 67, 75);
@@ -37,13 +40,14 @@
   --white-text: #111;
   --text-color: #333;
   --text-info-color: #7f8185;
+  --text-disabled-color: #727375;
   --text-input-color: #3d3d3d;
   --text-error-color: #d8262c;
   --border-input-color: #8e8e8f;
   --border-color: #8e8e8f;
   --border-error-color: #d8262c;
-  --submit-button-color: #112c57;
-  --submit-button-hover-color: #1d3d72;
+  --submit-button-color: #007aff;
+  --submit-button-hover-color: #1877dd;
   --button-color: #a1a1a1;
   --button-hover-color: #c0c0c0;
   --bg-color: #fff;
@@ -51,6 +55,8 @@
   --bg-progress-fill: #0da621;
   --bg-card: #d3d3d3;
   --bg-no-data: #e06969;
+  --bg-filter-input: #2a2a2a;
+  --bg-disabled-field: #b1afaf;
   --skeleton-loading: #c2c2c2;
   --skeleton-gradient: #dfdfdf;
   --hist-line: #0000001f;

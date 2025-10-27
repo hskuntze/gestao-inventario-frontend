@@ -18,7 +18,7 @@ const CardHistoricoAtivo = ({ element, ativo }: Props) => {
   const labels: { [key: string]: string } = {
     REGISTRO: "Ativo registrado",
     ATUALIZAÇÃO: "Ativo atualizado",
-    ATRIBUIÇÃO: `Atribuído a ${ativo.usuarioResponsavel}`,
+    ATRIBUIÇÃO: `Atribuído a ${ativo.usuarioResponsavel.nome}`,
   };
 
   return (
@@ -29,7 +29,7 @@ const CardHistoricoAtivo = ({ element, ativo }: Props) => {
       <div className="historico-content">
         <span className="historico-content-title">{labels[element.operation]}</span>
         <span className="historico-content-info">{formatarData(element.createdAt)}</span>
-        {element.operation === "REGISTRO" && <span className="historico-content-info">Responsável: {ativo.responsavel}</span>}
+        {element.operation === "REGISTRO" && <span className="historico-content-info">Responsável: {ativo.area.responsavel}</span>}
       </div>
     </div>
   );

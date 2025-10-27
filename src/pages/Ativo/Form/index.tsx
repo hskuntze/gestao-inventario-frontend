@@ -9,18 +9,23 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { AtivoType } from "@/types/ativo";
 import { HistoricoType } from "@/types/historico";
 import CardHistoricoAtivo from "@/components/CardHistoricoAtivo";
+import { AreaType } from "@/types/area";
+import { LocalizacaoType } from "@/types/localizacao";
+import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
+import { FornecedorType } from "@/types/fornecedor";
+import { fetchAllAreas, fetchAllFornecedores, fetchAllLocalizacoes, fetchAllUsuariosResponsaveis } from "@/utils/functions";
 
 type FormData = {
   tipoAtivo: string | null;
+  gerarIdPatrimonial: boolean;
 
   idPatrimonial: string;
   categoria: string;
   descricao: string;
-  area: string;
-  localizacao: string;
-  responsavel: string;
-  usuarioResponsavel: string;
-  fornecedor: string;
+  area: AreaType;
+  localizacao: LocalizacaoType;
+  usuarioResponsavel: UsuarioResponsavelType;
+  fornecedor: FornecedorType;
   dataAquisicao: string;
   codigoSerie: string;
   observacoes: string;
@@ -40,6 +45,14 @@ const AtivoForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [ativo, setAtivo] = useState<AtivoType>();
   const [historicoAtivo, setHistoricoAtivo] = useState<HistoricoType[]>();
+
+  const [areas, setAreas] = useState<AreaType[]>([]);
+  const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
+  const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
+  const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
+
+  const [selectedArea, setSelectedArea] = useState<AreaType>();
+  const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -85,6 +98,18 @@ const AtivoForm = () => {
         withCredentials: true,
         data: {
           ...formData,
+          fornecedor: {
+            id: formData.fornecedor.id,
+          },
+          area: {
+            id: formData.area.id,
+          },
+          usuariosResponsavel: {
+            id: formData.usuarioResponsavel.id,
+          },
+          localizacao: {
+            id: formData.localizacao.id,
+          },
         },
       };
 
@@ -115,10 +140,13 @@ const AtivoForm = () => {
 
         setAtivo(data);
 
+        setGerarIdPatrimonial(data.gerarIdPatrimonial);
+
         setValue("tipoAtivo", data.tipoAtivo);
         setTipoForm(data.tipoAtivo as "t" | "i" | "tl");
 
         setValue("area", data.area);
+        setSelectedArea(data.area);
         setValue("categoria", data.categoria);
         setValue("codigoSerie", data.codigoSerie);
         setValue("dataAquisicao", data.dataAquisicao);
@@ -129,8 +157,8 @@ const AtivoForm = () => {
         setValue("linkDocumento", data.linkDocumento);
         setValue("localizacao", data.localizacao);
         setValue("observacoes", data.observacoes);
-        setValue("responsavel", data.responsavel);
         setValue("usuarioResponsavel", data.usuarioResponsavel);
+        setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
       })
       .catch((err) => {
         toast.error("Erro ao tentar carregar dados do ativo");
@@ -164,6 +192,74 @@ const AtivoForm = () => {
       loadHistoricoInfo();
     }
   }, [isEditing, loadInfo, loadHistoricoInfo]);
+
+  useEffect(() => {
+    async function getAreas() {
+      //setLoadingAreas(true);
+      setAreas([]);
+
+      try {
+        const data = await fetchAllAreas();
+        setAreas(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar áreas";
+        toast.error(errorMsg);
+      }
+    }
+
+    getAreas();
+  }, []);
+
+  useEffect(() => {
+    async function getFornecedores() {
+      //setLoadingFornecedores(true);
+      setFornecedores([]);
+
+      try {
+        const data = await fetchAllFornecedores();
+        setFornecedores(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
+        toast.error(errorMsg);
+      }
+    }
+
+    getFornecedores();
+  }, []);
+
+  useEffect(() => {
+    async function getLocalizacoes() {
+      //setLoadingLocalizacoes(true);
+      setLocalizacoes([]);
+
+      try {
+        const data = await fetchAllLocalizacoes();
+        setLocalizacoes(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar localizações";
+        toast.error(errorMsg);
+      }
+    }
+
+    getLocalizacoes();
+  }, []);
+
+  useEffect(() => {
+    async function getUsuariosResponsaveis() {
+      //setLoadingUsuariosResponsaveis(true);
+      setUsuariosResponsaveis([]);
+
+      try {
+        const data = await fetchAllUsuariosResponsaveis();
+        setUsuariosResponsaveis(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar usuários responsáveis";
+        toast.error(errorMsg);
+      }
+    }
+
+    getUsuariosResponsaveis();
+  }, []);
 
   return (
     <div className="page">
@@ -211,12 +307,44 @@ const AtivoForm = () => {
                       className={`input-formulario ${errors.descricao ? "input-error" : ""}`}
                       rows={4}
                       {...register("descricao", { required: "Campo obrigatório" })}
+                      maxLength={255}
                     ></textarea>
                     <div className="invalid-feedback d-block div-erro">{errors.descricao?.message}</div>
                   </div>
-                  <div className="div-input-formulario">
-                    <span>ID Patrimonial</span>
-                    <input type="text" className="input-formulario" {...register("idPatrimonial")} />
+                  <div className="row-input-fields w-50">
+                    <div className="div-input-formulario">
+                      <span>ID Patrimonial</span>
+                      <input
+                        type="text"
+                        className={`input-formulario ${gerarIdPatrimonial ? 'disabled-field' : ''}`}
+                        {...register("idPatrimonial", {
+                          required: gerarIdPatrimonial ? false : "Campo obrigatório",
+                        })}
+                        maxLength={255}
+                        disabled={gerarIdPatrimonial}
+                      />
+                      <div className="invalid-feedback d-block div-erro">{errors.idPatrimonial?.message}</div>
+                    </div>
+                    <div className="div-input-formulario">
+                      <span>Gerar ID Patrimonial</span>
+                      <Controller
+                        name="gerarIdPatrimonial"
+                        control={control}
+                        render={({ field }) => (
+                          <input
+                            type="checkbox"
+                            id="gerarIdPatrimonial"
+                            className={`checkbox-input-formulario ${errors.gerarIdPatrimonial ? "input-error" : ""}`}
+                            checked={gerarIdPatrimonial}
+                            onChange={(e) => {
+                              field.onChange(e.target.checked);
+                              setGerarIdPatrimonial(!gerarIdPatrimonial);
+                            }}
+                            disabled={isEditing}
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                   <div className="div-input-formulario">
                     <span>Categoria</span>
@@ -250,44 +378,134 @@ const AtivoForm = () => {
                         required: "Campo obrigatório",
                       }}
                       render={({ field }) => (
-                        <select id="area" className={`input-formulario ${errors.area ? "input-error" : ""}`} {...field} value={field.value}>
+                        <select
+                          id="area"
+                          className={`input-formulario ${errors.area ? "input-error" : ""}`}
+                          {...field}
+                          value={field.value?.id || ""}
+                          onChange={(e) => {
+                            const selectedId = Number(e.target.value);
+                            const selectedArea = areas.find((a) => a.id === selectedId);
+
+                            field.onChange(selectedArea || null);
+                            setSelectedArea(selectedArea);
+                          }}
+                        >
                           <option value="">Selecione uma área</option>
-                          <option value="GAP">GAP</option>
-                          <option value="GPS">GPS</option>
-                          <option value="GTI">GTI</option>
+                          {areas &&
+                            areas.length > 0 &&
+                            areas.map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.nome}
+                              </option>
+                            ))}
                         </select>
                       )}
                     />
                     <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
                   </div>
                   <div className="div-input-formulario">
-                    <span>Localização</span>
-                    <input type="text" className="input-formulario" {...register("localizacao")} />
+                    <span>Responsável</span>
+                    <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedArea?.responsavel} />
                   </div>
                   <div className="div-input-formulario">
-                    <span>Responsável</span>
-                    <input
-                      type="text"
-                      className={`input-formulario ${errors.responsavel ? "input-error" : ""}`}
-                      {...register("responsavel", { required: "Campo obrigatório" })}
+                    <span>Localização</span>
+                    <Controller
+                      name="localizacao"
+                      control={control}
+                      rules={{
+                        required: "Campo obrigatório",
+                      }}
+                      render={({ field }) => (
+                        <select
+                          id="localizacao"
+                          className={`input-formulario ${errors.localizacao ? "input-error" : ""}`}
+                          {...field}
+                          value={field.value?.id || ""}
+                          onChange={(e) => {
+                            const selectedId = Number(e.target.value);
+                            const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
+
+                            field.onChange(selectedLocalizacao || null);
+                          }}
+                        >
+                          <option value="">Selecione uma localização</option>
+                          {localizacoes &&
+                            localizacoes.length > 0 &&
+                            localizacoes.map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.nome}
+                              </option>
+                            ))}
+                        </select>
+                      )}
                     />
-                    <div className="invalid-feedback d-block div-erro">{errors.responsavel?.message}</div>
                   </div>
                   <div className="div-input-formulario">
                     <span>Usuário responsável</span>
-                    <input
-                      type="text"
-                      className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
-                      {...register("usuarioResponsavel", { required: "Campo obrigatório" })}
+                    <Controller
+                      name="usuarioResponsavel"
+                      control={control}
+                      rules={{
+                        required: "Campo obrigatório",
+                      }}
+                      render={({ field }) => (
+                        <select
+                          id="usuarioResponsavel"
+                          className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
+                          {...field}
+                          value={field.value?.id || ""}
+                          onChange={(e) => {
+                            const selectedId = Number(e.target.value);
+                            const selectedUsuarioResponsavel = usuariosResponsaveis.find((a) => a.id === selectedId);
+
+                            field.onChange(selectedUsuarioResponsavel || null);
+                          }}
+                        >
+                          <option value="">Selecione um usuário responsável</option>
+                          {usuariosResponsaveis &&
+                            usuariosResponsaveis.length > 0 &&
+                            usuariosResponsaveis.map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.nome}
+                              </option>
+                            ))}
+                        </select>
+                      )}
                     />
                     <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
                   </div>
                   <div className="div-input-formulario">
                     <span>Fornecedor</span>
-                    <input
-                      type="text"
-                      className={`input-formulario ${errors.fornecedor ? "input-error" : ""}`}
-                      {...register("fornecedor", { required: "Campo obrigatório" })}
+                    <Controller
+                      name="fornecedor"
+                      control={control}
+                      rules={{
+                        required: "Campo obrigatório",
+                      }}
+                      render={({ field }) => (
+                        <select
+                          id="fornecedor"
+                          className={`input-formulario ${errors.fornecedor ? "input-error" : ""}`}
+                          {...field}
+                          value={field.value?.id || ""}
+                          onChange={(e) => {
+                            const selectedId = Number(e.target.value);
+                            const selectedFornecedor = fornecedores.find((a) => a.id === selectedId);
+
+                            field.onChange(selectedFornecedor || null);
+                          }}
+                        >
+                          <option value="">Selecione um fornecedor</option>
+                          {fornecedores &&
+                            fornecedores.length > 0 &&
+                            fornecedores.map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.nome}
+                              </option>
+                            ))}
+                        </select>
+                      )}
                     />
                     <div className="invalid-feedback d-block div-erro">{errors.fornecedor?.message}</div>
                   </div>
@@ -333,16 +551,17 @@ const AtivoForm = () => {
                       type="text"
                       className={`input-formulario ${errors.codigoSerie ? "input-error" : ""}`}
                       {...register("codigoSerie", { required: "Campo obrigatório" })}
+                      maxLength={255}
                     />
                     <div className="invalid-feedback d-block div-erro">{errors.codigoSerie?.message}</div>
                   </div>
                   <div className={`div-input-formulario ${tipoForm !== "i" ? "input-full-width" : ""}`}>
                     <span>Link do documento</span>
-                    <input type="text" className="input-formulario" {...register("linkDocumento")} />
+                    <input type="text" className="input-formulario" {...register("linkDocumento")} maxLength={255} />
                   </div>
                   <div className="div-input-formulario text-area-formulario">
                     <span>Observações</span>
-                    <textarea id="observacoes" className="input-formulario" rows={4} {...register("observacoes")}></textarea>
+                    <textarea id="observacoes" className="input-formulario" rows={4} {...register("observacoes")} maxLength={255}></textarea>
                   </div>
                   <div className="form-buttons">
                     <button className="button submit-button">Salvar</button>
