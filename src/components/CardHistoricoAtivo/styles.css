@@ -1,11 +1,28 @@
 .historico-container {
   width: 100%;
   display: flex;
-  margin-top: 15px;
+  align-items: flex-start;
+  position: relative;
+  margin-top: 10px;
+}
+
+.historico-container::before {
+  content: "";
+  position: absolute;
+  left: 14px; /* alinhamento com o centro do ícone */
+  top: 0;
+  bottom: -10px;
+  width: 2px;
+  background-color: var(--hist-line);
+  z-index: 0;
+}
+
+.historico-container:last-child::before {
+  bottom: 100%;
 }
 
 .historico-icon {
-  margin-right: 7px;
+  margin-right: 8px;
   z-index: 1;
 }
 
@@ -18,6 +35,7 @@
   justify-content: center;
   font-size: 18px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  color: var(--bg-color);
 }
 
 .historico-content {
@@ -36,17 +54,17 @@
 }
 
 .registro-icon {
-  background-color: #0583f2;
+  background-color: #00A0EB;
 }
 
 .atualizacao-icon {
-  background-color: #f2b705;
+  background-color: #92691b;
 }
 
 .atribuicao-icon {
-  background-color: #29a63c;
+  background-color: #F2BB16;
 }
 
-.historico-container:last-child::before {
-  display: none;
+.movimentacao-icon {
+  background-color: #00963E;
 }

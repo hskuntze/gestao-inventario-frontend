@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Ativo from "./pages/Ativo";
+import PrivateRoute from "./PrivateRoute";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -20,8 +21,34 @@ const Routes = () => {
         <Switch>
           <Route path="/" element={<Navigate to="/gestao-inventario" />} />
           <Route path="/gestao-inventario/*" element={<Auth />} />
-          {isAuthenticated() && <Route path="/gestao-inventario" element={<Home />} />}
-          <Route path="/gestao-inventario/ativo/*" element={<Ativo />} />
+          <Route
+            path="/gestao-inventario"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_GERENTE" },
+                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                ]}
+              >
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/ativo/*"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_GERENTE" },
+                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                ]}
+              >
+                <Ativo />
+              </PrivateRoute>
+            }
+          />
         </Switch>
       </main>
     </BrowserRouter>

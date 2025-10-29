@@ -100,8 +100,15 @@
   justify-content: space-between;
 }
 
+.header-content-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  width: fit-content;
+}
+
 .voltar-button {
-  background-color: #fa8a01;
+  background-color: var(--button-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,8 +121,28 @@
   transition: background-color 0.5s ease-in-out;
 }
 
+.movimentacao-button {
+  background-color: var(--action-button-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
 .voltar-button:hover {
-  background-color: #bb6905;
+  background-color: var(--button-hover-color);
+}
+
+.movimentacao-button:hover {
+  background-color: var(--action-button-hover-color);
 }
 
 .qr-image {
@@ -149,8 +176,60 @@
 }
 
 .checkbox-input-formulario {
-  margin-top: 30px;
+  margin-top: 15px;
   width: fit-content;
+}
+
+.modal-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000ea;
+}
+
+.modal-content {
+  width: 90vw;
+  background-color: var(--bg-card);
+  padding: 20px 0 20px 20px;
+  border-radius: 10px;
+}
+
+@media (min-width: 576px) {
+  .row-input-fields {
+    display: flex;
+    width: 50%;
+  }
+}
+
+@media (min-width: 768px) {
+  .checkbox-input-formulario {
+    margin-top: 25px;
+  }
+
+  .checkbox-input-formulario {
+    margin-top: 5px;
+    margin-right: 10px;
+    width: fit-content;
+  }
+
+  .div-input-checkbox {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row-reverse;
+    padding-top: 20px;
+  }
+
+  .div-input-checkbox span {
+    width: 50%;
+  }
+
+  .modal-content {
+    width: 85vw;
+    background-color: var(--bg-card);
+    padding: 20px 0 20px 20px;
+    border-radius: 10px;
+  }
 }
 
 @media (min-width: 992px) {
@@ -172,16 +251,14 @@
     position: relative;
   }
 
-  .historico-body::before {
-    content: "";
-    position: absolute;
-    left: 14px; /* centro da linha: metade de padding-left (ajuste se mudar) */
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
-    background-color: var(--hist-line); /* cor sutil para tema escuro */
-    border-radius: 2px;
-    z-index: 0;
+  .modal-content {
+    width: 80vw;
+  }
+}
+
+@media (min-width: 1768px) {
+  .modal-content {
+    width: 50vw;
   }
 }
 

@@ -5,4 +5,7 @@ export type HistoricoType = {
   ativo: number;
   userId: number;
   userLogin: string;
+  area: string;
+  localizacao: string;
+  usuarioResponsavel: string;
 };

@@ -103,6 +103,15 @@
   font-weight: 300;
 }
 
+.clickable-table-row {
+  cursor: pointer;
+  transition: background-color 0.5s ease-in-out;
+}
+
+.clickable-table-row:hover {
+  background-color: var(--bg-card-hover);
+}
+
 @media (min-width: 992px) {
   .page-title {
     margin-top: 0;

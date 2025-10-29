@@ -1,6 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { TokenData } from "@/types/token";
 import { getAuthData } from "./storage";
+import { Perfil } from "@/types/perfil";
 
 /**
  * @returns Token JWT decodificado
@@ -27,12 +28,12 @@ export const isAuthenticated = (): boolean => {
  * @param roles - Array do tipo Perfil
  * @returns 
  */
-export const hasAnyRoles = (roles: string[]): boolean => {
+export const hasAnyRoles = (roles: Perfil[]): boolean => {
   const tokenData = getTokenData();
 
   if (tokenData !== undefined) {
     return roles.some((role) =>
-      tokenData.authorities.includes(role)
+      tokenData.authorities.includes(role.autorizacao)
     );
   }
 

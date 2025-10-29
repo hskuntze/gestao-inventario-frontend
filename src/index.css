@@ -220,6 +220,11 @@
   color: var(--text-disabled-color) !important;
 }
 
+/* no border radius */
+.nbr {
+  border-radius: 0;
+}
+
 /* animação da faixa se movendo */
 @keyframes shimmer-slide {
   0% {

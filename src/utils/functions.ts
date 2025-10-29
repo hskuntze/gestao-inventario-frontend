@@ -60,6 +60,21 @@ export async function fetchAllAreas(): Promise<AreaType[]> {
   }
 }
 
+export async function fetchAllFornecedoresByAreaId(id: number): Promise<LocalizacaoType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: `/localizacoes/all/${id}`,
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as LocalizacaoType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar as localizações.");
+  }
+}
+
 export async function fetchAllFornecedores(): Promise<FornecedorType[]> {
   const requestParams: AxiosRequestConfig = {
     url: "/fornecedores/all",
@@ -87,20 +102,5 @@ export async function fetchAllUsuariosResponsaveis(): Promise<UsuarioResponsavel
     return res.data as UsuarioResponsavelType[];
   } catch (err) {
     throw new Error("Falha ao buscar os usuários.");
-  }
-}
-
-export async function fetchAllLocalizacoes(): Promise<LocalizacaoType[]> {
-  const requestParams: AxiosRequestConfig = {
-    url: "/localizacoes/all",
-    method: "GET",
-    withCredentials: true,
-  };
-
-  try {
-    const res = await requestBackend(requestParams);
-    return res.data as LocalizacaoType[];
-  } catch (err) {
-    throw new Error("Falha ao buscar as localizações.");
   }
 }

@@ -10,10 +10,11 @@ import { AtivoType } from "@/types/ativo";
 import { HistoricoType } from "@/types/historico";
 import CardHistoricoAtivo from "@/components/CardHistoricoAtivo";
 import { AreaType } from "@/types/area";
-import { LocalizacaoType } from "@/types/localizacao";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { FornecedorType } from "@/types/fornecedor";
-import { fetchAllAreas, fetchAllFornecedores, fetchAllLocalizacoes, fetchAllUsuariosResponsaveis } from "@/utils/functions";
+import { fetchAllAreas, fetchAllFornecedores, fetchAllFornecedoresByAreaId, fetchAllUsuariosResponsaveis } from "@/utils/functions";
+import { LocalizacaoType } from "@/types/localizacao";
+import { Box, Modal } from "@mui/material";
 
 type FormData = {
   tipoAtivo: string | null;
@@ -47,12 +48,15 @@ const AtivoForm = () => {
   const [historicoAtivo, setHistoricoAtivo] = useState<HistoricoType[]>();
 
   const [areas, setAreas] = useState<AreaType[]>([]);
+  const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
   const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
-  const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
 
   const [selectedArea, setSelectedArea] = useState<AreaType>();
+  const [selectedLocalizacao, setSelectedLocalizacao] = useState<LocalizacaoType>();
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -63,6 +67,10 @@ const AtivoForm = () => {
     handleSubmit,
     setValue,
   } = useForm<FormData>();
+
+  const handleToggleModal = () => {
+    setModalOpen(!modalOpen);
+  };
 
   const handleSelectTipoForm = (e: ChangeEvent<HTMLSelectElement>) => {
     let value = e.target.value;
@@ -104,11 +112,11 @@ const AtivoForm = () => {
           area: {
             id: formData.area.id,
           },
-          usuariosResponsavel: {
-            id: formData.usuarioResponsavel.id,
-          },
           localizacao: {
             id: formData.localizacao.id,
+          },
+          usuariosResponsavel: {
+            id: formData.usuarioResponsavel.id,
           },
         },
       };
@@ -125,6 +133,32 @@ const AtivoForm = () => {
           setLoading(false);
         });
     }
+  };
+
+  const onSubmitMovimentacao = (formData: FormData) => {
+    const requestParams: AxiosRequestConfig = {
+      url: "/ativos/movimentar",
+      method: "POST",
+      withCredentials: true,
+      data: {
+        idAtivo: urlParams.id,
+        idArea: formData.area.id,
+        idLocalizacao: formData.localizacao.id,
+        idUsuarioResponsavel: formData.usuarioResponsavel.id,
+      },
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        handleToggleModal();
+        toast.success("Ativo movimentado com sucesso.");
+        loadInfo();
+        loadHistoricoInfo();
+      })
+      .catch((err) => {
+        toast.error("Erro ao tentar movimentar ativo.");
+      })
+      .finally(() => {});
   };
 
   const loadInfo = useCallback(() => {
@@ -147,6 +181,10 @@ const AtivoForm = () => {
 
         setValue("area", data.area);
         setSelectedArea(data.area);
+
+        setValue("localizacao", data.localizacao);
+        setSelectedLocalizacao(data.localizacao);
+
         setValue("categoria", data.categoria);
         setValue("codigoSerie", data.codigoSerie);
         setValue("dataAquisicao", data.dataAquisicao);
@@ -155,7 +193,6 @@ const AtivoForm = () => {
         setValue("fornecedor", data.fornecedor);
         setValue("idPatrimonial", data.idPatrimonial);
         setValue("linkDocumento", data.linkDocumento);
-        setValue("localizacao", data.localizacao);
         setValue("observacoes", data.observacoes);
         setValue("usuarioResponsavel", data.usuarioResponsavel);
         setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
@@ -199,7 +236,7 @@ const AtivoForm = () => {
       setAreas([]);
 
       try {
-        const data = await fetchAllAreas();
+        const data = (await fetchAllAreas()) as AreaType[];
         setAreas(data);
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar áreas";
@@ -233,8 +270,10 @@ const AtivoForm = () => {
       setLocalizacoes([]);
 
       try {
-        const data = await fetchAllLocalizacoes();
-        setLocalizacoes(data);
+        if (selectedArea) {
+          const data = await fetchAllFornecedoresByAreaId(selectedArea.id);
+          setLocalizacoes(data);
+        }
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar localizações";
         toast.error(errorMsg);
@@ -242,7 +281,7 @@ const AtivoForm = () => {
     }
 
     getLocalizacoes();
-  }, []);
+  }, [selectedArea]);
 
   useEffect(() => {
     async function getUsuariosResponsaveis() {
@@ -266,11 +305,135 @@ const AtivoForm = () => {
       <div className="page-header">
         <div className="header-content">
           <h2>Detalhes do Ativo</h2>
-          <Link to="/gestao-inventario/ativo" type="button" className="voltar-button">
-            Voltar
-          </Link>
+          <div className="header-content-buttons">
+            <Link to="/gestao-inventario/ativo" type="button" className="voltar-button">
+              Voltar
+            </Link>
+            <button type="button" className="movimentacao-button" onClick={handleToggleModal}>
+              Movimentar
+            </button>
+          </div>
         </div>
       </div>
+      <Modal open={modalOpen} onClose={handleToggleModal} className="modal-container">
+        <Box className="modal-content">
+          <h2 style={{ textAlign: "center" }}>Movimentar ativo</h2>
+          <form className="formulario" onSubmit={handleSubmit(onSubmitMovimentacao)}>
+            <div className="div-input-formulario">
+              <span>Área</span>
+              <Controller
+                name="area"
+                control={control}
+                rules={{
+                  required: "Campo obrigatório",
+                }}
+                render={({ field }) => (
+                  <select
+                    id="area"
+                    className={`input-formulario ${errors.area ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedArea = areas.find((a) => a.id === selectedId) as AreaType;
+
+                      field.onChange(selectedArea || null);
+                      setSelectedArea(selectedArea);
+                      setLocalizacoes(selectedArea ? selectedArea.localizacoes : []);
+                    }}
+                  >
+                    <option value="">Selecione uma área</option>
+                    {areas &&
+                      areas.length > 0 &&
+                      areas.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                        </option>
+                      ))}
+                  </select>
+                )}
+              />
+              <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
+            </div>
+            <div className="div-input-formulario">
+              <span>Responsável</span>
+              <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedArea?.responsavel} />
+            </div>
+            <div className="div-input-formulario">
+              <span>Localização</span>
+              <Controller
+                name="localizacao"
+                control={control}
+                rules={{
+                  required: "Campo obrigatório",
+                }}
+                render={({ field }) => (
+                  <select
+                    id="localizacao"
+                    className={`input-formulario ${errors.localizacao ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
+
+                      field.onChange(selectedLocalizacao || null);
+                      setSelectedLocalizacao(selectedLocalizacao);
+                    }}
+                  >
+                    <option value="">Selecione uma localização</option>
+                    {localizacoes &&
+                      localizacoes.length > 0 &&
+                      localizacoes.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                        </option>
+                      ))}
+                  </select>
+                )}
+              />
+              <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
+            </div>
+            <div className="div-input-formulario">
+              <span>Usuário responsável</span>
+              <Controller
+                name="usuarioResponsavel"
+                control={control}
+                rules={{
+                  required: "Campo obrigatório",
+                }}
+                render={({ field }) => (
+                  <select
+                    id="usuarioResponsavel"
+                    className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedUsuarioResponsavel = usuariosResponsaveis.find((a) => a.id === selectedId);
+
+                      field.onChange(selectedUsuarioResponsavel || null);
+                    }}
+                  >
+                    <option value="">Selecione um usuário responsável</option>
+                    {usuariosResponsaveis &&
+                      usuariosResponsaveis.length > 0 &&
+                      usuariosResponsaveis.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                        </option>
+                      ))}
+                  </select>
+                )}
+              />
+              <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
+            </div>
+            <div className="form-buttons">
+              <button className="button submit-button">Salvar</button>
+            </div>
+          </form>
+        </Box>
+      </Modal>
       <div className="select-tipo-ativo">
         <span>Tipo de ativo</span>
         <Controller
@@ -311,12 +474,12 @@ const AtivoForm = () => {
                     ></textarea>
                     <div className="invalid-feedback d-block div-erro">{errors.descricao?.message}</div>
                   </div>
-                  <div className="row-input-fields w-50">
+                  <div className="row-input-fields">
                     <div className="div-input-formulario">
                       <span>ID Patrimonial</span>
                       <input
                         type="text"
-                        className={`input-formulario ${gerarIdPatrimonial ? 'disabled-field' : ''}`}
+                        className={`input-formulario ${gerarIdPatrimonial ? "disabled-field" : ""}`}
                         {...register("idPatrimonial", {
                           required: gerarIdPatrimonial ? false : "Campo obrigatório",
                         })}
@@ -325,7 +488,7 @@ const AtivoForm = () => {
                       />
                       <div className="invalid-feedback d-block div-erro">{errors.idPatrimonial?.message}</div>
                     </div>
-                    <div className="div-input-formulario">
+                    <div className="div-input-formulario div-input-checkbox">
                       <span>Gerar ID Patrimonial</span>
                       <Controller
                         name="gerarIdPatrimonial"
@@ -380,16 +543,18 @@ const AtivoForm = () => {
                       render={({ field }) => (
                         <select
                           id="area"
-                          className={`input-formulario ${errors.area ? "input-error" : ""}`}
+                          className={`input-formulario ${errors.area ? "input-error" : ""} ${!isEditing ? "" : "disabled-field"}`}
                           {...field}
                           value={field.value?.id || ""}
                           onChange={(e) => {
                             const selectedId = Number(e.target.value);
-                            const selectedArea = areas.find((a) => a.id === selectedId);
+                            const selectedArea = areas.find((a) => a.id === selectedId) as AreaType;
 
                             field.onChange(selectedArea || null);
                             setSelectedArea(selectedArea);
+                            setLocalizacoes(selectedArea ? selectedArea.localizacoes : []);
                           }}
+                          disabled={!isEditing ? false : true}
                         >
                           <option value="">Selecione uma área</option>
                           {areas &&
@@ -419,7 +584,9 @@ const AtivoForm = () => {
                       render={({ field }) => (
                         <select
                           id="localizacao"
-                          className={`input-formulario ${errors.localizacao ? "input-error" : ""}`}
+                          className={`input-formulario ${errors.localizacao ? "input-error" : ""} ${
+                            (localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing ? "" : "disabled-field"
+                          }`}
                           {...field}
                           value={field.value?.id || ""}
                           onChange={(e) => {
@@ -427,7 +594,9 @@ const AtivoForm = () => {
                             const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
 
                             field.onChange(selectedLocalizacao || null);
+                            setSelectedLocalizacao(selectedLocalizacao);
                           }}
+                          disabled={(localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing ? false : true}
                         >
                           <option value="">Selecione uma localização</option>
                           {localizacoes &&
@@ -440,6 +609,7 @@ const AtivoForm = () => {
                         </select>
                       )}
                     />
+                    <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
                   </div>
                   <div className="div-input-formulario">
                     <span>Usuário responsável</span>
@@ -452,7 +622,7 @@ const AtivoForm = () => {
                       render={({ field }) => (
                         <select
                           id="usuarioResponsavel"
-                          className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
+                          className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""} ${!isEditing ? "" : "disabled-field"}`}
                           {...field}
                           value={field.value?.id || ""}
                           onChange={(e) => {
@@ -461,6 +631,7 @@ const AtivoForm = () => {
 
                             field.onChange(selectedUsuarioResponsavel || null);
                           }}
+                          disabled={!isEditing ? false : true}
                         >
                           <option value="">Selecione um usuário responsável</option>
                           {usuariosResponsaveis &&
@@ -568,14 +739,16 @@ const AtivoForm = () => {
                   </div>
                 </form>
               </div>
-              <div className="content-container">
-                <span className="form-title">Anexos</span>
-                {ativo ? (
-                  <UploadArquivos tipoAtivo={tipoForm} idAtivo={String(ativo.id)} defaultFiles={ativo?.imagens} />
-                ) : (
-                  <UploadArquivos tipoAtivo={tipoForm} />
-                )}
-              </div>
+              {isEditing && (
+                <div className="content-container">
+                  <span className="form-title">Anexos</span>
+                  {ativo ? (
+                    <UploadArquivos tipoAtivo={tipoForm} idAtivo={String(ativo.id)} defaultFiles={ativo?.imagens} />
+                  ) : (
+                    <UploadArquivos tipoAtivo={tipoForm} />
+                  )}
+                </div>
+              )}
             </>
           </div>
           <div className="page-side-section">
@@ -583,7 +756,7 @@ const AtivoForm = () => {
               <span className="form-title">Histórico do Ativo</span>
               <div className="historico-body">
                 {ativo && historicoAtivo ? (
-                  historicoAtivo.map((h) => <CardHistoricoAtivo key={h.id} ativo={ativo} element={h} />)
+                  historicoAtivo.map((h) => <CardHistoricoAtivo key={h.id} element={h} />)
                 ) : (
                   <div className="no-info">Sem histórico a ser exibido</div>
                 )}

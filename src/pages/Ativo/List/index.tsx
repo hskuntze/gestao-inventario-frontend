@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
 import "./styles.css";
+import { useCallback, useEffect, useState } from "react";
 import { AtivoType } from "@/types/ativo";
 import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TablePagination } from "@mui/material";
 
 const tiposAtivo: { [key: string]: string } = {
@@ -21,6 +21,8 @@ const AtivoList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
 
+  const navigate = useNavigate();
+
   const loadAtivos = useCallback(() => {
     setLoading(true);
 
@@ -34,6 +36,7 @@ const AtivoList = () => {
       .then((res) => {
         let data = res.data as AtivoType[];
         setAtivos(data);
+        console.log(data);
       })
       .catch((err) => {
         toast.error("Erro ao tentar carregar os ativos.");
@@ -101,7 +104,7 @@ const AtivoList = () => {
         .includes(searchTerm) ??
         false) ||
       (a.categoria.toLowerCase().includes(searchTerm) ?? false) ||
-      (a.localizacao.nome.toLowerCase().includes(searchTerm) ?? false) ||
+      ((a.localizacao.nome ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
       ((a.usuarioResponsavel.nome ?? "-").toLowerCase().includes(searchTerm) ?? false)
     );
   });
@@ -152,7 +155,7 @@ const AtivoList = () => {
               <tbody>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((a) => (
-                    <tr key={a.id}>
+                    <tr key={a.id} className="clickable-table-row" onClick={() => navigate(`/gestao-inventario/ativo/formulario/${a.id}`)}>
                       <td>
                         <div>{a.descricao}</div>
                       </td>
@@ -163,7 +166,7 @@ const AtivoList = () => {
                         <div className="text-info">{a.categoria}</div>
                       </td>
                       <td>
-                        <div className="text-info">{a.localizacao.nome}</div>
+                        <div className="text-info">{a.localizacao ? a.localizacao.nome : "-"}</div>
                       </td>
                       <td>
                         <div>
@@ -177,10 +180,10 @@ const AtivoList = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button">
+                          <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button nbr">
                             <i className="bi bi-pencil" />
                           </Link>
-                          <button onClick={() => deleteAtivo(a.id, a.tipoAtivo)} type="button" className="button action-button delete-button">
+                          <button onClick={() => deleteAtivo(a.id, a.tipoAtivo)} type="button" className="button action-button delete-button nbr">
                             <i className="bi bi-trash3" />
                           </button>
                         </div>
@@ -189,7 +192,7 @@ const AtivoList = () => {
                   ))
                 ) : (
                   <tr>
-                    <td className="no-data-on-table" colSpan={6}>
+                    <td className="no-data-on-table" colSpan={7}>
                       Sem dados a serem exibidos
                     </td>
                   </tr>

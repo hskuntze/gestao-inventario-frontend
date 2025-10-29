@@ -1,8 +1,12 @@
+import { Perfil } from "./perfil";
+
 export type User = {
   id: number;
+  nome: string;
   email: string;
   login: string;
-  username: string;
   userUuid: string;
-  groups: string[];
+  firstAccess: number;
+  userState: number;
+  perfis: Perfil[];
 };
