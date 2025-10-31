@@ -126,9 +126,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100px;
+  width: 100%;
   height: 40px;
-  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.desabilitar-button {
+  background-color: #B50C00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.habilitar-button {
+  background-color: #003fb5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.015rem;
@@ -143,6 +172,68 @@
 
 .movimentacao-button:hover {
   background-color: var(--action-button-hover-color);
+}
+
+.desabilitar-button:hover {
+  background-color: #810900;
+}
+
+.habilitar-button:hover {
+  background-color: #002c7e;
+}
+
+.acoes-button {
+  position: relative;
+  display: inline-block;
+}
+
+.acoes-toggle {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acoes-toggle i {
+  font-size: 0.8rem;
+}
+
+.acoes-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: var(--bg-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  min-width: 160px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.acoes-toggle {
+  background-color: #00974F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.acoes-toggle {
+  background-color: #006635;
 }
 
 .qr-image {

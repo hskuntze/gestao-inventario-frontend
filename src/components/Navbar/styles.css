@@ -50,6 +50,86 @@
   width: auto;
 }
 
+.configurations {
+  padding: 0.2rem;
+}
+
+.configuration-button {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: var(--bg-card);
+  transition: background-color 0.4s ease-in-out;
+}
+
+.configuration-button:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.configuration-button i {
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 2.8rem;
+  right: 0;
+  background: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 220px;
+  padding: 0.75rem;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0.5rem;
+}
+
+.user-info strong {
+  color: var(--text-color);
+}
+
+.user-info span {
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: var(--text-info-color);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--hist-line);
+  margin: 0.5rem 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+}
+
+.dropdown-item:hover {
+  background-color: var(--button-hover-color);
+}
+
 @media (min-width: 576px) {
   .navbar-container {
     display: flex;
@@ -96,58 +176,6 @@
     font-size: 20px;
     margin: 0 5px;
     border-radius: 10px;
-  }
-
-  .user-dropdown {
-    position: absolute;
-    top: 2.8rem;
-    right: 0;
-    background: var(--bg-card);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    width: 220px;
-    padding: 0.75rem;
-    z-index: 1000;
-    animation: fadeIn 0.15s ease-in-out;
-  }
-
-  .user-info {
-    display: flex;
-    flex-direction: column;
-    padding: 0.25rem 0.5rem;
-  }
-
-  .user-info strong {
-    color: var(--text-color);
-  }
-
-  .user-info span {
-    margin-top: 5px;
-    font-size: 0.85rem;
-    color: var(--text-info-color);
-  }
-
-  .dropdown-divider {
-    height: 1px;
-    background: var(--hist-line);
-    margin: 0.5rem 0;
-  }
-
-  .dropdown-item {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--text-color);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.5rem;
-    border-radius: 6px;
-  }
-
-  .dropdown-item:hover {
-    background-color: var(--button-hover-color);
   }
 
   @keyframes fadeIn {

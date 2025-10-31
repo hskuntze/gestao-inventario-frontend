@@ -2,23 +2,19 @@ import './App.css';
 import "bootstrap/dist/js/bootstrap.bundle";
 import "react-toastify/ReactToastify.css";
 import { useState } from 'react';
-import { AuthContext, AuthContextData } from "@/utils/contexts/AuthContext";
 import { UserContext, UserContextData } from "@/utils/contexts/UserContext";
 import { ToastContainer } from "react-toastify";
 import { getUserData } from "@/utils/storage";
 import Routes from "./Routes";
+import { AuthProvider } from './utils/providers/AuthProvider';
 
 function App() {
-  const [authContextData, setAuthContextData] = useState<AuthContextData>({
-    authenticated: false,
-  });
-
   const [userContextData, setUserContextData] = useState<UserContextData>({
     user: getUserData(),
   });
 
   return (
-    <AuthContext.Provider value={{ authContextData, setAuthContextData }}>
+    <AuthProvider>
       <UserContext.Provider value={{ userContextData, setUserContextData }}>
         <Routes />
         <ToastContainer
@@ -33,7 +29,7 @@ function App() {
           pauseOnHover
         />
       </UserContext.Provider>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 

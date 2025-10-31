@@ -12,6 +12,8 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     ATUALIZAÇÃO: "bi bi-file-earmark-diff atualizacao-icon",
     ATRIBUIÇÃO: "bi bi-person atribuicao-icon",
     MOVIMENTAÇÃO: "bi bi-arrows-move movimentacao-icon",
+    DESABILITAR: "bi bi-x-circle desabilitar-icon",
+    HABILITAR: "bi bi-check-circle habilitar-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -19,6 +21,8 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     ATUALIZAÇÃO: "Ativo atualizado",
     ATRIBUIÇÃO: `Atribuído a ${element.usuarioResponsavel}`,
     MOVIMENTAÇÃO: `Movido para ${element.usuarioResponsavel}`,
+    DESABILITAR: "Ativo desabilitado",
+    HABILITAR: "Ativo habilitado",
   };
 
   return (

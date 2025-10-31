@@ -65,11 +65,32 @@
   color: var(--text-error-color);
 }
 
+.add-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0861e7;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.remove-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e70808;
+  position: absolute;
+  z-index: 100;
+  top: 18px;
+  right: 10px;
+  cursor: pointer;
+}
+
 .skeleton-card-container {
   display: flex;
   align-items: center;
   border-radius: 10px;
-  margin-top: 15px;
+  margin-top: 20px;
   border: 1px solid var(--skeleton-gradient);
 
   overflow: hidden; /* evita que a faixa saia da div */
@@ -107,11 +128,11 @@
 }
 
 .content-container {
-  background-color: var(--bg-card);
-  color: var(--text-color);
-  border-radius: 10px;
-  padding: 20px;
-  margin: 20px auto 0 auto;
+  background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
+  border-radius: 10px !important;
+  padding: 20px !important;
+  margin: 20px auto 0 auto !important;
 }
 
 .delete-button {
@@ -218,11 +239,21 @@
 .disabled-field {
   background-color: var(--bg-disabled-field) !important;
   color: var(--text-disabled-color) !important;
+  cursor: not-allowed;
 }
 
 /* no border radius */
 .nbr {
   border-radius: 0;
+}
+
+.accordion-container {
+  margin-top: 30px !important;
+}
+
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
 }
 
 /* animação da faixa se movendo */

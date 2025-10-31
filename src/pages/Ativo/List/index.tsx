@@ -6,6 +6,7 @@ import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { TablePagination } from "@mui/material";
+import AtivoListSkeletonLoader from "./AtivoListSkeletonLoader";
 
 const tiposAtivo: { [key: string]: string } = {
   t: "TANGÍVEL",
@@ -36,7 +37,6 @@ const AtivoList = () => {
       .then((res) => {
         let data = res.data as AtivoType[];
         setAtivos(data);
-        console.log(data);
       })
       .catch((err) => {
         toast.error("Erro ao tentar carregar os ativos.");
@@ -125,109 +125,113 @@ const AtivoList = () => {
         </div>
         <span className="page-subtitle">Visualize e gerencie todos os ativos.</span>
       </div>
-      <div className="page-body w-100">
-        <div className="content-container">
-          <div className="filtro-container">
-            <div className="filtro-input-div form-floating">
-              <i className="bi bi-search" />
-              <input
-                type="text"
-                className="form-control filtro-input"
-                id="nome-treinamento-filtro"
-                placeholder="Digite um termo para filtrar"
-                onChange={handleFilterChange}
-              />
+      {loading ? (
+        <AtivoListSkeletonLoader />
+      ) : (
+        <div className="page-body w-100">
+          <div className="content-container">
+            <div className="filtro-container">
+              <div className="filtro-input-div form-floating">
+                <i className="bi bi-search" />
+                <input
+                  type="text"
+                  className="form-control filtro-input"
+                  id="nome-treinamento-filtro"
+                  placeholder="Digite um termo para filtrar"
+                  onChange={handleFilterChange}
+                />
+              </div>
             </div>
-          </div>
-          <div className="div-table">
-            <table className="ativo-list-table">
-              <thead>
-                <tr key={"tr-head-ativo-list-table"}>
-                  <th scope="col">Descrição</th>
-                  <th scope="col">ID</th>
-                  <th scope="col">Categoria</th>
-                  <th scope="col">Localização</th>
-                  <th scope="col">Tipo</th>
-                  <th scope="col">Usuário Designado</th>
-                  <th scope="col">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((a) => (
-                    <tr key={a.id} className="clickable-table-row" onClick={() => navigate(`/gestao-inventario/ativo/formulario/${a.id}`)}>
-                      <td>
-                        <div>{a.descricao}</div>
-                      </td>
-                      <td>
-                        <div className="text-info">{a.idPatrimonial ?? "N/A"}</div>
-                      </td>
-                      <td>
-                        <div className="text-info">{a.categoria}</div>
-                      </td>
-                      <td>
-                        <div className="text-info">{a.localizacao ? a.localizacao.nome : "-"}</div>
-                      </td>
-                      <td>
-                        <div>
-                          <span className={`tag-tipo-ativo-${a.tipoAtivo}`}>
-                            <div className={`tag-dot-${a.tipoAtivo}`}></div> {tiposAtivo[a.tipoAtivo]}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="text-info">{a.usuarioResponsavel.nome ?? "-"}</div>
-                      </td>
-                      <td>
-                        <div className="table-action-buttons">
-                          <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button nbr">
-                            <i className="bi bi-pencil" />
-                          </Link>
-                          <button onClick={() => deleteAtivo(a.id, a.tipoAtivo)} type="button" className="button action-button delete-button nbr">
-                            <i className="bi bi-trash3" />
-                          </button>
-                        </div>
+            <div className="div-table">
+              <table className="ativo-list-table">
+                <thead>
+                  <tr key={"tr-head-ativo-list-table"}>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Localização</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Usuário Designado</th>
+                    <th scope="col">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.length > 0 ? (
+                    paginatedData.map((a) => (
+                      <tr key={a.id} className="clickable-table-row" onClick={() => navigate(`/gestao-inventario/ativo/formulario/${a.id}`)}>
+                        <td>
+                          <div>{a.descricao}</div>
+                        </td>
+                        <td>
+                          <div className="text-info">{a.idPatrimonial ?? "N/A"}</div>
+                        </td>
+                        <td>
+                          <div className="text-info">{a.categoria}</div>
+                        </td>
+                        <td>
+                          <div className="text-info">{a.localizacao ? a.localizacao.nome : "-"}</div>
+                        </td>
+                        <td>
+                          <div>
+                            <span className={`tag-tipo-ativo-${a.tipoAtivo}`}>
+                              <div className={`tag-dot-${a.tipoAtivo}`}></div> {tiposAtivo[a.tipoAtivo]}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="text-info">{a.usuarioResponsavel.nome ?? "-"}</div>
+                        </td>
+                        <td>
+                          <div className="table-action-buttons">
+                            <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button nbr">
+                              <i className="bi bi-pencil" />
+                            </Link>
+                            <button onClick={() => deleteAtivo(a.id, a.tipoAtivo)} type="button" className="button action-button delete-button nbr">
+                              <i className="bi bi-trash3" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="no-data-on-table" colSpan={7}>
+                        Sem dados a serem exibidos
                       </td>
                     </tr>
-                  ))
-                ) : (
+                  )}
+                </tbody>
+                <tfoot>
                   <tr>
-                    <td className="no-data-on-table" colSpan={7}>
-                      Sem dados a serem exibidos
+                    <td colSpan={6}>
+                      <TablePagination
+                        className="table-pagination-container"
+                        component="div"
+                        count={filteredData.length}
+                        page={page}
+                        onPageChange={handlePageChange}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        labelRowsPerPage="Registros por página: "
+                        labelDisplayedRows={({ from, to, count }) => {
+                          return `${from} - ${to} de ${count}`;
+                        }}
+                        classes={{
+                          selectLabel: "pagination-select-label",
+                          displayedRows: "pagination-displayed-rows-label",
+                          select: "pagination-select",
+                          toolbar: "pagination-toolbar",
+                          spacer: "pagination-spacer",
+                        }}
+                      />
                     </td>
                   </tr>
-                )}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan={6}>
-                    <TablePagination
-                      className="table-pagination-container"
-                      component="div"
-                      count={filteredData.length}
-                      page={page}
-                      onPageChange={handlePageChange}
-                      rowsPerPage={rowsPerPage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                      labelRowsPerPage="Registros por página: "
-                      labelDisplayedRows={({ from, to, count }) => {
-                        return `${from} - ${to} de ${count}`;
-                      }}
-                      classes={{
-                        selectLabel: "pagination-select-label",
-                        displayedRows: "pagination-displayed-rows-label",
-                        select: "pagination-select",
-                        toolbar: "pagination-toolbar",
-                        spacer: "pagination-spacer",
-                      }}
-                    />
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                </tfoot>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

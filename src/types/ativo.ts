@@ -22,5 +22,7 @@ export type AtivoType = {
   qrCodeUrl: string;
   qrCodeImage: string;
   tipoAtivo: string;
+  desabilitado: boolean;
+  razaoDesabilitado: string;
   imagens: Imagem[];
 };

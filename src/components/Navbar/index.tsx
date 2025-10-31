@@ -1,18 +1,24 @@
 import "./styles.css";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { getUserData } from "@/utils/storage";
 
 import CtceaLogoEscuro from "@/assets/images/Marca_Principal_Escuro.png";
 import CtceaLogoClaro from "@/assets/images/Marca_Principal_Claro.png";
+import { hasAnyRoles } from "@/utils/auth";
+import { AuthContext } from "@/utils/contexts/AuthContext";
 
 const Navbar = () => {
+  const { setAuthContextData } = useContext(AuthContext);
+
   const [dropdown, setDropdown] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const navigate = useNavigate();
   const userData = getUserData();
+
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -36,9 +42,19 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
+  }, []);
+
   const handleLogout = () => {
-    // Exemplo: limpa o token e redireciona
     localStorage.removeItem("authData");
+    localStorage.removeItem("userData");
+
+    setAuthContextData({
+      authenticated: false,
+      tokenData: undefined,
+    });
+
     navigate("/gestao-inventario");
   };
 
@@ -62,6 +78,17 @@ const Navbar = () => {
               <strong>{userData.nome}</strong>
               <span>{userData.email}</span>
             </div>
+            {isAdmin && (
+              <>
+                <div className="dropdown-divider"></div>
+                <div className="configurations">
+                  <Link to={"/gestao-inventario/admin/cadastros"} type="button" className="configuration-button">
+                    <i className="bi bi-gear-fill" />
+                    <span>Cadastros</span>
+                  </Link>
+                </div>
+              </>
+            )}
             <div className="dropdown-divider"></div>
             <button className="dropdown-item" onClick={handleLogout}>
               <i className="bi bi-box-arrow-right"></i> Sair

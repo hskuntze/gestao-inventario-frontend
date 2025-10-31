@@ -27,9 +27,10 @@ interface UploadArquivosProps {
   defaultFiles?: BackendFile[];
   tipoAtivo: string;
   idAtivo?: string;
+  ativoDesabilitado: boolean;
 }
 
-const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivosProps) => {
+const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilitado }: UploadArquivosProps) => {
   const { control, handleSubmit, setValue, watch } = useForm<FormData>();
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -167,7 +168,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivo
             name="file"
             control={control}
             render={({ field }) => (
-              <input type="file" multiple onChange={(e) => field.onChange(e.target.files)} accept=".jpg,.jpeg,.png,.gif,.pdf" hidden />
+              <input type="file" multiple onChange={(e) => field.onChange(e.target.files)} accept=".jpg,.jpeg,.png,.gif,.pdf" disabled={ativoDesabilitado} hidden />
             )}
           />
           <span>procure em seus arquivos</span>
@@ -207,7 +208,9 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo }: UploadArquivo
         })}
       </div>
       <div className="form-buttons">
-        <button className="button submit-button">Salvar</button>
+        <button disabled={ativoDesabilitado} className={`button submit-button ${ativoDesabilitado ? "disabled-field" : ""}`}>
+          Salvar
+        </button>
       </div>
     </form>
   );

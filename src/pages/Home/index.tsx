@@ -32,7 +32,7 @@ const Home = () => {
   }
 
   useEffect(() => {
-    //setLoading(true);
+    setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
       url: "/ativos/qtd/total",
@@ -48,7 +48,7 @@ const Home = () => {
         toast.error("Erro ao tentar carregar informações de quantidade de ativos.");
       })
       .finally(() => {
-        //setLoading(false);
+        setLoading(false);
       });
   }, []);
 

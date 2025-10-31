@@ -37,9 +37,9 @@
   --bg-filter-input: #001621;
   --bg-disabled-field: #012233;
 
-  --skeleton-loading: #1d2228;
-  --skeleton-gradient: #3e4957;
-  --skeleton-element: rgb(62, 67, 75);
+  --skeleton-loading: #015175;
+  --skeleton-gradient: #016593;
+  --skeleton-element: #004464;
 
   --hist-line: #ffffff1f;
 }

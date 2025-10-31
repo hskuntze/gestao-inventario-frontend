@@ -62,9 +62,17 @@
 }
 
 .atribuicao-icon {
-  background-color: #F2BB16;
+  background-color: #f8ba00;
 }
 
 .movimentacao-icon {
   background-color: #00963E;
+}
+
+.desabilitar-icon {
+  background-color: #df6c00;
+}
+
+.habilitar-icon {
+  background-color: #00c3d1;
 }

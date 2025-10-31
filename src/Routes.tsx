@@ -1,10 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes as Switch } from "react-router-dom";
-import { isAuthenticated } from "@/utils/auth";
 import Navbar from "@/components/Navbar";
-import Auth from "./pages/Auth";
-import Home from "./pages/Home";
-import Ativo from "./pages/Ativo";
+import Auth from "@/pages/Auth";
+import Home from "@/pages/Home";
+import Ativo from "@/pages/Ativo";
 import PrivateRoute from "./PrivateRoute";
+import { useContext } from "react";
+import { AuthContext } from "@/utils/contexts/AuthContext";
+import Admin from "./pages/Admin";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -14,9 +16,11 @@ import PrivateRoute from "./PrivateRoute";
  * gerenciar o histórico de navegação.
  */
 const Routes = () => {
+  const { authContextData } = useContext(AuthContext);
+
   return (
     <BrowserRouter>
-      {isAuthenticated() && <Navbar />}
+      {authContextData.authenticated && <Navbar />}
       <main id="main">
         <Switch>
           <Route path="/" element={<Navigate to="/gestao-inventario" />} />
@@ -46,6 +50,14 @@ const Routes = () => {
                 ]}
               >
                 <Ativo />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/admin/*"
+            element={
+              <PrivateRoute roles={[{ id: 1, autorizacao: "PERFIL_ADMIN" }]}>
+                <Admin />
               </PrivateRoute>
             }
           />
