@@ -54,6 +54,11 @@ const GerenciarArea = () => {
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
+
+    setValue("nome", "");
+    setValue("responsavel", "");
+    setValue("substitutoResponsavel", "");
+    setValue("localizacoes", []);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -115,6 +120,7 @@ const GerenciarArea = () => {
         responsavel: formData.responsavel,
         substitutoResponsavel: formData.substitutoResponsavel,
         localizacoes: formData.localizacoes.map((loc) => ({
+          id: loc.id,
           nome: loc.nome,
         })),
       },
@@ -123,9 +129,13 @@ const GerenciarArea = () => {
     requestBackend(requestParams)
       .then((res) => {
         toast.success(`Área ${isEditing ? "editada" : "criada"} com sucesso.`);
+        loadAreas();
+        handleToggleModal();
       })
       .catch((err) => {
-        toast.error(`Erro ao tentar ${isEditing ? "editar" : "criar"} área.`);
+        const message = err.response?.data?.message || "Erro ao tentar atualizar a área.";
+        toast.error(message);
+        handleToggleModal();
       })
       .finally(() => {});
   };
@@ -167,10 +177,15 @@ const GerenciarArea = () => {
     <div className="component-accordion" id="gerenciar-area">
       <Accordion
         classes={{
-          root: "content-container",
+          root: "bg-card-blue content-container",
         }}
       >
-        <AccordionSummary expandIcon={<i className="bi bi-chevron-down" />} aria-controls="gerenciar-area" id="gerenciar-area-header">
+        <AccordionSummary
+          expandIcon={<i className="bi bi-chevron-down" />}
+          aria-controls="gerenciar-area"
+          id="gerenciar-area-header"
+          className="accordion-title"
+        >
           Áreas
         </AccordionSummary>
         <AccordionDetails>
@@ -207,15 +222,15 @@ const GerenciarArea = () => {
               <tbody>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((a) => (
-                    <tr key={a.id} className="clickable-table-row">
+                    <tr key={a.id}>
                       <td>
                         <div>{a.nome}</div>
                       </td>
                       <td>
-                        <div>{a.responsavel}</div>
+                        <div>{a.responsavel ?? "-"}</div>
                       </td>
                       <td>
-                        <div>{a.substitutoResponsavel}</div>
+                        <div>{a.substitutoResponsavel ?? "-"}</div>
                       </td>
                       <td>
                         <div className="table-action-buttons">
@@ -268,7 +283,7 @@ const GerenciarArea = () => {
         </AccordionDetails>
       </Accordion>
       <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
-        <Box className="modal-content">
+        <Box className="modal-content ov-y-scroll">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
               <span>Nome da área</span>
@@ -282,13 +297,13 @@ const GerenciarArea = () => {
             </div>
 
             <div className="div-input-formulario">
+              <span>Localização</span>
               {locFields.map((field, index) => (
                 <div className="loc-group" key={`div-loc-${index}`}>
-                  <span>Localização</span>
                   <div className="localizacao-input-div">
                     <input
                       type="text"
-                      className={`input-formulario ${errors.localizacoes ? "is-invalid" : ""}`}
+                      className={`input-formulario localizacao-formulario ${errors.localizacoes ? "is-invalid" : ""}`}
                       id={`localizacao-${index}`}
                       placeholder="Localização"
                       {...register(`localizacoes.${index}.nome`, {
@@ -350,9 +365,6 @@ const GerenciarArea = () => {
               <Controller
                 name="substitutoResponsavel"
                 control={control}
-                rules={{
-                  required: "Campo obrigatório",
-                }}
                 render={({ field }) => (
                   <select
                     id="substituto"

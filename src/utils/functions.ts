@@ -45,6 +45,16 @@ export function formatarDataParaMesAno(dataStr: string): string {
   }
 }
 
+export function formatarPerfil(perfil: string): string {
+  const perfis: { [key: string]: string } = {
+    PERFIL_ADMIN: "Administrador",
+    PERFIL_GERENTE: "Gerente",
+    PERFIL_USUARIO: "Usuário",
+  };
+
+  return perfis[perfil] ?? "Sem perfil definido";
+}
+
 export async function fetchAllAreas(): Promise<AreaType[]> {
   const requestParams: AxiosRequestConfig = {
     url: "/areas/all",

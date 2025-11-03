@@ -283,6 +283,8 @@
   background-color: var(--bg-card);
   padding: 20px 0 20px 20px;
   border-radius: 10px;
+  position: relative;
+  max-height: 90vh;
 }
 
 @media (min-width: 576px) {
