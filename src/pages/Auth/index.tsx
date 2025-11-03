@@ -1,18 +1,21 @@
+import "./styles.css";
+
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
-
-import "./styles.css";
+import { AxiosRequestConfig } from "axios";
 
 import GestInvIcone from "@/assets/images/Gestao_Inventario_Icone.png";
 
 import { AuthContext } from "@/utils/contexts/AuthContext";
-import { requestBackendLogin } from "@/utils/requests";
-import { saveAuthData } from "@/utils/storage";
+import { requestBackend, requestBackendLogin } from "@/utils/requests";
+import { saveAuthData, saveUserData } from "@/utils/storage";
 import { getTokenData } from "@/utils/auth";
 
 import Loader from "@/components/Loader";
+
+import { User } from "@/types/user";
 
 type FormData = {
   username: string;
@@ -33,25 +36,39 @@ const Auth = () => {
     formState: { errors },
   } = useForm<FormData>();
 
+  const loadUserInfo = () => {
+    const requestParams: AxiosRequestConfig = {
+      url: "/usuarios/authenticated/info",
+      method: "GET",
+      withCredentials: true,
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        saveUserData(res.data as User);
+      })
+      .catch(() => {
+        toast.error("Erro ao tentar resgatar os dados do usuário.");
+      });
+  };
+
   const onSubmit = (formData: FormData) => {
     setLoading(true);
 
     requestBackendLogin(formData)
       .then((res) => {
         saveAuthData(res.data);
+
         setAuthContextData({
           authenticated: true,
           tokenData: getTokenData(),
         });
 
+        loadUserInfo();
         navigate("/gestao-inventario");
       })
-      .catch((err) => {
-        toast.error("Não foi possível realizar o login. Tente novamente mais tarde.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(() => toast.error("Não foi possível realizar o login."))
+      .finally(() => setLoading(false));
   };
 
   return (

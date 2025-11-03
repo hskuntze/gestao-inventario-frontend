@@ -1,0 +1,399 @@
+.page {
+  max-width: 87vw;
+  margin: 20px auto 0 auto;
+}
+
+.page-header h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--white-text);
+}
+
+.page-body {
+  margin-bottom: 20px;
+}
+
+.select-tipo-ativo select {
+  background-color: var(--bg-card);
+}
+
+.form-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  margin-top: 20px;
+}
+
+.div-input-formulario {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 20px 0 0;
+  width: calc(50% - 20px);
+}
+
+.div-input-formulario.text-area-formulario {
+  width: 100%;
+}
+
+.div-input-formulario span {
+  color: var(--text-input-label);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.015rem;
+}
+
+.div-input-formulario select,
+.select-tipo-ativo select {
+  appearance: none; /* remove seta padrão */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239e9e9e' class='bi bi-chevron-down' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center; /* controla a distância da seta */
+  background-size: 16px;
+
+  width: 100%;
+}
+
+.input-formulario {
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  color: var(--white-text);
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 0;
+  margin-top: 12px;
+  width: calc(100% - 20px);
+  min-height: 50px;
+}
+
+.input-full-width {
+  width: 100%;
+}
+
+.text-area-formulario textarea {
+  padding-top: 10px;
+}
+
+.form-buttons {
+  width: 140px;
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
+.no-info {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--text-info-color);
+  font-style: italic;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-content-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  width: fit-content;
+}
+
+.voltar-button {
+  background-color: var(--button-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+}
+
+.movimentacao-button {
+  background-color: var(--action-button-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.desabilitar-button {
+  background-color: #B50C00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.habilitar-button {
+  background-color: #003fb5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.voltar-button:hover {
+  background-color: var(--button-hover-color);
+}
+
+.movimentacao-button:hover {
+  background-color: var(--action-button-hover-color);
+}
+
+.desabilitar-button:hover {
+  background-color: #810900;
+}
+
+.habilitar-button:hover {
+  background-color: #002c7e;
+}
+
+.acoes-button {
+  position: relative;
+  display: inline-block;
+}
+
+.acoes-toggle {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acoes-toggle i {
+  font-size: 0.8rem;
+}
+
+.acoes-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: var(--bg-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  min-width: 160px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.acoes-toggle {
+  background-color: #00974F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  transition: background-color 0.5s ease-in-out;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.acoes-toggle {
+  background-color: #006635;
+}
+
+.qr-image {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.print-button {
+  margin-bottom: 10px;
+  background-color: var(--submit-button-color);
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  transition: background-color 0.45s ease-in-out;
+  cursor: pointer;
+}
+
+.print-button:hover {
+  background-color: var(--submit-button-hover-color);
+}
+
+.print-qr-code-icon {
+  font-size: 21px;
+  margin-left: 3px;
+}
+
+.row-input-fields {
+  display: flex;
+}
+
+.checkbox-input-formulario {
+  margin-top: 15px;
+  width: fit-content;
+}
+
+.modal-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000ea;
+}
+
+.modal-content {
+  width: 90vw;
+  background-color: var(--bg-card);
+  padding: 20px 0 20px 20px;
+  border-radius: 10px;
+  position: relative;
+  max-height: 90vh;
+}
+
+@media (min-width: 576px) {
+  .row-input-fields {
+    display: flex;
+    width: 50%;
+  }
+}
+
+@media (min-width: 768px) {
+  .checkbox-input-formulario {
+    margin-top: 25px;
+  }
+
+  .checkbox-input-formulario {
+    margin-top: 5px;
+    margin-right: 10px;
+    width: fit-content;
+  }
+
+  .div-input-checkbox {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row-reverse;
+    padding-top: 20px;
+  }
+
+  .div-input-checkbox span {
+    width: 50%;
+  }
+
+  .modal-content {
+    width: 85vw;
+    background-color: var(--bg-card);
+    padding: 20px 0 20px 20px;
+    border-radius: 10px;
+  }
+}
+
+@media (min-width: 992px) {
+  .page-content {
+    display: flex;
+    width: 100%;
+  }
+
+  .page-body {
+    width: 75%;
+  }
+
+  .page-side-section {
+    margin-left: 20px;
+    width: 25%;
+  }
+
+  .historico-body {
+    position: relative;
+  }
+
+  .modal-content {
+    width: 80vw;
+  }
+}
+
+@media (min-width: 1768px) {
+  .modal-content {
+    width: 50vw;
+  }
+}
+
+@media print {
+  /* Oculta todo o resto da tela */
+  body * {
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Mostra apenas o contêiner do QR Code */
+  .qr-container,
+  .qr-container * {
+    visibility: visible;
+  }
+
+  /* Centraliza o QR Code na folha */
+  .qr-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    background: white; /* evita fundo colorido */
+    page-break-after: avoid;
+    page-break-before: avoid;
+  }
+
+  /* Remove margens padrão da impressora */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  /* Oculta o botão de impressão */
+  .qr-container .print-button {
+    display: none !important;
+  }
+}

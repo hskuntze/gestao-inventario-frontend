@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import ProgressBar from "../ProgressBar";
 import "./styles.css";
 
@@ -15,11 +16,11 @@ const CardAtivoQtd = ({ qtd, tipo, total }: Props) => {
   };
 
   return (
-    <div className="card-container">
+    <Link to="/gestao-inventario/ativo" className="card-container">
       <span className="card-title">{titulo[tipo]}</span>
       <span className="card-number">{qtd}</span>
       <ProgressBar total={total} value={qtd} key={"BARRA-PROGRESSO-CARD-" + tipo} />
-    </div>
+    </Link>
   );
 };
 

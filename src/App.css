@@ -8,49 +8,84 @@
 
 /* --- TEMA ESCURO --- */
 :root {
-  --text-color: #e7e7e7;
-  --text-info-color: #9ba6b1;
-  --text-input-color: #76787c;
+  --white-text: #fff;
+
+  --text-color: #fff;
+  --text-info-color: #657f8d;
+  --text-disabled-color: #727375;
+  --text-input-color: #657f8d;
   --text-error-color: #e60109;
+  --text-input-label: #86a1b1;
+
   --border-input-color: #6a6b6e;
-  --border-color: #404349;
+  --border-color: #1a425a;
   --border-error-color: #e60109;
-  --submit-button-color: #007aff;
-  --submit-button-hover-color: #1c86f8;
-  --button-color: #3c414d;
-  --button-hover-color: #4d5361;
-  --bg-color: #121212;
-  --bg-progress-bar: #39414d;
-  --bg-progress-fill: #007dfe;
-  --bg-card: #1d2228;
-  --skeleton-loading: #1d2228;
-  --skeleton-gradient: #3E4957;
-  --skeleton-element: rgb(62, 67, 75);
+
+  --submit-button-color: #009fe3;
+  --submit-button-hover-color: #006996;
+  --button-color: #005a89;
+  --button-hover-color: #0074b3;
+  --action-button-color: #00963E;
+  --action-button-hover-color: #006e2e;
+
+  --bg-color: #013148;
+  --bg-progress-bar: #025a82;
+  --bg-progress-fill: #009fe3;
+  --bg-card: #003b59;
+  --bg-card-hover: #005580;
+  --bg-no-data: #d41919;
+  --bg-filter-input: #001621;
+  --bg-disabled-field: #012233;
+
+  --skeleton-loading: #015175;
+  --skeleton-gradient: #016593;
+  --skeleton-element: #004464;
+
+  --hist-line: #ffffff1f;
 }
 
 /* --- TEMA CLARO --- */
 [data-theme="light"] {
-  --text-color: #333;
-  --text-info-color: #9ba6b1;
+  --white-text: #111;
+  
+  --text-color: #001621;
+  --text-info-color: #7f8185;
+  --text-disabled-color: #727375;
   --text-input-color: #3d3d3d;
   --text-error-color: #d8262c;
+  --text-input-label: #485965;
+
   --border-input-color: #8e8e8f;
   --border-color: #8e8e8f;
   --border-error-color: #d8262c;
-  --submit-button-color: #112c57;
-  --submit-button-hover-color: #1d3d72;
+
+  --submit-button-color: #007aff;
+  --submit-button-hover-color: #1877dd;
   --button-color: #a1a1a1;
   --button-hover-color: #c0c0c0;
+  --action-button-color: #007aff;
+  --action-button-hover-color: #1877dd;
+
   --bg-color: #fff;
   --bg-progress-bar: #b4b4b4;
   --bg-progress-fill: #0da621;
   --bg-card: #d3d3d3;
+  --bg-card-hover: #b7b7b7;
+  --bg-no-data: #e06969;
+  --bg-filter-input: #2a2a2a;
+  --bg-disabled-field: #b1afaf;
+
   --skeleton-loading: #c2c2c2;
   --skeleton-gradient: #dfdfdf;
+  --hist-line: #0000001f;
 }
 
 #root {
   max-height: 100vh;
+}
+
+#main {
+  padding-bottom: 20px;
 }
 
 body {
@@ -73,4 +108,16 @@ button {
   color: unset;
   margin: unset;
   padding: unset;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background: url("/icons/calendario.svg") center/90% no-repeat;
+}
+
+html[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }

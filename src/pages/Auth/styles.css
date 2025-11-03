@@ -35,7 +35,7 @@
 }
 
 .login-container {
-  background-color: #2c2c2c;
+  background-color: var(--bg-card);
   width: 300px;
   height: 300px;
   border-radius: 14px;
@@ -88,7 +88,7 @@
 }
 
 .input-error {
-  border: 1px solid var(--border-error-color);
+  border: 1px solid var(--border-error-color) !important;
 }
 
 @media (min-width: 576px) {

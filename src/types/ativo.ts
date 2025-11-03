@@ -1,0 +1,28 @@
+import { AreaType } from "./area";
+import { FornecedorType } from "./fornecedor";
+import { Imagem } from "./imagem";
+import { LocalizacaoType } from "./localizacao";
+import { UsuarioResponsavelType } from "./usuario_responsavel";
+
+export type AtivoType = {
+  id: number;
+  idPatrimonial: string;
+  gerarIdPatrimonial: boolean;
+  categoria: string;
+  descricao: string;
+  area: AreaType;
+  localizacao: LocalizacaoType;
+  usuarioResponsavel: UsuarioResponsavelType;
+  fornecedor: FornecedorType;
+  dataAquisicao: string;
+  codigoSerie: string;
+  observacoes: string;
+  linkDocumento: string;
+  estadoConservacao: string;
+  qrCodeUrl: string;
+  qrCodeImage: string;
+  tipoAtivo: string;
+  desabilitado: boolean;
+  razaoDesabilitado: string;
+  imagens: Imagem[];
+};
