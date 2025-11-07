@@ -130,7 +130,7 @@
   background-color: var(--button-hover-color);
 }
 
-@media (min-width: 576px) {
+@media (min-width: 992px) {
   .navbar-container {
     display: flex;
     justify-content: space-between;

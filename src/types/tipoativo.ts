@@ -1,3 +1,1 @@
-export type TipoAtivoType = {
-  tipo: "TANGIVEL" | "INTANGIVEL" | "TANGIVEL_MANUTENCAO";
-};
+export type TipoAtivoType = "TANGIVEL" | "INTANGIVEL" | "LOCACAO";

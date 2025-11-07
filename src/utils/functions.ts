@@ -4,6 +4,7 @@ import { AreaType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
+import { NotificacaoType } from "@/types/notificacao";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -112,5 +113,20 @@ export async function fetchAllUsuariosResponsaveis(): Promise<UsuarioResponsavel
     return res.data as UsuarioResponsavelType[];
   } catch (err) {
     throw new Error("Falha ao buscar os usuários.");
+  }
+}
+
+export async function fetchAllNotificacoes(): Promise<NotificacaoType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: "/notificacoes/all",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as NotificacaoType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar notificações.");
   }
 }

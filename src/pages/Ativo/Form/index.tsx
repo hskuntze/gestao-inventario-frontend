@@ -33,6 +33,8 @@ type FormData = {
   observacoes: string;
   linkDocumento: string;
   estadoConservacao: string;
+  dataDevolucaoPrevista: string;
+  dataDevolucaoRealizada: string;
 };
 
 type UrlParams = {
@@ -222,6 +224,7 @@ const AtivoForm = () => {
     requestBackend(requestParams)
       .then((res) => {
         let data = res.data as AtivoType;
+        console.log(data);
 
         setAtivo(data);
 
@@ -248,6 +251,9 @@ const AtivoForm = () => {
         setValue("observacoes", data.observacoes);
         setValue("usuarioResponsavel", data.usuarioResponsavel);
         setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
+
+        setValue("dataDevolucaoPrevista", data.dataDevolucaoPrevista ?? "");
+        setValue("dataDevolucaoRealizada", data.dataDevolucaoRealizada ?? "");
       })
       .catch((err) => {
         toast.error("Erro ao tentar carregar dados do ativo");
@@ -790,6 +796,34 @@ const AtivoForm = () => {
                         />
                         <div className="invalid-feedback d-block div-erro">{errors.dataAquisicao?.message}</div>
                       </div>
+                      {tipoForm === "tl" && (
+                        <>
+                          <div className="div-input-formulario">
+                            <span>Data de devolução prevista</span>
+                            <input
+                              type="date"
+                              className={`input-formulario data-input ${errors.dataDevolucaoPrevista ? "input-error" : ""} ${
+                                desabilitado ? "disabled-field" : ""
+                              }`}
+                              {...register("dataDevolucaoPrevista", { required: "Campo obrigatório" })}
+                              disabled={desabilitado}
+                            />
+                            <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoPrevista?.message}</div>
+                          </div>
+                          <div className="div-input-formulario">
+                            <span>Data em que foi realizada a devolução</span>
+                            <input
+                              type="date"
+                              className={`input-formulario data-input ${errors.dataDevolucaoRealizada ? "input-error" : ""} ${
+                                desabilitado ? "disabled-field" : ""
+                              }`}
+                              {...register("dataDevolucaoRealizada")}
+                              disabled={desabilitado}
+                            />
+                            <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoRealizada?.message}</div>
+                          </div>
+                        </>
+                      )}
                       {tipoForm !== "i" && (
                         <div className="div-input-formulario">
                           <span>Estado de conservação</span>

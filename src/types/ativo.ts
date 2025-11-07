@@ -25,4 +25,6 @@ export type AtivoType = {
   desabilitado: boolean;
   razaoDesabilitado: string;
   imagens: Imagem[];
+  dataDevolucaoPrevista?: string;
+  dataDevolucaoRealizada?: string;
 };
