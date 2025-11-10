@@ -20,7 +20,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     REGISTRO: "Ativo registrado",
     ATUALIZAÇÃO: "Ativo atualizado",
     ATRIBUIÇÃO: `Atribuído a ${element.usuarioResponsavel}`,
-    MOVIMENTAÇÃO: `Movido para ${element.usuarioResponsavel}`,
+    MOVIMENTAÇÃO: `Ativo movimentado`,
     DESABILITAR: "Ativo desabilitado",
     HABILITAR: "Ativo habilitado",
   };
@@ -28,15 +28,16 @@ const CardHistoricoAtivo = ({ element }: Props) => {
   return (
     <div className="historico-container">
       <div className="historico-icon">
-        <i className={icons[element.operation]} />
+        <i className={icons[element.operacao]} />
       </div>
       <div className="historico-content">
-        <span className="historico-content-title">{labels[element.operation]}</span>
+        <span className="historico-content-title">{labels[element.operacao]}</span>
         <span className="historico-content-info">{formatarData(element.createdAt)}</span>
-        {element.operation === "REGISTRO" && <span className="historico-content-info">Área: {element.area}</span>}
-        {element.operation === "REGISTRO" && <span className="historico-content-info">Localização: {element.localizacao}</span>}
-        {element.operation === "MOVIMENTAÇÃO" && <span className="historico-content-info">Área: {element.area}</span>}
-        {element.operation === "MOVIMENTAÇÃO" && <span className="historico-content-info">Localização: {element.localizacao}</span>}
+        {element.operacao === "REGISTRO" && <span className="historico-content-info">Área: {element.area}</span>}
+        {element.operacao === "REGISTRO" && <span className="historico-content-info">Localização: {element.localizacao}</span>}
+        {element.operacao === "MOVIMENTAÇÃO" && <span className="historico-content-info">Usuário Responsável: {element.usuarioResponsavel}</span>}
+        {element.operacao === "MOVIMENTAÇÃO" && <span className="historico-content-info">Área: {element.area}</span>}
+        {element.operacao === "MOVIMENTAÇÃO" && <span className="historico-content-info">Localização: {element.localizacao}</span>}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { FornecedorType } from "@/types/fornecedor";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
 import { NotificacaoType } from "@/types/notificacao";
+import { ContratoType } from "@/types/contrato";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -128,5 +129,20 @@ export async function fetchAllNotificacoes(): Promise<NotificacaoType[]> {
     return res.data as NotificacaoType[];
   } catch (err) {
     throw new Error("Falha ao buscar notificações.");
+  }
+}
+
+export async function fetchAllContratos(): Promise<ContratoType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: "/contratos/all",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as ContratoType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar contratos.");
   }
 }

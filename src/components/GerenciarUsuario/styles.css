@@ -12,12 +12,12 @@
 
 .usuario-list-table th {
   text-align: start;
-  color: #00200e;
+  color: var(--text-info-color);
   font-size: 14px;
 }
 
 .usuario-list-table tbody tr {
-  border-top: 1px solid #006C2F;
+  border-top: 1px solid var(--border-color);
   font-size: 15px;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .usuario-list-table tbody tr:last-of-type {
-  border-bottom: 1px solid #006C2F;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .localizacao-input-div {

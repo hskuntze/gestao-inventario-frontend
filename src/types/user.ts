@@ -8,5 +8,6 @@ export type User = {
   userUuid: string;
   firstAccess: number;
   userState: number;
+  termoParceria: string;
   perfis: Perfil[];
 };

@@ -1,17 +1,14 @@
 import "./styles.css";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { ApexOptions } from "apexcharts";
-import Chart from "react-apexcharts";
 
 import { NotificacaoType } from "@/types/notificacao";
+import { TipoNotificacao } from "@/types/tiponotificacao";
 
 import { fetchAllNotificacoes } from "@/utils/functions";
 
 import CNSkeletonLoader from "@/components/CardNotificacao/CNSkeletonLoader";
 import CardNotificacaoCompleto from "@/components/CardNotificacaoCompleto";
-import { TipoNotificacao } from "@/types/tiponotificacao";
-import Loader from "@/components/Loader";
 
 const Notificacoes = () => {
   const [loadingNotificacoes, setLoadingNotificacoes] = useState(true);
