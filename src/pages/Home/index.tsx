@@ -12,9 +12,11 @@ import CAQSkeletonLoader from "@/components/CardAtivoQtd/CAQSkeletonLoader";
 import CARSkeletonLoader from "@/components/CardAtivoRecente/CARSkeletonLoader";
 import { Link } from "react-router-dom";
 import { NotificacaoType } from "@/types/notificacao";
-import { fetchAllNotificacoes } from "@/utils/functions";
+import { fetchAllAtivosRecentes, fetchAllNotificacoes, tiposAtivo } from "@/utils/functions";
 import { TipoNotificacao } from "@/types/tiponotificacao";
 import { TipoAtivoType } from "@/types/tipoativo";
+import { AtivoType } from "@/types/ativo";
+import { CategoriaType } from "@/types/categoria";
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
@@ -23,6 +25,9 @@ const Home = () => {
 
   const [qtdAtivos, setQtdAtivos] = useState<QuantidadeAtivosType>();
   const [notificacoes, setNotificacoes] = useState<NotificacaoType[]>([]);
+  const [recentes, setRecentes] = useState<AtivoType[]>([]);
+
+  const [os, setOs] = useState<string>();
 
   function getOS() {
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -35,8 +40,6 @@ const Home = () => {
 
     return "Desconhecido";
   }
-
-  console.log(getOS());
 
   useEffect(() => {
     setLoading(true);
@@ -76,6 +79,29 @@ const Home = () => {
     getNotificacoes();
   }, []);
 
+  useEffect(() => {
+    async function getAtivosRecentes() {
+      setLoadingAtivosRecentes(true);
+
+      try {
+        const data = await fetchAllAtivosRecentes();
+        setRecentes(data);
+        setLoadingAtivosRecentes(false);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar ativos recentes";
+        toast.error(errorMsg);
+      }
+    }
+
+    getAtivosRecentes();
+  }, []);
+
+  useEffect(() => {
+    if(os === undefined) {
+      setOs(getOS());
+    }
+  }, [os]);
+
   return (
     <div className="home-container">
       <section className="home-section">
@@ -88,7 +114,7 @@ const Home = () => {
           Gerar Relatório
         </button>
         <button type="button" className="button general-button auto-width pd-2">
-          Iniciar Processo
+          Ler QRCode
         </button>
       </section>
       <section className="home-section cards-section">
@@ -135,17 +161,19 @@ const Home = () => {
           <span className="section-title">Ativos Recentes</span>
           {loadingAtivosRecentes ? (
             <CARSkeletonLoader />
-          ) : (
-            <>
-              <CardAtivoRecente idAtivo={0} mensagem="Notebook Dell XPS 15" tipoAtivo={"TANGIVEL"} categoria={{ nome: "ELETRONICO" }} />
-              <CardAtivoRecente idAtivo={0} mensagem="Cadeira de escritório" tipoAtivo={"TANGIVEL"} categoria={{ nome: "MOBILIARIO" }} />
+          ) : recentes.length > 0 ? (
+            recentes.map((r) => (
               <CardAtivoRecente
-                idAtivo={0}
-                mensagem="Pedestal para TV de 32” a 75” Suporte vídeoconferência com rodízios"
-                tipoAtivo={"TANGIVEL"}
-                categoria={{ nome: "ACESSORIO" }}
+                idAtivo={r.id}
+                mensagem={r.descricao}
+                tipoAtivo={tiposAtivo[r.tipoAtivo] as TipoAtivoType}
+                categoria={r.categoria as CategoriaType}
               />
-            </>
+            ))
+          ) : (
+            <div className="section-subtitle">
+              <span>Sem ativos recentes...</span>
+            </div>
           )}
         </div>
       </section>

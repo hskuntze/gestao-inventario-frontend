@@ -118,7 +118,6 @@ const AtivoList = () => {
           <h2 className="page-title">Inventário de Ativos</h2>
           <Link to={"/gestao-inventario/ativo/formulario/create"}>
             <button type="button" className="button submit-button auto-width pd-2">
-              <i className="bi bi-plus" />
               Adicionar Ativo
             </button>
           </Link>

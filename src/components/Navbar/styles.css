@@ -25,8 +25,7 @@
 }
 
 .navbar-div-left h5 {
-  font-size: 13px;
-  margin-left: 10px;
+  display: none;
 }
 
 .nav-icon {
@@ -128,6 +127,14 @@
 
 .dropdown-item:hover {
   background-color: var(--button-hover-color);
+}
+
+@media (min-width: 576px) {
+  .navbar-div-left h5 {
+    display: block;
+    font-size: 15px;
+    margin-left: 10px;
+  }
 }
 
 @media (min-width: 992px) {

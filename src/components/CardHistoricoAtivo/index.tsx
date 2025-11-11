@@ -1,5 +1,5 @@
-import { HistoricoType } from "@/types/historico";
 import "./styles.css";
+import { HistoricoType } from "@/types/historico";
 import { formatarData } from "@/utils/functions";
 
 interface Props {
@@ -33,11 +33,19 @@ const CardHistoricoAtivo = ({ element }: Props) => {
       <div className="historico-content">
         <span className="historico-content-title">{labels[element.operacao]}</span>
         <span className="historico-content-info">{formatarData(element.createdAt)}</span>
-        {element.operacao === "REGISTRO" && <span className="historico-content-info">Área: {element.area}</span>}
-        {element.operacao === "REGISTRO" && <span className="historico-content-info">Localização: {element.localizacao}</span>}
-        {element.operacao === "MOVIMENTAÇÃO" && <span className="historico-content-info">Usuário Responsável: {element.usuarioResponsavel}</span>}
-        {element.operacao === "MOVIMENTAÇÃO" && <span className="historico-content-info">Área: {element.area}</span>}
-        {element.operacao === "MOVIMENTAÇÃO" && <span className="historico-content-info">Localização: {element.localizacao}</span>}
+        {element.operacao === "REGISTRO" && (
+          <>
+            <span className="historico-content-info">Área: {element.area}</span>
+            <span className="historico-content-info">Localização: {element.localizacao}</span>
+          </>
+        )}
+        {element.operacao === "MOVIMENTAÇÃO" && (
+          <>
+            <span className="historico-content-info">Usuário Responsável: {element.usuarioResponsavel}</span>
+            <span className="historico-content-info">Área: {element.area}</span>
+            <span className="historico-content-info">Localização: {element.localizacao}</span>
+          </>
+        )}
       </div>
     </div>
   );
