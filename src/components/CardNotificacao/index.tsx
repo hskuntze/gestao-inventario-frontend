@@ -1,19 +1,20 @@
 import { TipoAtivoType } from "@/types/tipoativo";
 import "./styles.css";
+import { TipoNotificacao } from "@/types/tiponotificacao";
 
 interface Props {
   idAtivo: number;
   tipoAtivo: TipoAtivoType;
   titulo: string;
   mensagem: string;
-  tipo: "MANUTENCAO" | "GARANTIA" | "OUTRO";
+  tipo: TipoNotificacao;
 }
 
 const CardNotificacao = ({ idAtivo, mensagem, tipo, tipoAtivo, titulo }: Props) => {
-  const iconeAtivo: { [key: string]: string } = {
-    MANUTENCAO: "bi bi-wrench-adjustable",
-    GARANTIA: "bi bi-calendar2-x",
-    OUTRO: "bi bi-blockquote-right",
+  const iconeAtivo: Record<TipoNotificacao, string> = {
+    ALERTA: "bi bi-exclamation-diamond",
+    GARANTIA: "bi bi-calendar-event",
+    EXPIRADO: "bi bi-calendar-x",
   };
 
   return (

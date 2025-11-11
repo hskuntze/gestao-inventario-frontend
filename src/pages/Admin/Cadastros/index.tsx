@@ -1,9 +1,10 @@
+import GerenciarContrato from "@/components/GerenciarContrato";
 import "./styles.css";
 import GerenciarArea from "@/components/GerenciarArea";
-import GerenciarFornecedor from "@/components/GerenciarFornecedor";
 import GerenciarUsuario from "@/components/GerenciarUsuario";
 import GerenciarUsuarioResponsavel from "@/components/GerenciarUsuarioResponsavel";
 import { Link } from "react-router-dom";
+import GerenciarFornecedor from "@/components/GerenciarFornecedor";
 
 const AdminCadastros = () => {
   return (
@@ -12,7 +13,9 @@ const AdminCadastros = () => {
         <div className="header-content">
           <div>
             <h2 className="page-title">Gerenciamento de Cadastros Auxiliares</h2>
-            <span className="page-subtitle">Adicione, edite ou remova usuários, fornecedores e áreas.</span>
+            <span className="page-subtitle">
+              Adicione, edite ou remova usuários de sistema, usuários responsáveis, contratos, fornecedores e áreas.
+            </span>
           </div>
           <div className="header-content-buttons">
             <Link to="/gestao-inventario" type="button" className="voltar-button">
@@ -24,6 +27,7 @@ const AdminCadastros = () => {
       <div className="page-body w-100">
         <GerenciarArea />
         <GerenciarUsuarioResponsavel />
+        <GerenciarContrato />
         <GerenciarFornecedor />
         <GerenciarUsuario />
       </div>

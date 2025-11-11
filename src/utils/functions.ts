@@ -4,6 +4,10 @@ import { AreaType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
+import { NotificacaoType } from "@/types/notificacao";
+import { ContratoType } from "@/types/contrato";
+import { HistoricoType } from "@/types/historico";
+import { AtivoType } from "@/types/ativo";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -29,6 +33,12 @@ export const formatarData = (date: string) => {
   } else {
     return "-";
   }
+};
+
+export const tiposAtivo: { [key: string]: string } = {
+  t: "TANGÍVEL",
+  i: "INTANGÍVEL",
+  tl: "LOCAÇÃO",
 };
 
 export function formatarDataParaMesAno(dataStr: string): string {
@@ -112,5 +122,50 @@ export async function fetchAllUsuariosResponsaveis(): Promise<UsuarioResponsavel
     return res.data as UsuarioResponsavelType[];
   } catch (err) {
     throw new Error("Falha ao buscar os usuários.");
+  }
+}
+
+export async function fetchAllNotificacoes(): Promise<NotificacaoType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: "/notificacoes/all",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as NotificacaoType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar notificações.");
+  }
+}
+
+export async function fetchAllAtivosRecentes(): Promise<AtivoType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: "/historico/recentes",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as AtivoType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar os ativos recentes.");
+  }
+}
+
+export async function fetchAllContratos(): Promise<ContratoType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: "/contratos/all",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as ContratoType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar contratos.");
   }
 }

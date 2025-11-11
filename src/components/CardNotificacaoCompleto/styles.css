@@ -1,0 +1,96 @@
+.card-completo-notificacao-container {
+  position: relative;
+  max-width: 100%;
+  margin: 10px 0;
+  min-height: 80px;
+  padding: 5px 10px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.card-completo-notificacao-container:first-of-type {
+  margin-top: 15px;
+}
+
+.card-date {
+  color: var(--text-info-color);
+  font-size: 13px;
+  font-weight: 200;
+  margin-top: 5px;
+}
+
+.card-bell {
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.bell-readed {
+  cursor: not-allowed !important;
+}
+
+/* Classe ativada quando o item é marcado como lido */
+.pop-animation {
+  animation: popExplosion 0.4s ease-out;
+}
+
+.notificacao-nao-lida {
+  border: 2px solid var(--warning-color, #ffc107);
+  background-color: var(--bg-highlight, #fff8e1);
+}
+
+@media (min-width: 992px) {
+  .card-completo-notificacao-container {
+    width: 100%;
+    padding: 5px 10px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .card-bell {
+    margin-left: auto;
+    margin-right: 15px;
+    font-size: 25px;
+  }
+}
+
+@keyframes popExplosion {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); /* leve brilho dourado */
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes bellPop {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 215, 0, 0));
+  }
+  40% {
+    transform: scale(1.4);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 215, 0, 0));
+  }
+}
+
+/* Classe aplicada durante o efeito */
+.bell-pop {
+  animation: bellPop 0.4s ease-out;
+}

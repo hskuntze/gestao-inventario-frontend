@@ -1,7 +1,7 @@
 export type HistoricoType = {
   id: number;
   createdAt: string;
-  operation: string;
+  operacao: string;
   ativo: number;
   userId: number;
   userLogin: string;

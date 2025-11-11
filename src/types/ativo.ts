@@ -1,4 +1,5 @@
 import { AreaType } from "./area";
+import { ContratoType } from "./contrato";
 import { FornecedorType } from "./fornecedor";
 import { Imagem } from "./imagem";
 import { LocalizacaoType } from "./localizacao";
@@ -14,6 +15,7 @@ export type AtivoType = {
   localizacao: LocalizacaoType;
   usuarioResponsavel: UsuarioResponsavelType;
   fornecedor: FornecedorType;
+  contrato: ContratoType;
   dataAquisicao: string;
   codigoSerie: string;
   observacoes: string;
@@ -25,4 +27,7 @@ export type AtivoType = {
   desabilitado: boolean;
   razaoDesabilitado: string;
   imagens: Imagem[];
+  dataDevolucaoPrevista?: string;
+  dataDevolucaoRealizada?: string;
+  termoParceria: string;
 };

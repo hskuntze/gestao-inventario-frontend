@@ -124,7 +124,6 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
         const response = await requestBackend(requestParams);
         //if (!response.status) throw new Error(`Erro ao enviar ${file.name}`);
       } catch (error) {
-        console.error(error);
         alert(`Erro ao enviar ${file.name}`);
       }
     }

@@ -28,7 +28,7 @@
   border-radius: 10px;
   cursor: pointer;
   width: 100%;
-  height: 45px;
+  min-height: 45px;
   font-weight: 700;
   letter-spacing: 0.025em;
   transition: background-color 0.3s ease-in-out;
@@ -280,6 +280,16 @@
 
 .accordion-header div:nth-child(2) {
   margin-top: 10px;
+}
+
+.chart-tooltip {
+  background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
+}
+
+.apexcharts-legend-text {
+  margin: 0 !important;
+  padding-left: 5px !important;
 }
 
 /* animação da faixa se movendo */

@@ -86,6 +86,11 @@ const Navbar = () => {
                     <i className="bi bi-gear-fill" />
                     <span>Cadastros</span>
                   </Link>
+
+                  <Link to={"/gestao-inventario/admin/notificacoes"} type="button" className="configuration-button">
+                    <i className="bi bi-bell-fill" />
+                    <span>Notificações</span>
+                  </Link>
                 </div>
               </>
             )}

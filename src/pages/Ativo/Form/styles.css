@@ -62,7 +62,7 @@
 }
 
 .input-formulario {
-  background-color: var(--bg-color);
+  background-color: var(--bg-input);
   border-radius: 10px;
   color: var(--white-text);
   padding-left: 10px;
@@ -280,7 +280,7 @@
 
 .modal-content {
   width: 90vw;
-  background-color: var(--bg-card);
+  background-color: var(--bg-color);
   padding: 20px 0 20px 20px;
   border-radius: 10px;
   position: relative;
@@ -319,7 +319,6 @@
 
   .modal-content {
     width: 85vw;
-    background-color: var(--bg-card);
     padding: 20px 0 20px 20px;
     border-radius: 10px;
   }

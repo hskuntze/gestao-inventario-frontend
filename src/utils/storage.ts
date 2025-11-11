@@ -38,3 +38,14 @@ export const getUserData = () => {
 export const removeUserData = () => {
   localStorage.removeItem("userData");
 };
+
+/**
+ * Sistema Operacional
+ */
+export const saveOS = (str: string) => {
+  localStorage.setItem("OS", str);
+}
+
+export const getOS = () => {
+  const str = localStorage.getItem("OS") ?? "Desconhecido";
+}

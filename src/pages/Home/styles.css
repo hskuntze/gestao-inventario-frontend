@@ -42,9 +42,16 @@
   font-size: 23px;
 }
 
+.section-subtitle {
+  margin-top: 12px;
+  color: var(--text-info-color);
+  font-size: 15px;
+}
+
 .notificacoes-container {
   width: calc(100% - 10px);
   position: relative;
+  margin-bottom: 20px;
 }
 
 .ativos-recentes-container {
@@ -75,16 +82,12 @@
     margin-right: 10px;
   }
 
-  .home-section {
-    display: flex;
-    margin-left: 20px;
-  }
-
   .cards-section {
     width: unset !important;
     display: flex;
     flex-direction: unset;
   }
+
   .section-title {
     font-weight: 700;
     font-size: 23px;

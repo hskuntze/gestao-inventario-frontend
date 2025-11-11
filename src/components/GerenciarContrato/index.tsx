@@ -4,27 +4,23 @@ import { useEffect, useState } from "react";
 import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
-import { Controller, useForm } from "react-hook-form";
-import { Perfil } from "@/types/perfil";
-import { User } from "@/types/user";
-import { formatarPerfil } from "@/utils/functions";
-import { hasAnyRoles } from "@/utils/auth";
-import { getUserData } from "@/utils/storage";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { FornecedorType } from "@/types/fornecedor";
+import { ContratoType } from "@/types/contrato";
+import { formatarData } from "@/utils/functions";
 
 type FormData = {
-  nome: string;
-  email: string;
-  login: string;
-  perfilUsuario: Perfil;
-  senha: string;
+  titulo: string;
+  descricao: string;
   termoParceria: string;
+  inicioDataVigencia: string;
+  fimDataVigencia: string;
+  fornecedores: FornecedorType[];
 };
 
-const GerenciarUsuario = () => {
-  const user = getUserData();
-
+const GerenciarContrato = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [usuarios, setUsuarios] = useState<User[]>([]);
+  const [contratos, setContratos] = useState<ContratoType[]>([]);
   const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -32,26 +28,38 @@ const GerenciarUsuario = () => {
 
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [usuarioId, setUsuarioId] = useState<number>();
-
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [contratoId, setContratoId] = useState<number>();
 
   const {
     register,
+    control,
     formState: { errors },
     handleSubmit,
     setValue,
+  } = useForm<FormData>({
+    defaultValues: {
+      fornecedores: [{ nome: "", cnpj: "", contatoEmail: "", contatoNome: "", contatoTelefone: "" }],
+    },
+  });
+
+  const {
+    append: appendFornecedor,
+    fields: fornecedorFields,
+    remove: removeFornecedor,
+  } = useFieldArray<FormData, "fornecedores">({
     control,
-  } = useForm<FormData>();
+    name: "fornecedores",
+  });
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
 
-    setValue("nome", "");
-    setValue("email", "");
-    setValue("login", "");
-    setValue("senha", "");
-    setValue("perfilUsuario", { id: -1, autorizacao: "" });
+    setValue("titulo", "");
+    setValue("descricao", "");
+    setValue("termoParceria", "");
+    setValue("inicioDataVigencia", "");
+    setValue("fimDataVigencia", "");
+    setValue("fornecedores", []);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -68,35 +76,36 @@ const GerenciarUsuario = () => {
     setPage(0);
   };
 
-  const filteredData = usuarios.filter((u) => {
+  const filteredData = contratos.filter((c) => {
     const searchTerm = filter.trim();
     if (!searchTerm) return true;
 
     return (
-      u.nome.toLowerCase().includes(searchTerm) ||
-      (u.email.toLowerCase().includes(searchTerm) ?? false) ||
-      (u.login.toLowerCase().includes(searchTerm) ?? false)
+      c.titulo.toLowerCase().includes(searchTerm) ||
+      (c.termoParceria.toLowerCase().includes(searchTerm) ?? false) ||
+      (formatarData(c.inicioDataVigencia).includes(searchTerm) ?? false) ||
+      (formatarData(c.fimDataVigencia).includes(searchTerm) ?? false)
     );
   });
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-  const loadUsuarios = () => {
+  const loadContratos = () => {
     setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
-      url: "/usuarios/all",
+      url: "/contratos/all",
       method: "GET",
       withCredentials: true,
     };
 
     requestBackend(requestParams)
       .then((res) => {
-        let data = res.data as User[];
-        setUsuarios(data);
+        let data = res.data as ContratoType[];
+        setContratos(data);
       })
       .catch((err) => {
-        toast.error("Erro ao tentar carregar os usuários do sistema. Erro: " + err.data.message);
+        toast.error("Erro ao tentar carregar os contratos. Erro: " + err.data.message);
       })
       .finally(() => {
         setLoading(false);
@@ -105,60 +114,61 @@ const GerenciarUsuario = () => {
 
   const onSubmit = (formData: FormData) => {
     const requestParams: AxiosRequestConfig = {
-      url: isEditing ? `/usuarios/update/${usuarioId}` : "/usuarios/register",
+      url: isEditing ? `/contratos/update/${contratoId}` : "/contratos/register",
       method: isEditing ? "PUT" : "POST",
       withCredentials: true,
       data: {
-        nome: formData.nome,
-        email: formData.email,
-        login: formData.login,
-        password: formData.senha,
-        termoParceria: isAdmin ? formData.termoParceria : user.termoParceria,
-        perfis: [
-          {
-            id: formData.perfilUsuario.id,
-          },
-        ],
+        titulo: formData.titulo,
+        descricao: formData.descricao,
+        inicioDataVigencia: formData.inicioDataVigencia,
+        fimDataVigencia: formData.fimDataVigencia,
+        termoParceria: formData.termoParceria,
+        fornecedores: formData.fornecedores.map((f) => ({
+          id: f.id,
+          nome: f.nome,
+          contatoEmail: f.contatoEmail,
+          contatoNome: f.contatoNome,
+          contatoTelefone: f.contatoTelefone,
+          cnpj: f.cnpj,
+        })),
       },
     };
 
     requestBackend(requestParams)
       .then((res) => {
-        toast.success(`Usuário do sistema ${isEditing ? "editado" : "criado"} com sucesso.`);
-        loadUsuarios();
+        toast.success(`Contrato ${isEditing ? "editado" : "criado"} com sucesso.`);
+        loadContratos();
         handleToggleModal();
       })
       .catch((err) => {
-        const message = err.response?.data?.message || "Erro ao tentar atualizar o usuário do sistema.";
+        const message = err.response?.data?.message || "Erro ao tentar atualizar o contrato.";
         toast.error(message);
         handleToggleModal();
       })
       .finally(() => {});
   };
 
-  const handleEditUsuario = (u: User) => {
-    setOpenModal(true);
-    setIsEditing(true);
-    setUsuarioId(u.id);
-
-    setValue("nome", u.nome);
-    setValue("email", u.email);
-    setValue("login", u.login);
-    setValue("perfilUsuario", u.perfis[0]);
-  };
-
   const handleDeleteArea = (id: number) => {};
 
-  useEffect(() => {
-    loadUsuarios();
-  }, []);
+  const handleEditArea = (contrato: ContratoType) => {
+    setOpenModal(true);
+    setIsEditing(true);
+    setContratoId(contrato.id);
+
+    setValue("titulo", contrato.titulo);
+    setValue("descricao", contrato.descricao);
+    setValue("fimDataVigencia", contrato.fimDataVigencia);
+    setValue("inicioDataVigencia", contrato.inicioDataVigencia);
+    setValue("termoParceria", contrato.termoParceria);
+    setValue("fornecedores", contrato.fornecedores);
+  };
 
   useEffect(() => {
-    setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
+    loadContratos();
   }, []);
 
   return (
-    <div className="component-accordion" id="gerenciar-usuario">
+    <div className="component-accordion" id="gerenciar-contrato">
       <Accordion
         classes={{
           root: "bg-card-blue content-container",
@@ -166,11 +176,11 @@ const GerenciarUsuario = () => {
       >
         <AccordionSummary
           expandIcon={<i className="bi bi-chevron-down" />}
-          aria-controls="gerenciar-usuario"
-          id="gerenciar-usuario-header"
+          aria-controls="gerenciar-contrato"
+          id="gerenciar-contrato-header"
           className="accordion-title"
         >
-          Usuários do sistema
+          Contratos
         </AccordionSummary>
         <AccordionDetails>
           <div className="accordion-header">
@@ -180,34 +190,27 @@ const GerenciarUsuario = () => {
                 <input
                   type="text"
                   className="form-control filtro-input"
-                  id="usuario-filtro"
+                  id="nome-treinamento-filtro"
                   placeholder="Digite um termo para filtrar"
                   onChange={handleFilterChange}
                 />
               </div>
             </div>
             <div>
-              <button
-                onClick={() => {
-                  handleToggleModal();
-                  setIsEditing(false);
-                }}
-                type="button"
-                className="button submit-button auto-width pd-2"
-              >
+              <button onClick={handleToggleModal} type="button" className="button submit-button auto-width pd-2">
                 <i className="bi bi-plus" />
-                Adicionar Usuário do Sistema
+                Adicionar Contrato
               </button>
             </div>
           </div>
           <div className="div-table">
-            <table className="usuario-list-table">
+            <table className="contrato-list-table">
               <thead>
-                <tr key={"tr-head-usuario-list-table"}>
-                  <th scope="col">Nome</th>
-                  <th scope="col">E-mail</th>
-                  <th scope="col">Login</th>
-                  <th scope="col">Perfil</th>
+                <tr key={"tr-head-contrato-list-table"}>
+                  <th scope="col">Título</th>
+                  <th scope="col">Termo de Parceria</th>
+                  <th scope="col">Início da vigência</th>
+                  <th scope="col">Fim da vigência</th>
                   <th scope="col">Ações</th>
                 </tr>
               </thead>
@@ -216,20 +219,20 @@ const GerenciarUsuario = () => {
                   paginatedData.map((a) => (
                     <tr key={a.id}>
                       <td>
-                        <div>{a.nome}</div>
+                        <div>{a.titulo}</div>
                       </td>
                       <td>
-                        <div>{a.email}</div>
+                        <div>{a.termoParceria}</div>
                       </td>
                       <td>
-                        <div>{a.login}</div>
+                        <div>{formatarData(a.inicioDataVigencia)}</div>
                       </td>
                       <td>
-                        <div>{formatarPerfil(a.perfis[0].autorizacao)}</div>
+                        <div>{formatarData(a.fimDataVigencia)}</div>
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditUsuario(a)} className="button action-button nbr">
+                          <button onClick={() => handleEditArea(a)} className="button action-button nbr">
                             <i className="bi bi-pencil" />
                           </button>
                           <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
@@ -281,71 +284,71 @@ const GerenciarUsuario = () => {
         <Box className="modal-content">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
-              <span>Nome</span>
+              <span>Título do contrato</span>
               <input
                 type="text"
-                className={`input-formulario ${errors.nome ? "input-error" : ""}`}
-                {...register("nome", { required: "Campo obrigatório" })}
+                className={`input-formulario ${errors.titulo ? "input-error" : ""}`}
+                {...register("titulo", { required: "Campo obrigatório" })}
                 maxLength={255}
               />
-              <div className="invalid-feedback d-block div-erro">{errors.nome?.message}</div>
+              <div className="invalid-feedback d-block div-erro">{errors.titulo?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>E-mail</span>
-              <input
-                type="text"
-                className={`input-formulario ${errors.email ? "input-error" : ""}`}
-                {...register("email", { required: "Campo obrigatório" })}
-                maxLength={255}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.email?.message}</div>
-            </div>
-            <div className="div-input-formulario">
-              <span>Login</span>
-              <input
-                type="text"
-                className={`input-formulario ${errors.login ? "input-error" : ""}`}
-                {...register("login", { required: "Campo obrigatório" })}
-                maxLength={255}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.login?.message}</div>
-            </div>
-            {!isEditing && (
-              <>
-                <div className="div-input-formulario">
-                  <span>Senha</span>
-                  <input
-                    type="password"
-                    className={`input-formulario ${errors.senha ? "input-error" : ""}`}
-                    {...register("senha", { required: "Campo obrigatório" })}
-                    maxLength={255}
-                  />
-                  <div className="invalid-feedback d-block div-erro">{errors.senha?.message}</div>
+              <span>Fornecedor</span>
+              {fornecedorFields.map((field, index) => (
+                <div className="loc-group" key={`div-loc-${index}`}>
+                  <div className="localizacao-input-div">
+                    <input
+                      type="text"
+                      className={`input-formulario localizacao-formulario ${errors.fornecedores ? "is-invalid" : ""}`}
+                      id={`localizacao-${index}`}
+                      placeholder="Fornecedor"
+                      {...register(`fornecedores.${index}.nome`, {
+                        required: "Campo obrigatório",
+                      })}
+                      key={`loc-${index}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (fornecedorFields.length > 1) {
+                          removeFornecedor(index);
+                        }
+                      }}
+                      disabled={fornecedorFields.length <= 1}
+                      className="remove-button"
+                    >
+                      <i className="bi bi-x-lg" />
+                    </button>
+                  </div>
                 </div>
-              </>
-            )}
+              ))}
+              <button
+                type="button"
+                onClick={() => appendFornecedor({ id: -1, nome: "", cnpj: "", contatoEmail: "", contatoNome: "", contatoTelefone: "" })}
+                className="add-button"
+              >
+                <i className="bi bi-plus-lg" />
+              </button>
+              <div className="invalid-feedback d-block div-erro">{errors.fornecedores?.message}</div>
+            </div>
             <div className="div-input-formulario">
-              <span>Perfil</span>
-              <Controller
-                name="perfilUsuario.id"
-                control={control}
-                rules={{ required: "Campo obrigatório" }}
-                render={({ field }) => (
-                  <select id="perfil" className={`input-formulario ${errors.perfilUsuario ? "input-error" : ""}`} {...field} value={field.value}>
-                    <option>Selecione um perfil</option>
-                    <option key={"perfil" + 1} value={1}>
-                      Admin
-                    </option>
-                    <option key={"perfil" + 3} value={2}>
-                      Gerente
-                    </option>
-                    <option key={"perfil" + 2} value={3}>
-                      Usuário
-                    </option>
-                  </select>
-                )}
+              <span>Início da vigência</span>
+              <input
+                type="date"
+                className={`input-formulario data-input ${errors.inicioDataVigencia ? "input-error" : ""}`}
+                {...register("inicioDataVigencia", { required: "Campo obrigatório" })}
               />
-              <div className="invalid-feedback d-block">{errors.perfilUsuario?.message}</div>
+              <div className="invalid-feedback d-block div-erro">{errors.inicioDataVigencia?.message}</div>
+            </div>
+            <div className="div-input-formulario">
+              <span>Fim da vigência</span>
+              <input
+                type="date"
+                className={`input-formulario data-input ${errors.fimDataVigencia ? "input-error" : ""}`}
+                {...register("fimDataVigencia", { required: "Campo obrigatório" })}
+              />
+              <div className="invalid-feedback d-block div-erro">{errors.fimDataVigencia?.message}</div>
             </div>
             <div className="div-input-formulario">
               <span>Termo de Parceria</span>
@@ -366,7 +369,18 @@ const GerenciarUsuario = () => {
               />
               <div className="invalid-feedback d-block div-erro">{errors.termoParceria?.message}</div>
             </div>
-            <div className="div-input-formulario"></div>
+            <div className="div-input-formulario">
+              <span>Descrição</span>
+              <textarea
+                id="descricao"
+                className={`input-formulario ${errors.descricao ? "input-error" : ""}`}
+                rows={4}
+                {...register("descricao", { required: "Campo obrigatório" })}
+                maxLength={255}
+                style={{ paddingTop: 5 }}
+              ></textarea>
+              <div className="invalid-feedback d-block div-erro">{errors.descricao?.message}</div>
+            </div>
             <div className="form-buttons">
               <button className="button submit-button">Salvar</button>
             </div>
@@ -377,4 +391,4 @@ const GerenciarUsuario = () => {
   );
 };
 
-export default GerenciarUsuario;
+export default GerenciarContrato;

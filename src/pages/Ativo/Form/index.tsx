@@ -12,10 +12,19 @@ import CardHistoricoAtivo from "@/components/CardHistoricoAtivo";
 import { AreaType } from "@/types/area";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { FornecedorType } from "@/types/fornecedor";
-import { fetchAllAreas, fetchAllFornecedores, fetchAllFornecedoresByAreaId, fetchAllUsuariosResponsaveis } from "@/utils/functions";
+import {
+  fetchAllAreas,
+  fetchAllContratos,
+  fetchAllFornecedores,
+  fetchAllFornecedoresByAreaId,
+  fetchAllUsuariosResponsaveis,
+} from "@/utils/functions";
 import { LocalizacaoType } from "@/types/localizacao";
 import { Box, Modal } from "@mui/material";
 import AtivoFormLoaderSkeleton from "./AtivoFormLoaderSkeleton";
+import { ContratoType } from "@/types/contrato";
+import { hasAnyRoles } from "@/utils/auth";
+import { getUserData } from "@/utils/storage";
 
 type FormData = {
   tipoAtivo: string | null;
@@ -27,12 +36,16 @@ type FormData = {
   area: AreaType;
   localizacao: LocalizacaoType;
   usuarioResponsavel: UsuarioResponsavelType;
+  contrato: ContratoType;
   fornecedor: FornecedorType;
   dataAquisicao: string;
   codigoSerie: string;
   observacoes: string;
   linkDocumento: string;
   estadoConservacao: string;
+  dataDevolucaoPrevista: string;
+  dataDevolucaoRealizada: string;
+  termoParceria: string;
 };
 
 type UrlParams = {
@@ -43,6 +56,10 @@ const AtivoForm = () => {
   const urlParams = useParams<UrlParams>();
   const isEditing = urlParams.id === "create" ? false : true;
 
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  const user = getUserData();
+
   const [tipoForm, setTipoForm] = useState<"t" | "i" | "tl" | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [ativo, setAtivo] = useState<AtivoType>();
@@ -51,11 +68,14 @@ const AtivoForm = () => {
 
   const [areas, setAreas] = useState<AreaType[]>([]);
   const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
+  const [contratos, setContratos] = useState<ContratoType[]>([]);
   const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
+  const [allFornecedores, setAllFornecedores] = useState<FornecedorType[]>([]);
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
 
   const [selectedArea, setSelectedArea] = useState<AreaType>();
   const [selectedLocalizacao, setSelectedLocalizacao] = useState<LocalizacaoType>();
+  const [selectedContrato, setSelectedContrato] = useState<ContratoType | null>(null);
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
 
   const [openModal, setOpenModal] = useState(false);
@@ -70,6 +90,7 @@ const AtivoForm = () => {
     formState: { errors },
     handleSubmit,
     setValue,
+    resetField,
   } = useForm<FormData>();
 
   const handleToggleModal = () => {
@@ -167,6 +188,7 @@ const AtivoForm = () => {
           usuariosResponsavel: {
             id: formData.usuarioResponsavel.id,
           },
+          termoParceria: isAdmin ? formData.termoParceria : user.termoParceria,
         },
       };
 
@@ -237,17 +259,31 @@ const AtivoForm = () => {
         setValue("localizacao", data.localizacao);
         setSelectedLocalizacao(data.localizacao);
 
+        setValue("contrato", data.contrato);
+
+        setValue("fornecedor", data.fornecedor);
+        if (data.contrato !== null) {
+          setFornecedores(data.contrato.fornecedores);
+          setSelectedContrato(data.contrato);
+        } else {
+          setFornecedores(allFornecedores);
+        }
+
         setValue("categoria", data.categoria);
         setValue("codigoSerie", data.codigoSerie);
         setValue("dataAquisicao", data.dataAquisicao);
         setValue("descricao", data.descricao);
         setValue("estadoConservacao", data.estadoConservacao);
-        setValue("fornecedor", data.fornecedor);
         setValue("idPatrimonial", data.idPatrimonial);
         setValue("linkDocumento", data.linkDocumento);
         setValue("observacoes", data.observacoes);
         setValue("usuarioResponsavel", data.usuarioResponsavel);
         setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
+
+        setValue("dataDevolucaoPrevista", data.dataDevolucaoPrevista ?? "");
+        setValue("dataDevolucaoRealizada", data.dataDevolucaoRealizada ?? "");
+
+        setValue("termoParceria", data.termoParceria);
       })
       .catch((err) => {
         toast.error("Erro ao tentar carregar dados do ativo");
@@ -255,7 +291,7 @@ const AtivoForm = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [urlParams.id, setValue]);
+  }, [urlParams.id, setValue, allFornecedores]);
 
   const loadHistoricoInfo = useCallback(() => {
     const requestParams: AxiosRequestConfig = {
@@ -304,12 +340,14 @@ const AtivoForm = () => {
 
   useEffect(() => {
     async function getFornecedores() {
-      //setLoadingFornecedores(true);
+      //setLoadingAreas(true);
       setFornecedores([]);
+      setAllFornecedores([]);
 
       try {
-        const data = await fetchAllFornecedores();
+        const data = (await fetchAllFornecedores()) as FornecedorType[];
         setFornecedores(data);
+        setAllFornecedores(data);
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
         toast.error(errorMsg);
@@ -317,6 +355,23 @@ const AtivoForm = () => {
     }
 
     getFornecedores();
+  }, []);
+
+  useEffect(() => {
+    async function getContratos() {
+      //setLoadingFornecedores(true);
+      setContratos([]);
+
+      try {
+        const data = await fetchAllContratos();
+        setContratos(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar contratos";
+        toast.error(errorMsg);
+      }
+    }
+
+    getContratos();
   }, []);
 
   useEffect(() => {
@@ -363,6 +418,10 @@ const AtivoForm = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
   }, []);
 
   return (
@@ -744,6 +803,63 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
                       </div>
                       <div className="div-input-formulario">
+                        <span>Contrato</span>
+                        <Controller
+                          name="contrato"
+                          control={control}
+                          rules={{
+                            required: "Campo obrigatório",
+                          }}
+                          render={({ field }) => (
+                            <select
+                              id="contrato"
+                              className={`input-formulario ${errors.contrato ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
+                              {...field}
+                              value={field.value === null ? "-1" : field.value?.id?.toString()}
+                              onChange={(e) => {
+                                const selectedValue = e.target.value;
+                                if (selectedValue === "-1") {
+                                  // Exibe todos os fornecedores
+                                  setFornecedores(allFornecedores);
+                                  setSelectedContrato(null);
+                                  setValue("dataDevolucaoPrevista", "");
+                                  resetField("dataDevolucaoPrevista");
+
+                                  // No form, o valor será null (sem contrato)
+                                  field.onChange({ id: null });
+                                } else {
+                                  const selectedId = Number(selectedValue);
+                                  const sContrato = contratos.find((a) => a.id === selectedId) || null;
+
+                                  if (sContrato !== null) {
+                                    setSelectedContrato(sContrato);
+                                    setValue("dataDevolucaoPrevista", sContrato.fimDataVigencia);
+                                  } else {
+                                    setSelectedContrato(null);
+                                    setValue("dataDevolucaoPrevista", "");
+                                    resetField("dataDevolucaoPrevista");
+                                  }
+                                  setFornecedores(sContrato?.fornecedores ?? allFornecedores);
+                                  field.onChange(sContrato);
+                                }
+                              }}
+                              disabled={desabilitado}
+                            >
+                              <option value="">Selecione um contrato</option>
+                              <option value={-1}>Não possui contrato</option>
+                              {contratos &&
+                                contratos.length > 0 &&
+                                contratos.map((a) => (
+                                  <option key={a.id} value={a.id}>
+                                    {a.titulo}
+                                  </option>
+                                ))}
+                            </select>
+                          )}
+                        />
+                        <div className="invalid-feedback d-block div-erro">{errors.contrato?.message}</div>
+                      </div>
+                      <div className="div-input-formulario">
                         <span>Fornecedor</span>
                         <Controller
                           name="fornecedor"
@@ -754,7 +870,9 @@ const AtivoForm = () => {
                           render={({ field }) => (
                             <select
                               id="fornecedor"
-                              className={`input-formulario ${errors.fornecedor ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
+                              className={`input-formulario ${errors.fornecedor ? "input-error" : ""} ${
+                                desabilitado || fornecedores.length <= 0 ? "disabled-field" : ""
+                              }`}
                               {...field}
                               value={field.value?.id || ""}
                               onChange={(e) => {
@@ -763,7 +881,7 @@ const AtivoForm = () => {
 
                                 field.onChange(selectedFornecedor || null);
                               }}
-                              disabled={desabilitado}
+                              disabled={desabilitado || fornecedores.length <= 0}
                             >
                               <option value="">Selecione um fornecedor</option>
                               {fornecedores &&
@@ -790,6 +908,34 @@ const AtivoForm = () => {
                         />
                         <div className="invalid-feedback d-block div-erro">{errors.dataAquisicao?.message}</div>
                       </div>
+                      {tipoForm === "tl" && (
+                        <>
+                          <div className="div-input-formulario">
+                            <span>Data de devolução prevista</span>
+                            <input
+                              type="date"
+                              className={`input-formulario data-input ${errors.dataDevolucaoPrevista ? "input-error" : ""} ${
+                                desabilitado || selectedContrato !== null ? "disabled-field" : ""
+                              }`}
+                              {...register("dataDevolucaoPrevista", { required: "Campo obrigatório" })}
+                              disabled={desabilitado || selectedContrato !== null}
+                            />
+                            <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoPrevista?.message}</div>
+                          </div>
+                          <div className="div-input-formulario">
+                            <span>Data em que foi realizada a devolução</span>
+                            <input
+                              type="date"
+                              className={`input-formulario data-input ${errors.dataDevolucaoRealizada ? "input-error" : ""} ${
+                                desabilitado ? "disabled-field" : ""
+                              }`}
+                              {...register("dataDevolucaoRealizada")}
+                              disabled={desabilitado}
+                            />
+                            <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoRealizada?.message}</div>
+                          </div>
+                        </>
+                      )}
                       {tipoForm !== "i" && (
                         <div className="div-input-formulario">
                           <span>Estado de conservação</span>
@@ -818,6 +964,27 @@ const AtivoForm = () => {
                             )}
                           />
                           <div className="invalid-feedback d-block div-erro">{errors.estadoConservacao?.message}</div>
+                        </div>
+                      )}
+                      {isAdmin && (
+                        <div className="div-input-formulario">
+                          <span>Termo de Parceria</span>
+                          <Controller
+                            name="termoParceria"
+                            control={control}
+                            rules={{ required: "Campo obrigatório" }}
+                            render={({ field }) => (
+                              <select id="responsavel" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
+                                <option value="">Selecione um responsável</option>
+                                <option value={"CCOMGEX"}>CCOMGEX</option>
+                                <option value={"DECEA"}>DECEA</option>
+                                <option value={"CISCEA"}>CISCEA</option>
+                                <option value={"PAME"}>PAME</option>
+                                <option value={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
+                              </select>
+                            )}
+                          />
+                          <div className="invalid-feedback d-block div-erro">{errors.termoParceria?.message}</div>
                         </div>
                       )}
                       <div className="div-input-formulario">

@@ -22,7 +22,7 @@ const CardAtivoRecente = ({ idAtivo, mensagem, categoria, tipoAtivo }: Props) =>
   return (
     <div className="card-ativo-recente-container">
       <div className="card-icon-white">
-        <i className={iconeAtivo[categoria.nome]} />
+        <i className={iconeAtivo[categoria]} />
       </div>
       <div className="card-info">
         <span className="card-title">{mensagem}</span>
