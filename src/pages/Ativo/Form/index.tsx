@@ -21,6 +21,8 @@ import {
 } from "@/utils/functions";
 import { LocalizacaoType } from "@/types/localizacao";
 import { Box, Modal } from "@mui/material";
+import PhotoCaptureModal from "@/components/PhotoCaptureModal";
+import { usePhotoCapture, PhotoCaptureResult } from "@/utils/hooks/usePhotoCapture";
 import AtivoFormLoaderSkeleton from "./AtivoFormLoaderSkeleton";
 import { ContratoType } from "@/types/contrato";
 import { hasAnyRoles } from "@/utils/auth";
@@ -93,8 +95,49 @@ const AtivoForm = () => {
     resetField,
   } = useForm<FormData>();
 
+  // Photo capture hook + modal state
+  const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, reset: resetPhoto } = usePhotoCapture();
+
+  const [photoModalOpen, setPhotoModalOpen] = useState<boolean>(false);
+  const [confirmedPhoto, setConfirmedPhoto] = useState<PhotoCaptureResult | null>(null);
+
   const handleToggleModal = () => {
     setOpenModal(!openModal);
+  };
+
+  const handleConfirmPhoto = async () => {
+    // Close modal while fetching location
+    setPhotoModalOpen(false);
+
+    try {
+      const loc = await captureLocation();
+
+      const result: PhotoCaptureResult = {
+        photoBase64: photoBase64 || "",
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        accuracy: loc.accuracy,
+        timestamp: new Date().toISOString(),
+      };
+
+      setConfirmedPhoto(result);
+      console.log("[Ativo Form] Foto confirmada:", result);
+    } catch (err) {
+      console.error("Erro ao confirmar foto", err);
+    } finally {
+      // reset temporary hook state
+      resetPhoto();
+    }
+  };
+
+  const handleRetakePhoto = async () => {
+    resetPhoto();
+    await capturePhoto();
+  };
+
+  const handleCancelPhoto = () => {
+    resetPhoto();
+    setPhotoModalOpen(false);
   };
 
   const handleSelectTipoForm = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -579,6 +622,16 @@ const AtivoForm = () => {
           </form>
         </Box>
       </Modal>
+
+      {/* Photo capture preview/confirm modal (native camera preview handled by Capacitor) */}
+      <PhotoCaptureModal
+        isOpen={photoModalOpen}
+        photoBase64={photoBase64}
+        onConfirm={handleConfirmPhoto}
+        onRetake={handleRetakePhoto}
+        onCancel={handleCancelPhoto}
+        loading={photoLoading}
+      />
       {loading ? (
         <AtivoFormLoaderSkeleton />
       ) : (
@@ -1029,6 +1082,22 @@ const AtivoForm = () => {
                   {isEditing && (
                     <div className="content-container">
                       <span className="form-title">Anexos</span>
+                      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                        <button
+                          type="button"
+                          className="button"
+                          onClick={async () => {
+                            // open camera to take a photo (preview handled by modal below)
+                            await capturePhoto();
+                            setPhotoModalOpen(true);
+                          }}
+                          disabled={desabilitado}
+                        >
+                          📸 Tirar Foto
+                        </button>
+                        <span style={{ color: "#666" }}>Tire uma foto do ativo e confirme para visualizar abaixo.</span>
+                      </div>
+
                       {ativo ? (
                         <UploadArquivos
                           tipoAtivo={tipoForm}
@@ -1038,6 +1107,25 @@ const AtivoForm = () => {
                         />
                       ) : (
                         <UploadArquivos tipoAtivo={tipoForm} ativoDesabilitado={desabilitado} />
+                      )}
+
+                      {/* Inline preview of confirmed photo */}
+                      {confirmedPhoto && (
+                        <div className="inline-photo-preview" style={{ marginTop: 12 }}>
+                          <span className="form-title">Foto Capturada</span>
+                          <div style={{ marginTop: 8 }}>
+                            <img
+                              src={`data:image/jpeg;base64,${confirmedPhoto.photoBase64}`}
+                              alt="Foto do ativo"
+                              style={{ maxWidth: "100%", borderRadius: 6 }}
+                            />
+                            <div style={{ marginTop: 8, color: "#444" }}>
+                              <div>Latitude: {confirmedPhoto.latitude ?? "—"}</div>
+                              <div>Longitude: {confirmedPhoto.longitude ?? "—"}</div>
+                              <div>Timestamp: {confirmedPhoto.timestamp}</div>
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}

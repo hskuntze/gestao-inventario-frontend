@@ -1,6 +1,6 @@
 import "./styles.css";
 import { requestBackend } from "@/utils/requests";
-import { DragEvent, useEffect, useState } from "react";
+import { DragEvent, useEffect, useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { AxiosRequestConfig } from "axios";
 
@@ -39,7 +39,8 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
   const files = watch("file");
 
   const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-  const ALLOWED_TYPES = ["image/jpg", "image/jpeg", "image/png", "image/gif", "application/pdf"];
+  // Allowed MIME types
+  const ALLOWED_TYPES = useMemo(() => ["image/jpg", "image/jpeg", "image/png", "image/gif", "application/pdf"], []);
 
   // Gera previews quando o usuário seleciona novos arquivos
   useEffect(() => {
@@ -82,7 +83,9 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
       isNew: true,
     }));
 
+    // ALLOWED_TYPES and MAX_FILE_SIZE are stable (useMemo/const), so it's safe to omit them from deps
     setFilePreviews((prev) => [...prev, ...newPreviews]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files]);
 
   useEffect(() => {
@@ -121,9 +124,8 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
       };
 
       try {
-        const response = await requestBackend(requestParams);
-        //if (!response.status) throw new Error(`Erro ao enviar ${file.name}`);
-      } catch (error) {
+        await requestBackend(requestParams);
+      } catch (err) {
         alert(`Erro ao enviar ${file.name}`);
       }
     }

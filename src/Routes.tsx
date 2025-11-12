@@ -1,12 +1,14 @@
-import { BrowserRouter, Navigate, Route, Routes as Switch } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes as Switch, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Auth from "@/pages/Auth";
 import Home from "@/pages/Home";
 import Ativo from "@/pages/Ativo";
 import PrivateRoute from "./PrivateRoute";
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/utils/contexts/AuthContext";
 import Admin from "./pages/Admin";
+import { } from "react-toastify";
+import { Modal, Box } from "@mui/material";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -18,8 +20,103 @@ import Admin from "./pages/Admin";
 const Routes = () => {
   const { authContextData } = useContext(AuthContext);
 
+  // Back button handler component (needs to be inside Router so hooks work)
+  const BackButtonHandler = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // stack of visited location keys to determine if we can go back
+    const stackRef = useRef<string[]>([location.key]);
+    const [showExitConfirm, setShowExitConfirm] = useState(false);
+
+    useEffect(() => {
+      // push new location key into stack when location.key changes
+      const current = stackRef.current;
+      const last = current[current.length - 1];
+      if (location.key !== last) {
+        current.push(location.key);
+      }
+    }, [location.key]);
+
+    useEffect(() => {
+      const handleBack = () => {
+        const stack = stackRef.current;
+        if (stack.length > 1) {
+          // navigate back in app history
+          navigate(-1);
+          // remove current key from stack
+          stack.pop();
+        } else {
+          // at root of stack -> show confirmation modal
+          setShowExitConfirm(true);
+        }
+      };
+
+      // Register listener via global Capacitor App plugin if available at runtime
+      try {
+        const appPlugin = (window as any).Capacitor?.App;
+        if (appPlugin && typeof appPlugin.addListener === "function") {
+          const listener = appPlugin.addListener("backButton", handleBack);
+          return () => {
+            try {
+              listener.remove();
+            } catch (e) {
+              // ignore
+            }
+          };
+        }
+      } catch (e) {
+        // Capacitor App plugin not available in this environment (web)
+      }
+      // If no Capacitor App plugin, nothing to cleanup
+      return () => {};
+    }, [navigate]);
+
+    const exitApp = () => {
+      try {
+        const appPlugin = (window as any).Capacitor?.App;
+        if (appPlugin && typeof appPlugin.exitApp === "function") {
+          appPlugin.exitApp();
+        }
+      } catch (e) {
+        // no-op
+      }
+    };
+
+    return (
+      <>
+        <Modal open={showExitConfirm} onClose={() => setShowExitConfirm(false)}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              minWidth: 280,
+            }}
+          >
+            <h3>Deseja sair do aplicativo?</h3>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+              <button className="button" onClick={() => setShowExitConfirm(false)}>
+                Cancelar
+              </button>
+              <button className="button" onClick={() => exitApp()}>
+                Sair
+              </button>
+            </div>
+          </Box>
+        </Modal>
+      </>
+    );
+  };
+
   return (
     <BrowserRouter>
+      <BackButtonHandler />
       {authContextData.authenticated && <Navbar />}
       <main id="main">
         <Switch>

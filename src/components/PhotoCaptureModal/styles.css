@@ -1,0 +1,138 @@
+/* Photo Capture Modal Styles */
+
+.photo-capture-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.photo-capture-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 90%;
+  width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.photo-capture-modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  text-align: center;
+  color: #333;
+}
+
+.photo-preview-image {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: block;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.photo-loading {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.photo-loading p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.photo-capture-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photo-capture-actions .btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.photo-capture-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .photo-capture-modal-content {
+    width: 95%;
+    padding: 16px;
+  }
+
+  .photo-capture-actions {
+    flex-direction: column;
+  }
+
+  .photo-capture-actions .btn {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+}

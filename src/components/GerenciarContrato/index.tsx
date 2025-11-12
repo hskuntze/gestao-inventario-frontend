@@ -19,9 +19,9 @@ type FormData = {
 };
 
 const GerenciarContrato = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [_loading, _setLoading] = useState<boolean>(false);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
+  const [_reload, _setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -91,7 +91,7 @@ const GerenciarContrato = () => {
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const loadContratos = () => {
-    setLoading(true);
+    _setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
       url: "/contratos/all",
@@ -108,7 +108,7 @@ const GerenciarContrato = () => {
         toast.error("Erro ao tentar carregar os contratos. Erro: " + err.data.message);
       })
       .finally(() => {
-        setLoading(false);
+        _setLoading(false);
       });
   };
 
