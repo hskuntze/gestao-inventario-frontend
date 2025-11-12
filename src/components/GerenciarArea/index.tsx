@@ -18,9 +18,9 @@ type FormData = {
 };
 
 const GerenciarArea = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [_loading, _setLoading] = useState<boolean>(false);
   const [areas, setAreas] = useState<AreaType[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
+  const [_reload, _setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -89,7 +89,7 @@ const GerenciarArea = () => {
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const loadAreas = () => {
-    setLoading(true);
+    _setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
       url: "/areas/all",
@@ -106,7 +106,7 @@ const GerenciarArea = () => {
         toast.error("Erro ao tentar carregar as áreas. Erro: " + err.data.message);
       })
       .finally(() => {
-        setLoading(false);
+        _setLoading(false);
       });
   };
 

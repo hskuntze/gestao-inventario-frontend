@@ -34,21 +34,13 @@ const Home = () => {
   const [os, setOs] = useState<string>();
 
   // Photo Capture Hook
-  const {
-    photoBase64,
-    loading: photoLoading,
-    error: photoError,
-    capturePhoto,
-    captureLocation,
-    capturePhotoWithLocation,
-    reset: resetPhoto,
-  } = usePhotoCapture();
+  const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, capturePhotoWithLocation, reset: resetPhoto } = usePhotoCapture();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
 
   // Barcode scanner hook
-  const { scanning, error: scanError, scan } = useBarcodeScanner();
+  const { scanning, scan } = useBarcodeScanner();
   const navigate = useNavigate();
 
   function getOS() {
@@ -119,10 +111,12 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if(os === undefined) {
+    if (os === undefined) {
       setOs(getOS());
     }
-  }, [os]);
+    // os is only needed to be set once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Inicia fluxo de captura: tirar foto
