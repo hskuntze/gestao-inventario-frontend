@@ -17,6 +17,10 @@ import { TipoNotificacao } from "@/types/tiponotificacao";
 import { TipoAtivoType } from "@/types/tipoativo";
 import { AtivoType } from "@/types/ativo";
 import { CategoriaType } from "@/types/categoria";
+import PhotoCaptureModal from "@/components/PhotoCaptureModal";
+import { usePhotoCapture } from "@/utils/hooks/usePhotoCapture";
+import { useBarcodeScanner } from "@/utils/hooks/useBarcodeScanner";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
@@ -28,6 +32,24 @@ const Home = () => {
   const [recentes, setRecentes] = useState<AtivoType[]>([]);
 
   const [os, setOs] = useState<string>();
+
+  // Photo Capture Hook
+  const {
+    photoBase64,
+    loading: photoLoading,
+    error: photoError,
+    capturePhoto,
+    captureLocation,
+    capturePhotoWithLocation,
+    reset: resetPhoto,
+  } = usePhotoCapture();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPhotoPreview, setShowPhotoPreview] = useState(false);
+
+  // Barcode scanner hook
+  const { scanning, error: scanError, scan } = useBarcodeScanner();
+  const navigate = useNavigate();
 
   function getOS() {
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -102,6 +124,57 @@ const Home = () => {
     }
   }, [os]);
 
+  /**
+   * Inicia fluxo de captura: tirar foto
+   */
+  const handleCapturePhoto = async () => {
+    console.log("[Home] Iniciando captura de foto");
+    const base64 = await capturePhoto();
+    if (base64) {
+      setIsModalOpen(true);
+      setShowPhotoPreview(true);
+    }
+  };
+
+  /**
+   * Usuário confirma foto: capturar localização e logar resultado
+   */
+  const handleConfirmPhoto = async () => {
+    console.log("[Home] Confirmando foto e capturando localização");
+    const result = await capturePhotoWithLocation();
+    if (result) {
+      toast.success("✓ Foto e localização capturadas com sucesso!");
+      console.log("[Home] Resultado completo:", result);
+
+      // Resetar e fechar modal
+      setIsModalOpen(false);
+      setShowPhotoPreview(false);
+      resetPhoto();
+    }
+  };
+
+  /**
+   * Usuário clica em "Tirar Outra"
+   */
+  const handleRetakeLogo = async () => {
+    console.log("[Home] Retomando captura de foto");
+    resetPhoto();
+    setShowPhotoPreview(false);
+    setIsModalOpen(false);
+    // Aguardar um pouco e reabrir
+    setTimeout(handleCapturePhoto, 300);
+  };
+
+  /**
+   * Usuário cancela
+   */
+  const handleCancelPhoto = () => {
+    console.log("[Home] Cancelando captura de foto");
+    setIsModalOpen(false);
+    setShowPhotoPreview(false);
+    resetPhoto();
+  };
+
   return (
     <div className="home-container">
       <section className="home-section">
@@ -113,8 +186,48 @@ const Home = () => {
         <button type="button" className="button general-button auto-width pd-2">
           Gerar Relatório
         </button>
-        <button type="button" className="button general-button auto-width pd-2">
-          Ler QRCode
+        <button
+          type="button"
+          className="button general-button auto-width pd-2"
+          onClick={handleCapturePhoto}
+          disabled={photoLoading}
+        >
+          {photoLoading ? "Capturando..." : "📸 Capturar Foto"}
+        </button>
+
+        <button
+          type="button"
+          className="button general-button auto-width pd-2"
+          onClick={async () => {
+            console.log("[Home] Iniciando scanner de QR Code");
+            const text = await scan();
+            console.log("[Home] Resultado do scanner:", text);
+
+            if (!text) {
+              toast.error("Nenhum QR Code lido ou operação cancelada.");
+              return;
+            }
+
+            // Esperamos formato inventario://patrimonio/<codigo>
+            try {
+              const m = text.match(/^inventario:\/\/patrimonio\/(.+)$/i);
+              if (m && m[1]) {
+                const codigo = m[1];
+                toast.info(`QR Code lido: ${codigo}`);
+                console.log(`[Home] Navegando para cadastro do patrimônio: ${codigo}`);
+                navigate(`/gestao-inventario/ativo/formulario/${codigo}`);
+              } else {
+                toast.error("QR Code lido não está no formato esperado (inventario://patrimonio/<codigo>)");
+                console.warn("[Home] QR Code não corresponde ao esquema esperado:", text);
+              }
+            } catch (err) {
+              console.error("[Home] Erro ao processar QR Code:", err);
+              toast.error("Erro ao processar QR Code");
+            }
+          }}
+          disabled={scanning}
+        >
+          {scanning ? "Aguarde..." : "🔍 Ler QRCode"}
         </button>
       </section>
       <section className="home-section cards-section">
@@ -177,6 +290,16 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* Modal de Preview de Foto */}
+      <PhotoCaptureModal
+        isOpen={isModalOpen}
+        photoBase64={photoBase64}
+        onConfirm={handleConfirmPhoto}
+        onRetake={handleRetakeLogo}
+        onCancel={handleCancelPhoto}
+        loading={photoLoading}
+      />
     </div>
   );
 };
