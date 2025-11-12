@@ -34,7 +34,11 @@ export const useBarcodeScanner = () => {
         text = result.displayValue;
       } else if (Array.isArray(result)) {
         // alguns plugins retornam array de códigos
-        text = result[0]?.value || result[0]?.rawValue || null;
+        text = result[0]?.value || result[0]?.rawValue || result[0]?.displayValue || null;
+      } else if (result.barcodes && Array.isArray(result.barcodes) && result.barcodes.length > 0) {
+        // Formato observado: { barcodes: [ { rawValue, displayValue, ... } ] }
+        const b = result.barcodes[0];
+        text = b?.rawValue || b?.displayValue || null;
       } else {
         // stringify como fallback
         text = JSON.stringify(result);
