@@ -19,6 +19,7 @@ const Navbar = () => {
   const userData = getUserData();
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAnalista, setIsAnalista] = useState(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -44,6 +45,7 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
+    setIsAnalista(hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" }]));
   }, []);
 
   const handleLogout = () => {
@@ -78,7 +80,7 @@ const Navbar = () => {
               <strong>{userData.nome}</strong>
               <span>{userData.email}</span>
             </div>
-            {isAdmin && (
+            {(isAdmin || isAnalista) && (
               <>
                 <div className="dropdown-divider"></div>
                 <div className="configurations">

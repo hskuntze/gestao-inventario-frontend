@@ -334,10 +334,10 @@ const GerenciarUsuario = () => {
                   <select id="perfil" className={`input-formulario ${errors.perfilUsuario ? "input-error" : ""}`} {...field} value={field.value}>
                     <option>Selecione um perfil</option>
                     <option key={"perfil" + 1} value={1}>
-                      Admin
+                      Administrador
                     </option>
                     <option key={"perfil" + 3} value={2}>
-                      Gerente
+                      Analista de Inventário
                     </option>
                     <option key={"perfil" + 2} value={3}>
                       Usuário

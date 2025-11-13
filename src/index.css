@@ -127,6 +127,10 @@
   width: 50% !important;
 }
 
+.pd-0 {
+  padding: 0 !important;
+}
+
 .bg-card-blue {
   background-color: var(--bg-card) !important;
 }
@@ -143,6 +147,12 @@
   color: var(--text-color) !important;
   border-radius: 10px !important;
   padding: 20px !important;
+  margin: 20px auto 0 auto !important;
+}
+
+.list-content-container {
+  color: var(--text-color) !important;
+  border-radius: 10px !important;
   margin: 20px auto 0 auto !important;
 }
 

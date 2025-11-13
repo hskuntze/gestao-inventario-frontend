@@ -3,6 +3,8 @@ import { requestBackend } from "@/utils/requests";
 import { DragEvent, useEffect, useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { AxiosRequestConfig } from "axios";
+import ImagePreviewCarousel from "../ImagePreviewCarousel";
+import { base64ToBlob } from "@/utils/functions";
 
 interface BackendFile {
   id: number;
@@ -151,69 +153,79 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
     setValue("file", droppedFiles);
   };
 
+  const imageBlobs = defaultFiles?.filter((f) => /\.(jpg|jpeg|png|gif)$/i.test(f.nome)).map((f) => base64ToBlob(f.conteudo)) ?? [];
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="upload-card">
-      <div
-        className={`upload-dropzone ${dragOver ? "drag-over" : ""}`}
-        onDrop={handleDrop}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-      >
-        <i className="bi bi-cloud-arrow-up upload-icon" />
-        <span className="upload-span">Arraste e solte arquivos aqui ou</span>
-        <label className="upload-label">
-          <Controller
-            name="file"
-            control={control}
-            render={({ field }) => (
-              <input type="file" multiple onChange={(e) => field.onChange(e.target.files)} accept=".jpg,.jpeg,.png,.gif,.pdf" disabled={ativoDesabilitado} hidden />
-            )}
-          />
-          <span>procure em seus arquivos</span>
-        </label>
-      </div>
-
-      {errorMessage && (
-        <div className="upload-error">
-          <strong>⚠️ Erro nos arquivos:</strong>
-          <pre>{errorMessage}</pre>
+    <>
+      <ImagePreviewCarousel blobs={imageBlobs} />
+      <form onSubmit={handleSubmit(onSubmit)} className="upload-card">
+        <div
+          className={`upload-dropzone ${dragOver ? "drag-over" : ""}`}
+          onDrop={handleDrop}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+        >
+          <i className="bi bi-cloud-arrow-up upload-icon" />
+          <span className="upload-span">Arraste e solte arquivos aqui ou</span>
+          <label className="upload-label">
+            <Controller
+              name="file"
+              control={control}
+              render={({ field }) => (
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => field.onChange(e.target.files)}
+                  accept=".jpg,.jpeg,.png,.gif,.pdf"
+                  disabled={ativoDesabilitado}
+                  hidden
+                />
+              )}
+            />
+            <span>procure em seus arquivos</span>
+          </label>
         </div>
-      )}
 
-      {/* Lista de arquivos */}
-      <div className="upload-file-list">
-        {filePreviews.map((file) => {
-          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(file.name);
-          return (
-            <div key={file.name} className="upload-file-item">
-              <div className="file-info">
-                {isImage ? <i className="bi bi-card-image image-icon" /> : <i className="bi bi-file-earmark-text file-icon" />}
-                <a href={file.url} target="_blank" rel="noopener noreferrer">
-                  {file.name}
-                </a>
+        {errorMessage && (
+          <div className="upload-error">
+            <strong>⚠️ Erro nos arquivos:</strong>
+            <pre>{errorMessage}</pre>
+          </div>
+        )}
+
+        {/* Lista de arquivos */}
+        <div className="upload-file-list">
+          {filePreviews.map((file) => {
+            const isImage = /\.(jpg|jpeg|png|gif)$/i.test(file.name);
+            return (
+              <div key={file.name} className="upload-file-item">
+                <div className="file-info">
+                  {isImage ? <i className="bi bi-card-image image-icon" /> : <i className="bi bi-file-earmark-text file-icon" />}
+                  <span>{file.name}</span>
+                </div>
+                <div className="file-actions">
+                  <span className="file-size">{formatSize(file.size)}</span>
+                  <a href={file.url} download={file.name}>
+                    <i className="bi bi-download"></i>
+                  </a>
+                  <button type="button" className="file-remove" onClick={() => handleRemoveFile(file.name)}>
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
               </div>
-              <div className="file-actions">
-                <span className="file-size">{formatSize(file.size)}</span>
-                <a href={file.url} download={file.name}>
-                  <i className="bi bi-download"></i>
-                </a>
-                <button type="button" className="file-remove" onClick={() => handleRemoveFile(file.name)}>
-                  <i className="bi bi-x-lg"></i>
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="form-buttons">
-        <button disabled={ativoDesabilitado} className={`button submit-button ${ativoDesabilitado ? "disabled-field" : ""}`}>
-          Salvar
-        </button>
-      </div>
-    </form>
+            );
+          })}
+        </div>
+        <div className="form-buttons">
+          <button disabled={ativoDesabilitado} className={`button submit-button ${ativoDesabilitado ? "disabled-field" : ""}`}>
+            Salvar
+          </button>
+        </div>
+      </form>
+    </>
   );
 };
 

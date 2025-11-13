@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { requestBackend } from "./requests";
 import { AreaType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
@@ -8,6 +8,7 @@ import { NotificacaoType } from "@/types/notificacao";
 import { ContratoType } from "@/types/contrato";
 import { HistoricoType } from "@/types/historico";
 import { AtivoType } from "@/types/ativo";
+import { NavigateFunction } from "react-router-dom";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -58,7 +59,7 @@ export function formatarDataParaMesAno(dataStr: string): string {
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
     PERFIL_ADMIN: "Administrador",
-    PERFIL_GERENTE: "Gerente",
+    PERFIL_ANALISTA_INVENTARIO: "Analista de Inventário",
     PERFIL_USUARIO: "Usuário",
   };
 
@@ -167,5 +168,46 @@ export async function fetchAllContratos(): Promise<ContratoType[]> {
     return res.data as ContratoType[];
   } catch (err) {
     throw new Error("Falha ao buscar contratos.");
+  }
+}
+
+export const setupInterceptors = (navigate: NavigateFunction) => {
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response) {
+        const status = error.response.status;
+
+        if (status === 404) {
+          // redireciona para a tela de "não encontrado"
+          navigate("/gestao-inventario/nao-encontrado");
+        } else if (status === 401) {
+          // token inválido → volta pro login
+          navigate("/gestao-inventario/login");
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+};
+
+export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
+  try {
+    // Remove quebras de linha e espaços que possam ter vindo do banco
+    const cleanedBase64 = base64.replace(/[\r\n\s]/g, "");
+
+    const byteCharacters = atob(cleanedBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  } catch (error) {
+    console.error("Erro ao converter base64 para Blob:", error);
+    throw error;
   }
 }

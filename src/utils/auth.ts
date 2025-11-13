@@ -19,22 +19,25 @@ export const getTokenData = (): TokenData | undefined => {
  * @returns boolean
  */
 export const isAuthenticated = (): boolean => {
-  const tokenData = getTokenData();
-  return tokenData && tokenData.exp * 1000 > Date.now() ? true : false;
+  try {
+    const tokenData = getTokenData();
+    if (!tokenData || !tokenData.exp) return false;
+    return tokenData.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
 };
 
 /**
  * Verifica se o usuário tem algum perfil em um dado array de perfis
  * @param roles - Array do tipo Perfil
- * @returns 
+ * @returns
  */
 export const hasAnyRoles = (roles: Perfil[]): boolean => {
   const tokenData = getTokenData();
 
   if (tokenData !== undefined) {
-    return roles.some((role) =>
-      tokenData.authorities.includes(role.autorizacao)
-    );
+    return roles.some((role) => tokenData.authorities.includes(role.autorizacao));
   }
 
   return false;

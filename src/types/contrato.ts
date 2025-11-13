@@ -7,5 +7,5 @@ export type ContratoType = {
   termoParceria: string;
   inicioDataVigencia: string;
   fimDataVigencia: string;
-  fornecedores: FornecedorType[];
+  fornecedor: FornecedorType;
 };

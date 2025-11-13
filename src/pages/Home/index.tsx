@@ -21,17 +21,17 @@ import PhotoCaptureModal from "@/components/PhotoCaptureModal";
 import { usePhotoCapture } from "@/utils/hooks/usePhotoCapture";
 import { useBarcodeScanner } from "@/utils/hooks/useBarcodeScanner";
 import { useNavigate } from "react-router-dom";
+import { getOS } from "@/utils/storage";
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
   const [loadingNotificacoes, setLoadingNotificacoes] = useState(false);
   const [loadingAtivosRecentes, setLoadingAtivosRecentes] = useState(false);
+  const [os, setOs] = useState<string | null>(null);
 
   const [qtdAtivos, setQtdAtivos] = useState<QuantidadeAtivosType>();
   const [notificacoes, setNotificacoes] = useState<NotificacaoType[]>([]);
   const [recentes, setRecentes] = useState<AtivoType[]>([]);
-
-  const [os, setOs] = useState<string>();
 
   // Photo Capture Hook
   const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, capturePhotoWithLocation, reset: resetPhoto } = usePhotoCapture();
@@ -42,18 +42,6 @@ const Home = () => {
   // Barcode scanner hook
   const { scanning, scan } = useBarcodeScanner();
   const navigate = useNavigate();
-
-  function getOS() {
-    const userAgent = window.navigator.userAgent.toLowerCase();
-
-    if (userAgent.includes("windows")) return "Windows";
-    if (userAgent.includes("mac")) return "macOS";
-    if (userAgent.includes("linux")) return "Linux";
-    if (userAgent.includes("android")) return "Android";
-    if (userAgent.includes("iphone") || userAgent.includes("ipad")) return "iOS";
-
-    return "Desconhecido";
-  }
 
   useEffect(() => {
     setLoading(true);
@@ -111,12 +99,12 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (os === undefined) {
-      setOs(getOS());
+    let sistemaOperacional = getOS();
+
+    if (os === null && sistemaOperacional !== undefined) {
+      setOs(sistemaOperacional);
     }
-    // os is only needed to be set once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [os]);
 
   /**
    * Inicia fluxo de captura: tirar foto
@@ -172,57 +160,60 @@ const Home = () => {
   return (
     <div className="home-container">
       <section className="home-section">
-        <Link to={"/gestao-inventario/ativo/formulario/create"}>
-          <button type="button" className="button submit-button auto-width pd-2">
-            Adicionar Ativo
-          </button>
-        </Link>
-        <button type="button" className="button general-button auto-width pd-2">
-          Gerar Relatório
-        </button>
-        <button
-          type="button"
-          className="button general-button auto-width pd-2"
-          onClick={handleCapturePhoto}
-          disabled={photoLoading}
-        >
-          {photoLoading ? "Capturando..." : "📸 Capturar Foto"}
-        </button>
+        {os !== "Android" && os !== "iOS" && (
+          <>
+            <Link to={"/gestao-inventario/ativo/formulario/create"}>
+              <button type="button" className="button submit-button auto-width pd-2">
+                Adicionar Ativo
+              </button>
+            </Link>
+            <button type="button" className="button general-button auto-width pd-2">
+              Gerar Relatório
+            </button>
+          </>
+        )}
+        {(os === "Android" || os === "iOS") && (
+          <>
+            <button type="button" className="button general-button auto-width pd-2" onClick={handleCapturePhoto} disabled={photoLoading}>
+              {photoLoading ? "Capturando..." : "📸 Capturar Foto"}
+            </button>
 
-        <button
-          type="button"
-          className="button general-button auto-width pd-2"
-          onClick={async () => {
-            console.log("[Home] Iniciando scanner de QR Code");
-            const text = await scan();
-            console.log("[Home] Resultado do scanner:", text);
+            <button
+              type="button"
+              className="button general-button auto-width pd-2"
+              onClick={async () => {
+                console.log("[Home] Iniciando scanner de QR Code");
+                const text = await scan();
+                console.log("[Home] Resultado do scanner:", text);
 
-            if (!text) {
-              toast.error("Nenhum QR Code lido ou operação cancelada.");
-              return;
-            }
+                if (!text) {
+                  toast.error("Nenhum QR Code lido ou operação cancelada.");
+                  return;
+                }
 
-            // Esperamos formato inventario://patrimonio/<codigo>
-            try {
-              const m = text.match(/^inventario:\/\/patrimonio\/(.+)$/i);
-              if (m && m[1]) {
-                const codigo = m[1];
-                toast.info(`QR Code lido: ${codigo}`);
-                console.log(`[Home] Navegando para cadastro do patrimônio: ${codigo}`);
-                navigate(`/gestao-inventario/ativo/formulario/${codigo}`);
-              } else {
-                toast.error("QR Code lido não está no formato esperado (inventario://patrimonio/<codigo>)");
-                console.warn("[Home] QR Code não corresponde ao esquema esperado:", text);
-              }
-            } catch (err) {
-              console.error("[Home] Erro ao processar QR Code:", err);
-              toast.error("Erro ao processar QR Code");
-            }
-          }}
-          disabled={scanning}
-        >
-          {scanning ? "Aguarde..." : "🔍 Ler QRCode"}
-        </button>
+                // Esperamos formato inventario://patrimonio/<codigo>
+                try {
+                  const m = text.match(/^inventario:\/\/patrimonio\/(.+)$/i);
+                  if (m && m[1]) {
+                    const codigo = m[1];
+                    toast.info(`QR Code lido: ${codigo}`);
+                    console.log(`[Home] Navegando para cadastro do patrimônio: ${codigo}`);
+                    navigate(`/gestao-inventario/ativo/formulario/${codigo}`);
+                  } else {
+                    toast.error("QR Code lido não está no formato esperado (inventario://patrimonio/<codigo>)");
+                    console.warn("[Home] QR Code não corresponde ao esquema esperado:", text);
+                  }
+                } catch (err) {
+                  console.error("[Home] Erro ao processar QR Code:", err);
+                  toast.error("Erro ao processar QR Code");
+                }
+              }}
+              disabled={scanning}
+            >
+              {scanning ? "Aguarde..." : "🔍 Ler QRCode"}
+            </button>
+          </>
+        )}
       </section>
       <section className="home-section cards-section">
         {!loading ? (

@@ -17,7 +17,6 @@ const tiposAtivo: { [key: string]: string } = {
 const AtivoList = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [ativos, setAtivos] = useState<AtivoType[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -46,38 +45,9 @@ const AtivoList = () => {
       });
   }, []);
 
-  const deleteAtivo = (id: number, tipo: string) => {
-    const confirmed = window.confirm("Tem certeza que deseja excluir este item?");
-
-    if (!confirmed) {
-      return;
-    }
-
-    const urls: { [key: string]: string } = {
-      t: `/tangiveis/excluir/${id}`,
-      i: `/intangiveis/excluir/${id}`,
-      tl: `/tangiveis/locacao/excluir/${id}`,
-    };
-
-    const requestParams: AxiosRequestConfig = {
-      url: urls[tipo],
-      method: "DELETE",
-      withCredentials: true,
-    };
-
-    requestBackend(requestParams)
-      .then((res) => {
-        toast.success("Registro excluído.");
-        setReload((prev) => !prev);
-      })
-      .catch((err) => {
-        toast.error("Erro ao excluir registro.");
-      });
-  };
-
   useEffect(() => {
     loadAtivos();
-  }, [loadAtivos, reload]);
+  }, [loadAtivos]);
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
     setPage(pageNumber);
@@ -128,7 +98,7 @@ const AtivoList = () => {
         <AtivoListSkeletonLoader />
       ) : (
         <div className="page-body w-100">
-          <div className="content-container">
+          <div className="list-content-container pd-0">
             <div className="filtro-container">
               <div className="filtro-input-div form-floating">
                 <i className="bi bi-search" />
@@ -185,9 +155,6 @@ const AtivoList = () => {
                             <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button nbr">
                               <i className="bi bi-pencil" />
                             </Link>
-                            <button onClick={() => deleteAtivo(a.id, a.tipoAtivo)} type="button" className="button action-button delete-button nbr">
-                              <i className="bi bi-trash3" />
-                            </button>
                           </div>
                         </td>
                       </tr>

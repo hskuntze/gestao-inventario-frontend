@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { FornecedorType } from "@/types/fornecedor";
 import { ContratoType } from "@/types/contrato";
-import { formatarData } from "@/utils/functions";
+import { fetchAllFornecedores, formatarData } from "@/utils/functions";
 
 type FormData = {
   titulo: string;
@@ -15,13 +15,13 @@ type FormData = {
   termoParceria: string;
   inicioDataVigencia: string;
   fimDataVigencia: string;
-  fornecedores: FornecedorType[];
+  fornecedor: FornecedorType | null;
 };
 
 const GerenciarContrato = () => {
-  const [_loading, _setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
-  const [_reload, _setReload] = useState<boolean>(false);
+  const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -30,26 +30,15 @@ const GerenciarContrato = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [contratoId, setContratoId] = useState<number>();
 
+  const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
+
   const {
     register,
     control,
     formState: { errors },
     handleSubmit,
     setValue,
-  } = useForm<FormData>({
-    defaultValues: {
-      fornecedores: [{ nome: "", cnpj: "", contatoEmail: "", contatoNome: "", contatoTelefone: "" }],
-    },
-  });
-
-  const {
-    append: appendFornecedor,
-    fields: fornecedorFields,
-    remove: removeFornecedor,
-  } = useFieldArray<FormData, "fornecedores">({
-    control,
-    name: "fornecedores",
-  });
+  } = useForm<FormData>();
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
@@ -59,7 +48,7 @@ const GerenciarContrato = () => {
     setValue("termoParceria", "");
     setValue("inicioDataVigencia", "");
     setValue("fimDataVigencia", "");
-    setValue("fornecedores", []);
+    setValue("fornecedor", null);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -91,7 +80,7 @@ const GerenciarContrato = () => {
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const loadContratos = () => {
-    _setLoading(true);
+    setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
       url: "/contratos/all",
@@ -108,7 +97,7 @@ const GerenciarContrato = () => {
         toast.error("Erro ao tentar carregar os contratos. Erro: " + err.data.message);
       })
       .finally(() => {
-        _setLoading(false);
+        setLoading(false);
       });
   };
 
@@ -123,14 +112,7 @@ const GerenciarContrato = () => {
         inicioDataVigencia: formData.inicioDataVigencia,
         fimDataVigencia: formData.fimDataVigencia,
         termoParceria: formData.termoParceria,
-        fornecedores: formData.fornecedores.map((f) => ({
-          id: f.id,
-          nome: f.nome,
-          contatoEmail: f.contatoEmail,
-          contatoNome: f.contatoNome,
-          contatoTelefone: f.contatoTelefone,
-          cnpj: f.cnpj,
-        })),
+        fornecedor: formData.fornecedor,
       },
     };
 
@@ -143,7 +125,6 @@ const GerenciarContrato = () => {
       .catch((err) => {
         const message = err.response?.data?.message || "Erro ao tentar atualizar o contrato.";
         toast.error(message);
-        handleToggleModal();
       })
       .finally(() => {});
   };
@@ -160,11 +141,28 @@ const GerenciarContrato = () => {
     setValue("fimDataVigencia", contrato.fimDataVigencia);
     setValue("inicioDataVigencia", contrato.inicioDataVigencia);
     setValue("termoParceria", contrato.termoParceria);
-    setValue("fornecedores", contrato.fornecedores);
+    setValue("fornecedor", contrato.fornecedor);
   };
 
   useEffect(() => {
     loadContratos();
+  }, []);
+
+  useEffect(() => {
+    async function getFornecedores() {
+      //setLoadingAreas(true);
+      setFornecedores([]);
+
+      try {
+        const data = (await fetchAllFornecedores()) as FornecedorType[];
+        setFornecedores(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
+        toast.error(errorMsg);
+      }
+    }
+
+    getFornecedores();
   }, []);
 
   return (
@@ -295,42 +293,32 @@ const GerenciarContrato = () => {
             </div>
             <div className="div-input-formulario">
               <span>Fornecedor</span>
-              {fornecedorFields.map((field, index) => (
-                <div className="loc-group" key={`div-loc-${index}`}>
-                  <div className="localizacao-input-div">
-                    <input
-                      type="text"
-                      className={`input-formulario localizacao-formulario ${errors.fornecedores ? "is-invalid" : ""}`}
-                      id={`localizacao-${index}`}
-                      placeholder="Fornecedor"
-                      {...register(`fornecedores.${index}.nome`, {
-                        required: "Campo obrigatório",
-                      })}
-                      key={`loc-${index}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (fornecedorFields.length > 1) {
-                          removeFornecedor(index);
-                        }
-                      }}
-                      disabled={fornecedorFields.length <= 1}
-                      className="remove-button"
-                    >
-                      <i className="bi bi-x-lg" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => appendFornecedor({ id: -1, nome: "", cnpj: "", contatoEmail: "", contatoNome: "", contatoTelefone: "" })}
-                className="add-button"
-              >
-                <i className="bi bi-plus-lg" />
-              </button>
-              <div className="invalid-feedback d-block div-erro">{errors.fornecedores?.message}</div>
+              <Controller
+                name="fornecedor"
+                control={control}
+                rules={{ required: "Campo obrigatório" }}
+                render={({ field }) => (
+                  <select
+                    id="fornecedor"
+                    className={`input-formulario ${errors.fornecedor ? "input-error" : ""}`}
+                    {...field}
+                    value={fornecedores.find((f) => f.id === field.value?.id)?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedFornecedor = fornecedores.find((f) => f.id === selectedId);
+                      field.onChange(selectedFornecedor || "");
+                    }}
+                  >
+                    <option value="">Selecione um fornecedor</option>
+                    {fornecedores.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
+              <div className="invalid-feedback d-block div-erro">{errors.fornecedor?.message}</div>
             </div>
             <div className="div-input-formulario">
               <span>Início da vigência</span>

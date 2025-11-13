@@ -9,19 +9,20 @@ import { Perfil } from "./types/perfil";
  * a determinadas páginas da aplicação. Recebe dois argumentos:
  * - children: JSX.Element >> componente que será exibido em tela
  * - roles: Array<Perfil> >> array de perfis que podem acessar 'children'
- * 
+ *
  * Utiliza as funções "hasAnyRoles" e "isAuthenticated" para fazer este controle.
  */
 const PrivateRoute = ({ children, roles }: { children: JSX.Element; roles: Array<Perfil> }) => {
-  let location = useLocation();
+  const location = useLocation();
 
+  const isAuth = isAuthenticated();
   const hasRoles = hasAnyRoles(roles);
 
-  if (!isAuthenticated()) {
-    return <Navigate replace to="/gestao-inventario/login" state={{ from: location }} />;
+  if (!isAuth) {
+    return <Navigate to="/gestao-inventario/login" state={{ from: location }} replace />;
   }
 
-  if (isAuthenticated() && !hasRoles) {
+  if (isAuth && !hasRoles) {
     return <Denied />;
   }
 

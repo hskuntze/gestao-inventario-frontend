@@ -7,8 +7,10 @@ import PrivateRoute from "./PrivateRoute";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/utils/contexts/AuthContext";
 import Admin from "./pages/Admin";
-import { } from "react-toastify";
+import {} from "react-toastify";
 import { Modal, Box } from "@mui/material";
+import NaoEncontrado from "./pages/NaoEncontrado";
+import { setupInterceptors } from "./utils/functions";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -19,10 +21,10 @@ import { Modal, Box } from "@mui/material";
  */
 const Routes = () => {
   const { authContextData } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Back button handler component (needs to be inside Router so hooks work)
   const BackButtonHandler = () => {
-    const navigate = useNavigate();
     const location = useLocation();
 
     // stack of visited location keys to determine if we can go back
@@ -70,7 +72,7 @@ const Routes = () => {
       }
       // If no Capacitor App plugin, nothing to cleanup
       return () => {};
-    }, [navigate]);
+    }, []);
 
     const exitApp = () => {
       try {
@@ -82,6 +84,10 @@ const Routes = () => {
         // no-op
       }
     };
+
+    useEffect(() => {
+      setupInterceptors(navigate);
+    }, []);
 
     return (
       <>
@@ -115,20 +121,21 @@ const Routes = () => {
   };
 
   return (
-    <BrowserRouter>
+    <>
       <BackButtonHandler />
       {authContextData.authenticated && <Navbar />}
       <main id="main">
         <Switch>
           <Route path="/" element={<Navigate to="/gestao-inventario" />} />
           <Route path="/gestao-inventario/*" element={<Auth />} />
+          <Route path="/gestao-inventario/nao-encontrado" element={<NaoEncontrado />} />
           <Route
             path="/gestao-inventario"
             element={
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_GERENTE" },
+                  { id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" },
                   { id: 3, autorizacao: "PERFIL_USUARIO" },
                 ]}
               >
@@ -142,7 +149,7 @@ const Routes = () => {
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_GERENTE" },
+                  { id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" },
                   { id: 3, autorizacao: "PERFIL_USUARIO" },
                 ]}
               >
@@ -153,14 +160,19 @@ const Routes = () => {
           <Route
             path="/gestao-inventario/admin/*"
             element={
-              <PrivateRoute roles={[{ id: 1, autorizacao: "PERFIL_ADMIN" }]}>
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" },
+                ]}
+              >
                 <Admin />
               </PrivateRoute>
             }
           />
         </Switch>
       </main>
-    </BrowserRouter>
+    </>
   );
 };
 

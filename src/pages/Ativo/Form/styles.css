@@ -287,6 +287,10 @@
   max-height: 90vh;
 }
 
+.bg-card-container {
+  background-color: var(--bg-card);
+}
+
 @media (min-width: 576px) {
   .row-input-fields {
     display: flex;

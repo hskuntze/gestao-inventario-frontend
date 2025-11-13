@@ -24,7 +24,7 @@
 
 ### Architecture: Role-Based Access Control (RBAC)
 - **Auth Flow**: OAuth2 password grant → JWT tokens stored in localStorage → Bearer auth for API calls
-- **Roles**: PERFIL_ADMIN, PERFIL_GERENTE, PERFIL_USUARIO
+- **Roles**: PERFIL_ADMIN, PERFIL_ANALISTA_INVENTARIO, PERFIL_USUARIO
 - **Route Protection**: `PrivateRoute` wraps pages, checks `isAuthenticated()` + `hasAnyRoles()`
 - **Contexts**: `AuthContext` (auth state sync), `UserContext` (user data)
 

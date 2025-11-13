@@ -26,7 +26,7 @@ import { usePhotoCapture, PhotoCaptureResult } from "@/utils/hooks/usePhotoCaptu
 import AtivoFormLoaderSkeleton from "./AtivoFormLoaderSkeleton";
 import { ContratoType } from "@/types/contrato";
 import { hasAnyRoles } from "@/utils/auth";
-import { getUserData } from "@/utils/storage";
+import { getOS, getUserData } from "@/utils/storage";
 
 type FormData = {
   tipoAtivo: string | null;
@@ -38,12 +38,11 @@ type FormData = {
   area: AreaType;
   localizacao: LocalizacaoType;
   usuarioResponsavel: UsuarioResponsavelType;
-  contrato: ContratoType;
+  contrato: ContratoType | null;
   fornecedor: FornecedorType;
   dataAquisicao: string;
   codigoSerie: string;
   observacoes: string;
-  linkDocumento: string;
   estadoConservacao: string;
   dataDevolucaoPrevista: string;
   dataDevolucaoRealizada: string;
@@ -67,11 +66,12 @@ const AtivoForm = () => {
   const [ativo, setAtivo] = useState<AtivoType>();
   const [historicoAtivo, setHistoricoAtivo] = useState<HistoricoType[]>();
   const [desabilitado, setDesabilitado] = useState(false);
+  const [os, setOs] = useState<string | null>(null);
 
   const [areas, setAreas] = useState<AreaType[]>([]);
   const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
-  const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
+  const [fornecedor, setFornecedor] = useState<FornecedorType>();
   const [allFornecedores, setAllFornecedores] = useState<FornecedorType[]>([]);
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
 
@@ -302,15 +302,14 @@ const AtivoForm = () => {
         setValue("localizacao", data.localizacao);
         setSelectedLocalizacao(data.localizacao);
 
-        setValue("contrato", data.contrato);
+        if (data.contrato === null) {
+          setValue("contrato", null);
+          setSelectedContrato(null);
+        } else {
+          setValue("contrato", data.contrato);
+        }
 
         setValue("fornecedor", data.fornecedor);
-        if (data.contrato !== null) {
-          setFornecedores(data.contrato.fornecedores);
-          setSelectedContrato(data.contrato);
-        } else {
-          setFornecedores(allFornecedores);
-        }
 
         setValue("categoria", data.categoria);
         setValue("codigoSerie", data.codigoSerie);
@@ -318,7 +317,6 @@ const AtivoForm = () => {
         setValue("descricao", data.descricao);
         setValue("estadoConservacao", data.estadoConservacao);
         setValue("idPatrimonial", data.idPatrimonial);
-        setValue("linkDocumento", data.linkDocumento);
         setValue("observacoes", data.observacoes);
         setValue("usuarioResponsavel", data.usuarioResponsavel);
         setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
@@ -334,7 +332,7 @@ const AtivoForm = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [urlParams.id, setValue, allFornecedores]);
+  }, [urlParams.id, setValue]);
 
   const loadHistoricoInfo = useCallback(() => {
     const requestParams: AxiosRequestConfig = {
@@ -384,12 +382,12 @@ const AtivoForm = () => {
   useEffect(() => {
     async function getFornecedores() {
       //setLoadingAreas(true);
-      setFornecedores([]);
+      //etFornecedores([]);
       setAllFornecedores([]);
 
       try {
         const data = (await fetchAllFornecedores()) as FornecedorType[];
-        setFornecedores(data);
+        //setFornecedores(data);
         setAllFornecedores(data);
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
@@ -467,6 +465,14 @@ const AtivoForm = () => {
     setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
   }, []);
 
+  useEffect(() => {
+    let sistemaOperacional = getOS();
+
+    if (os === null && sistemaOperacional !== undefined) {
+      setOs(sistemaOperacional);
+    }
+  }, [os]);
+
   return (
     <div className="page">
       <div className="page-header">
@@ -478,25 +484,23 @@ const AtivoForm = () => {
             </Link>
             {isEditing && (
               <div className="acoes-button" ref={acoesDropdownRef}>
-                <button type="button" className="acoes-toggle" onClick={() => setOpenAcoes(!openAcoes)}>
-                  Ações <i className="bi bi-chevron-down" />
-                </button>
-
-                {openAcoes && (
-                  <div className="acoes-menu">
-                    <button type="button" disabled={desabilitado} className="movimentacao-button" onClick={handleToggleModal}>
-                      Movimentar
+                {!desabilitado && (
+                  <>
+                    <button type="button" className="acoes-toggle" onClick={() => setOpenAcoes(!openAcoes)}>
+                      Ações <i className="bi bi-chevron-down" />
                     </button>
-                    {ativo?.desabilitado ? (
-                      <button type="button" className="habilitar-button" onClick={handleHabilitar}>
-                        Habilitar
-                      </button>
-                    ) : (
-                      <button type="button" className="desabilitar-button" onClick={handleDesabilitar}>
-                        Desabilitar
-                      </button>
+
+                    {openAcoes && (
+                      <div className="acoes-menu">
+                        <button type="button" disabled={desabilitado} className="movimentacao-button" onClick={handleToggleModal}>
+                          Movimentar
+                        </button>
+                        <button type="button" className="desabilitar-button" onClick={handleDesabilitar}>
+                          Desabilitar
+                        </button>
+                      </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             )}
@@ -662,7 +666,7 @@ const AtivoForm = () => {
             <div className="page-content">
               <div className="page-body">
                 <>
-                  <div className="content-container">
+                  <div className="content-container bg-card-container">
                     <span className="form-title">Informações do Ativo</span>
                     <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
                       <div className="div-input-formulario text-area-formulario">
@@ -861,7 +865,12 @@ const AtivoForm = () => {
                           name="contrato"
                           control={control}
                           rules={{
-                            required: "Campo obrigatório",
+                            validate: (value) => {
+                              if (value === null || value?.id === null) {
+                                return true; // Aceita "sem contrato"
+                              }
+                              return true; // Tudo ok
+                            },
                           }}
                           render={({ field }) => (
                             <select
@@ -872,11 +881,13 @@ const AtivoForm = () => {
                               onChange={(e) => {
                                 const selectedValue = e.target.value;
                                 if (selectedValue === "-1") {
-                                  // Exibe todos os fornecedores
-                                  setFornecedores(allFornecedores);
+                                  // Se não tiver contrato...
                                   setSelectedContrato(null);
                                   setValue("dataDevolucaoPrevista", "");
                                   resetField("dataDevolucaoPrevista");
+                                  // Libera o campo de fornecedor
+                                  resetField("dataDevolucaoPrevista");
+                                  setFornecedor(undefined);
 
                                   // No form, o valor será null (sem contrato)
                                   field.onChange({ id: null });
@@ -887,12 +898,15 @@ const AtivoForm = () => {
                                   if (sContrato !== null) {
                                     setSelectedContrato(sContrato);
                                     setValue("dataDevolucaoPrevista", sContrato.fimDataVigencia);
+                                    setValue("fornecedor", sContrato.fornecedor); // preenche fornecedor automaticamente
+                                    setFornecedor(sContrato.fornecedor);
                                   } else {
                                     setSelectedContrato(null);
-                                    setValue("dataDevolucaoPrevista", "");
                                     resetField("dataDevolucaoPrevista");
+                                    resetField("fornecedor");
+                                    setFornecedor(undefined);
                                   }
-                                  setFornecedores(sContrato?.fornecedores ?? allFornecedores);
+
                                   field.onChange(sContrato);
                                 }
                               }}
@@ -924,22 +938,25 @@ const AtivoForm = () => {
                             <select
                               id="fornecedor"
                               className={`input-formulario ${errors.fornecedor ? "input-error" : ""} ${
-                                desabilitado || fornecedores.length <= 0 ? "disabled-field" : ""
+                                desabilitado || selectedContrato !== null ? "disabled-field" : ""
                               }`}
                               {...field}
                               value={field.value?.id || ""}
                               onChange={(e) => {
                                 const selectedId = Number(e.target.value);
-                                const selectedFornecedor = fornecedores.find((a) => a.id === selectedId);
+                                const fornecedorSelecionado = allFornecedores.find((f) => f.id === selectedId) || null;
 
-                                field.onChange(selectedFornecedor || null);
+                                if (fornecedorSelecionado !== null) {
+                                  field.onChange(fornecedorSelecionado);
+                                  setFornecedor(fornecedorSelecionado);
+                                }
                               }}
-                              disabled={desabilitado || fornecedores.length <= 0}
+                              disabled={desabilitado || selectedContrato !== null}
                             >
                               <option value="">Selecione um fornecedor</option>
-                              {fornecedores &&
-                                fornecedores.length > 0 &&
-                                fornecedores.map((a) => (
+                              {allFornecedores &&
+                                allFornecedores.length > 0 &&
+                                allFornecedores.map((a) => (
                                   <option key={a.id} value={a.id}>
                                     {a.nome}
                                   </option>
@@ -1027,7 +1044,12 @@ const AtivoForm = () => {
                             control={control}
                             rules={{ required: "Campo obrigatório" }}
                             render={({ field }) => (
-                              <select id="responsavel" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
+                              <select
+                                id="responsavel"
+                                className={`input-formulario ${errors.termoParceria ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
+                                disabled={desabilitado}
+                                {...field}
+                              >
                                 <option value="">Selecione um responsável</option>
                                 <option value={"CCOMGEX"}>CCOMGEX</option>
                                 <option value={"DECEA"}>DECEA</option>
@@ -1051,16 +1073,6 @@ const AtivoForm = () => {
                         />
                         <div className="invalid-feedback d-block div-erro">{errors.codigoSerie?.message}</div>
                       </div>
-                      <div className={`div-input-formulario ${tipoForm !== "i" ? "input-full-width" : ""}`}>
-                        <span>Link do documento</span>
-                        <input
-                          type="text"
-                          className={`input-formulario ${desabilitado ? "disabled-field" : ""}`}
-                          {...register("linkDocumento")}
-                          maxLength={255}
-                          disabled={desabilitado}
-                        />
-                      </div>
                       <div className="div-input-formulario text-area-formulario">
                         <span>Observações</span>
                         <textarea
@@ -1080,24 +1092,25 @@ const AtivoForm = () => {
                     </form>
                   </div>
                   {isEditing && (
-                    <div className="content-container">
+                    <div className="content-container bg-card-container">
                       <span className="form-title">Anexos</span>
-                      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-                        <button
-                          type="button"
-                          className="button"
-                          onClick={async () => {
-                            // open camera to take a photo (preview handled by modal below)
-                            await capturePhoto();
-                            setPhotoModalOpen(true);
-                          }}
-                          disabled={desabilitado}
-                        >
-                          📸 Tirar Foto
-                        </button>
-                        <span style={{ color: "#666" }}>Tire uma foto do ativo e confirme para visualizar abaixo.</span>
-                      </div>
-
+                      {(os === "Android" || os === "iOS") && (
+                        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                          <button
+                            type="button"
+                            className="button"
+                            onClick={async () => {
+                              // open camera to take a photo (preview handled by modal below)
+                              await capturePhoto();
+                              setPhotoModalOpen(true);
+                            }}
+                            disabled={desabilitado}
+                          >
+                            📸 Tirar Foto
+                          </button>
+                          <span style={{ color: "#666" }}>Tire uma foto do ativo e confirme para visualizar abaixo.</span>
+                        </div>
+                      )}
                       {ativo ? (
                         <UploadArquivos
                           tipoAtivo={tipoForm}
