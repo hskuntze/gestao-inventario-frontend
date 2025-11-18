@@ -47,5 +47,10 @@ export const saveOS = (str: string) => {
 }
 
 export const getOS = () => {
-  const str = localStorage.getItem("OS") ?? "Desconhecido";
+  const str = localStorage.getItem("OS") ?? undefined;
+  return str;
+}
+
+export const removeOS = () => {
+  localStorage.removeItem("OS");
 }

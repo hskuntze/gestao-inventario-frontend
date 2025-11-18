@@ -19,6 +19,7 @@ const Navbar = () => {
   const userData = getUserData();
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminTp, setIsAdminTp] = useState(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -44,6 +45,7 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
+    setIsAdminTp(hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ADMIN_TP" }]));
   }, []);
 
   const handleLogout = () => {
@@ -60,12 +62,19 @@ const Navbar = () => {
 
   return (
     <nav className="navbar-container">
-      <Link to="/gestao-inventario" style={{ display: "flex" }}>
+      {userData.firstAccess ? (
         <div className="navbar-div-left">
           <img src={theme === "light" ? CtceaLogoClaro : CtceaLogoEscuro} alt="Logotipo CTCEA" className="navbar-img" />
           <h5>Gestão de Inventário</h5>
         </div>
-      </Link>
+      ) : (
+        <Link to="/gestao-inventario" style={{ display: "flex" }}>
+          <div className="navbar-div-left">
+            <img src={theme === "light" ? CtceaLogoClaro : CtceaLogoEscuro} alt="Logotipo CTCEA" className="navbar-img" />
+            <h5>Gestão de Inventário</h5>
+          </div>
+        </Link>
+      )}
       <div className="navbar-div-right">
         <ThemeSwitcher />
         <button className="navbar-button" onClick={() => setDropdown((prev) => !prev)}>
@@ -78,7 +87,7 @@ const Navbar = () => {
               <strong>{userData.nome}</strong>
               <span>{userData.email}</span>
             </div>
-            {isAdmin && (
+            {!userData.firstAccess && (isAdmin || isAdminTp) && (
               <>
                 <div className="dropdown-divider"></div>
                 <div className="configurations">

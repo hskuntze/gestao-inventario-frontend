@@ -1,0 +1,15 @@
+.nao-encontrado {
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--text-disabled-color);
+  text-decoration: underline;
+}
+
+.nao-encontrado-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.nao-encontrado-container div {
+  margin-top: 20px;
+}

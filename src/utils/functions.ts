@@ -1,6 +1,6 @@
-import { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { requestBackend } from "./requests";
-import { AreaType } from "@/types/area";
+import { SetorType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
@@ -8,6 +8,7 @@ import { NotificacaoType } from "@/types/notificacao";
 import { ContratoType } from "@/types/contrato";
 import { HistoricoType } from "@/types/historico";
 import { AtivoType } from "@/types/ativo";
+import { NavigateFunction } from "react-router-dom";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -58,14 +59,14 @@ export function formatarDataParaMesAno(dataStr: string): string {
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
     PERFIL_ADMIN: "Administrador",
-    PERFIL_GERENTE: "Gerente",
+    PERFIL_ADMIN_TP: "Analista de Inventário",
     PERFIL_USUARIO: "Usuário",
   };
 
   return perfis[perfil] ?? "Sem perfil definido";
 }
 
-export async function fetchAllAreas(): Promise<AreaType[]> {
+export async function fetchAllSetores(): Promise<SetorType[]> {
   const requestParams: AxiosRequestConfig = {
     url: "/areas/all",
     method: "GET",
@@ -74,9 +75,9 @@ export async function fetchAllAreas(): Promise<AreaType[]> {
 
   try {
     const res = await requestBackend(requestParams);
-    return res.data as AreaType[];
+    return res.data as SetorType[];
   } catch (err) {
-    throw new Error("Falha ao buscar as áreas.");
+    throw new Error("Falha ao buscar ps setores.");
   }
 }
 
@@ -113,6 +114,21 @@ export async function fetchAllFornecedores(): Promise<FornecedorType[]> {
 export async function fetchAllUsuariosResponsaveis(): Promise<UsuarioResponsavelType[]> {
   const requestParams: AxiosRequestConfig = {
     url: "/usuarios/responsaveis/all",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as UsuarioResponsavelType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar os usuários.");
+  }
+}
+
+export async function fetchAllUsuariosResponsaveisByAreaId(id: number): Promise<UsuarioResponsavelType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: `/usuarios/responsaveis/area/${id}`,
     method: "GET",
     withCredentials: true,
   };
@@ -167,5 +183,46 @@ export async function fetchAllContratos(): Promise<ContratoType[]> {
     return res.data as ContratoType[];
   } catch (err) {
     throw new Error("Falha ao buscar contratos.");
+  }
+}
+
+export const setupInterceptors = (navigate: NavigateFunction) => {
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response) {
+        const status = error.response.status;
+
+        if (status === 404) {
+          // redireciona para a tela de "não encontrado"
+          navigate("/gestao-inventario/nao-encontrado");
+        } else if (status === 401) {
+          // token inválido → volta pro login
+          navigate("/gestao-inventario/login");
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+};
+
+export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
+  try {
+    // Remove quebras de linha e espaços que possam ter vindo do banco
+    const cleanedBase64 = base64.replace(/[\r\n\s]/g, "");
+
+    const byteCharacters = atob(cleanedBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  } catch (error) {
+    console.error("Erro ao converter base64 para Blob:", error);
+    throw error;
   }
 }

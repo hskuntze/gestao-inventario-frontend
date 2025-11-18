@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { AxiosRequestConfig } from "axios";
 
-import GestInvIcone from "@/assets/images/Gestao_Inventario_Icone.png";
+import GestInvIcone from "@/assets/images/Marca_Principal_Escuro.png";
 
 import { AuthContext } from "@/utils/contexts/AuthContext";
 import { requestBackend, requestBackendLogin } from "@/utils/requests";
@@ -45,7 +45,14 @@ const Auth = () => {
 
     requestBackend(requestParams)
       .then((res) => {
-        saveUserData(res.data as User);
+        let data = res.data as User;
+        saveUserData(data);
+
+        if (data.firstAccess) {
+          navigate("/gestao-inventario/primeiro-acesso");
+        } else {
+          navigate("/gestao-inventario");
+        }
       })
       .catch(() => {
         toast.error("Erro ao tentar resgatar os dados do usuário.");
@@ -65,7 +72,6 @@ const Auth = () => {
         });
 
         loadUserInfo();
-        navigate("/gestao-inventario");
       })
       .catch(() => toast.error("Não foi possível realizar o login."))
       .finally(() => setLoading(false));

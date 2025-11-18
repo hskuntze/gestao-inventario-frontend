@@ -1,7 +1,7 @@
 import "./styles.css";
 import { Accordion, AccordionDetails, AccordionSummary, Box, Modal, TablePagination } from "@mui/material";
 import { useEffect, useState } from "react";
-import { AreaType } from "@/types/area";
+import { SetorType } from "@/types/area";
 import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
@@ -13,13 +13,12 @@ import { fetchAllUsuariosResponsaveis } from "@/utils/functions";
 type FormData = {
   nome: string;
   responsavel: string;
-  substitutoResponsavel: string;
   localizacoes: LocalizacaoType[];
 };
 
 const GerenciarArea = () => {
-  const [_loading, _setLoading] = useState<boolean>(false);
-  const [areas, setAreas] = useState<AreaType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [setores, setSetores] = useState<SetorType[]>([]);
   const [_reload, _setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -57,7 +56,6 @@ const GerenciarArea = () => {
 
     setValue("nome", "");
     setValue("responsavel", "");
-    setValue("substitutoResponsavel", "");
     setValue("localizacoes", []);
   };
 
@@ -75,21 +73,17 @@ const GerenciarArea = () => {
     setPage(0);
   };
 
-  const filteredData = areas.filter((a) => {
+  const filteredData = setores.filter((a) => {
     const searchTerm = filter.trim();
     if (!searchTerm) return true;
 
-    return (
-      a.nome.toLowerCase().includes(searchTerm) ||
-      (a.responsavel.toLowerCase().includes(searchTerm) ?? false) ||
-      (a.substitutoResponsavel.toLowerCase().includes(searchTerm) ?? false)
-    );
+    return a.nome.toLowerCase().includes(searchTerm) || (a.responsavel.toLowerCase().includes(searchTerm) ?? false);
   });
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-  const loadAreas = () => {
-    _setLoading(true);
+  const loadSetores = () => {
+    setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
       url: "/areas/all",
@@ -99,14 +93,14 @@ const GerenciarArea = () => {
 
     requestBackend(requestParams)
       .then((res) => {
-        let data = res.data as AreaType[];
-        setAreas(data);
+        let data = res.data as SetorType[];
+        setSetores(data);
       })
       .catch((err) => {
-        toast.error("Erro ao tentar carregar as áreas. Erro: " + err.data.message);
+        toast.error("Erro ao tentar carregar os setores. Erro: " + err.data.message);
       })
       .finally(() => {
-        _setLoading(false);
+        setLoading(false);
       });
   };
 
@@ -118,7 +112,6 @@ const GerenciarArea = () => {
       data: {
         nome: formData.nome,
         responsavel: formData.responsavel,
-        substitutoResponsavel: formData.substitutoResponsavel,
         localizacoes: formData.localizacoes.map((loc) => ({
           id: loc.id,
           nome: loc.nome,
@@ -128,12 +121,12 @@ const GerenciarArea = () => {
 
     requestBackend(requestParams)
       .then((res) => {
-        toast.success(`Área ${isEditing ? "editada" : "criada"} com sucesso.`);
-        loadAreas();
+        toast.success(`Setor ${isEditing ? "editado" : "criado"} com sucesso.`);
+        loadSetores();
         handleToggleModal();
       })
       .catch((err) => {
-        const message = err.response?.data?.message || "Erro ao tentar atualizar a área.";
+        const message = err.response?.data?.message || "Erro ao tentar atualizar o setor.";
         toast.error(message);
         handleToggleModal();
       })
@@ -142,19 +135,18 @@ const GerenciarArea = () => {
 
   const handleDeleteArea = (id: number) => {};
 
-  const handleEditArea = (area: AreaType) => {
+  const handleEditArea = (area: SetorType) => {
     setOpenModal(true);
     setIsEditing(true);
     setAreaId(area.id);
 
     setValue("nome", area.nome);
     setValue("responsavel", area.responsavel);
-    setValue("substitutoResponsavel", area.substitutoResponsavel);
     setValue("localizacoes", area.localizacoes);
   };
 
   useEffect(() => {
-    loadAreas();
+    loadSetores();
   }, []);
 
   useEffect(() => {
@@ -186,7 +178,7 @@ const GerenciarArea = () => {
           id="gerenciar-area-header"
           className="accordion-title"
         >
-          Áreas
+          Setores
         </AccordionSummary>
         <AccordionDetails>
           <div className="accordion-header">
@@ -196,18 +188,18 @@ const GerenciarArea = () => {
                 <input
                   type="text"
                   className="form-control filtro-input"
-                  id="nome-treinamento-filtro"
+                  id="nome-area-filtro"
                   placeholder="Digite um termo para filtrar"
                   onChange={handleFilterChange}
                 />
               </div>
             </div>
-            <div>
+            {/* <div>
               <button onClick={handleToggleModal} type="button" className="button submit-button auto-width pd-2">
                 <i className="bi bi-plus" />
-                Adicionar Área
+                Adicionar Setor
               </button>
-            </div>
+            </div> */}
           </div>
           <div className="div-table">
             <table className="area-list-table">
@@ -215,7 +207,6 @@ const GerenciarArea = () => {
                 <tr key={"tr-head-area-list-table"}>
                   <th scope="col">Nome</th>
                   <th scope="col">Responsável</th>
-                  <th scope="col">Substituto</th>
                   <th scope="col">Ações</th>
                 </tr>
               </thead>
@@ -230,23 +221,20 @@ const GerenciarArea = () => {
                         <div>{a.responsavel ?? "-"}</div>
                       </td>
                       <td>
-                        <div>{a.substitutoResponsavel ?? "-"}</div>
-                      </td>
-                      <td>
                         <div className="table-action-buttons">
                           <button onClick={() => handleEditArea(a)} className="button action-button nbr">
                             <i className="bi bi-pencil" />
                           </button>
-                          <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
+                          {/* <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
                             <i className="bi bi-trash3" />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="no-data-on-table" colSpan={4}>
+                    <td className="no-data-on-table" colSpan={3}>
                       Sem dados a serem exibidos
                     </td>
                   </tr>
@@ -254,7 +242,7 @@ const GerenciarArea = () => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={3}>
                     <TablePagination
                       className="table-pagination-container"
                       component="div"
@@ -284,52 +272,18 @@ const GerenciarArea = () => {
       </Accordion>
       <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
         <Box className="modal-content ov-y-scroll">
-          <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
+          {/* <form className="formulario" onSubmit={handleSubmit(onSubmit)}> */}
+          <div className="formulario">
             <div className="div-input-formulario">
-              <span>Nome da área</span>
+              <span>Nome do setor</span>
               <input
                 type="text"
                 className={`input-formulario ${errors.nome ? "input-error" : ""}`}
                 {...register("nome", { required: "Campo obrigatório" })}
                 maxLength={255}
+                disabled={true}
               />
               <div className="invalid-feedback d-block div-erro">{errors.nome?.message}</div>
-            </div>
-
-            <div className="div-input-formulario">
-              <span>Localização</span>
-              {locFields.map((field, index) => (
-                <div className="loc-group" key={`div-loc-${index}`}>
-                  <div className="localizacao-input-div">
-                    <input
-                      type="text"
-                      className={`input-formulario localizacao-formulario ${errors.localizacoes ? "is-invalid" : ""}`}
-                      id={`localizacao-${index}`}
-                      placeholder="Localização"
-                      {...register(`localizacoes.${index}.nome`, {
-                        required: "Campo obrigatório",
-                      })}
-                      key={`loc-${index}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (locFields.length > 1) {
-                          removeLoc(index);
-                        }
-                      }}
-                      disabled={locFields.length <= 1}
-                      className="remove-button"
-                    >
-                      <i className="bi bi-x-lg" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              <button type="button" onClick={() => appendLoc({ id: -1, nome: "" })} className="add-button">
-                <i className="bi bi-plus-lg" />
-              </button>
             </div>
             <div className="div-input-formulario">
               <span>Responsável</span>
@@ -348,6 +302,7 @@ const GerenciarArea = () => {
                       const selectedUser = usuariosResponsaveis.find((a) => a.id === selectedId);
                       field.onChange(selectedUser?.nome || "");
                     }}
+                    disabled={true}
                   >
                     <option value="">Selecione um responsável</option>
                     {usuariosResponsaveis.map((a) => (
@@ -361,38 +316,45 @@ const GerenciarArea = () => {
               <div className="invalid-feedback d-block div-erro">{errors.responsavel?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Substituto</span>
-              <Controller
-                name="substitutoResponsavel"
-                control={control}
-                render={({ field }) => (
-                  <select
-                    id="substituto"
-                    className={`input-formulario ${errors.substitutoResponsavel ? "input-error" : ""}`}
-                    {...field}
-                    value={usuariosResponsaveis.find((u) => u.nome === field.value)?.id || ""}
-                    onChange={(e) => {
-                      const selected = Number(e.target.value);
-                      const selectedSubstituto = usuariosResponsaveis.find((a) => a.id === selected);
-
-                      field.onChange(selectedSubstituto?.nome || "");
-                    }}
-                  >
-                    <option value="">Selecione um substituto</option>
-                    {usuariosResponsaveis.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.nome}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.substitutoResponsavel?.message}</div>
+              <span>Localização</span>
+              {locFields.map((field, index) => (
+                <div className="loc-group" key={`div-loc-${index}`}>
+                  <div className="localizacao-input-div">
+                    <input
+                      type="text"
+                      className={`input-formulario localizacao-formulario ${errors.localizacoes ? "is-invalid" : ""}`}
+                      id={`localizacao-${index}`}
+                      placeholder="Localização"
+                      {...register(`localizacoes.${index}.nome`, {
+                        required: "Campo obrigatório",
+                      })}
+                      key={`loc-${index}`}
+                      disabled={true}
+                    />
+                    {/* <button
+                      type="button"
+                      onClick={() => {
+                        if (locFields.length > 1) {
+                          removeLoc(index);
+                        }
+                      }}
+                      disabled={locFields.length <= 1}
+                      className="remove-button"
+                    >
+                      <i className="bi bi-x-lg" />
+                    </button> */}
+                  </div>
+                </div>
+              ))}
+              {/* <button type="button" onClick={() => appendLoc({ id: -1, nome: "" })} className="add-button">
+                <i className="bi bi-plus-lg" />
+              </button> */}
             </div>
-            <div className="form-buttons">
+            {/* <div className="form-buttons">
               <button className="button submit-button">Salvar</button>
-            </div>
-          </form>
+            </div> */}
+          </div>
+          {/* </form> */}
         </Box>
       </Modal>
     </div>

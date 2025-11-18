@@ -127,6 +127,10 @@
   width: 50% !important;
 }
 
+.pd-0 {
+  padding: 0 !important;
+}
+
 .bg-card-blue {
   background-color: var(--bg-card) !important;
 }
@@ -143,6 +147,12 @@
   color: var(--text-color) !important;
   border-radius: 10px !important;
   padding: 20px !important;
+  margin: 20px auto 0 auto !important;
+}
+
+.list-content-container {
+  color: var(--text-color) !important;
+  border-radius: 10px !important;
   margin: 20px auto 0 auto !important;
 }
 
@@ -182,8 +192,9 @@
 }
 
 .filtro-input {
-  background-color: var(--bg-color);
+  background-color: var(--bg-input);
   height: 45px;
+  min-width: 260px;
   padding-left: 35px;
   padding-right: 12px;
   border: 0;
@@ -197,7 +208,7 @@
 .filtro-input-div i {
   position: absolute;
   top: 0;
-  transform: translateY(60%) translateX(50%);
+  transform: translateY(85%) translateX(50%);
 }
 
 [class^="tag-dot-"] {

@@ -49,21 +49,21 @@ const PhotoCaptureModal: React.FC<PhotoCaptureModalProps> = ({
                 onClick={onConfirm}
                 disabled={loading}
               >
-                ✓ Confirmar Foto
+                Confirmar Foto
               </button>
               <button
                 className="btn btn-warning"
                 onClick={onRetake}
                 disabled={loading}
               >
-                🔄 Tirar Outra
+                Tirar Outra
               </button>
               <button
                 className="btn btn-danger"
                 onClick={onCancel}
                 disabled={loading}
               >
-                ✗ Cancelar
+                Cancelar
               </button>
             </div>
           </>

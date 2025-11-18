@@ -14,7 +14,7 @@ const AdminCadastros = () => {
           <div>
             <h2 className="page-title">Gerenciamento de Cadastros Auxiliares</h2>
             <span className="page-subtitle">
-              Adicione, edite ou remova usuários de sistema, usuários responsáveis, contratos, fornecedores e áreas.
+              Adicione, edite ou remova usuários de sistema, usuários responsáveis, contratos, fornecedores e setores.
             </span>
           </div>
           <div className="header-content-buttons">
@@ -27,8 +27,8 @@ const AdminCadastros = () => {
       <div className="page-body w-100">
         <GerenciarArea />
         <GerenciarUsuarioResponsavel />
-        <GerenciarContrato />
         <GerenciarFornecedor />
+        <GerenciarContrato />
         <GerenciarUsuario />
       </div>
     </div>

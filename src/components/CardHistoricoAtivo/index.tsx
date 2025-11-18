@@ -14,6 +14,9 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     MOVIMENTAÇÃO: "bi bi-arrows-move movimentacao-icon",
     DESABILITAR: "bi bi-x-circle desabilitar-icon",
     HABILITAR: "bi bi-check-circle habilitar-icon",
+    DESCARTAR: "bi bi-trash3 descartar-icon",
+    DEVOLVER: "bi bi-sign-turn-left devolver-icon",
+    "ARQUIVO INSERIDO": "bi bi-file-earmark-arrow-up arquivo-inserido-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -23,6 +26,9 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     MOVIMENTAÇÃO: `Ativo movimentado`,
     DESABILITAR: "Ativo desabilitado",
     HABILITAR: "Ativo habilitado",
+    DESCARTAR: "Ativo descartado",
+    DEVOLVER: "Ativo devolvido",
+    "ARQUIVO INSERIDO": "Arquivo(s) inserido(s)",
   };
 
   return (
@@ -35,14 +41,14 @@ const CardHistoricoAtivo = ({ element }: Props) => {
         <span className="historico-content-info">{formatarData(element.createdAt)}</span>
         {element.operacao === "REGISTRO" && (
           <>
-            <span className="historico-content-info">Área: {element.area}</span>
-            <span className="historico-content-info">Localização: {element.localizacao}</span>
+            <span className="historico-content-info">Setor: {element.area ?? "Sem setor"}</span>
+            <span className="historico-content-info">Localização: {element.localizacao ?? "Sem localização"}</span>
           </>
         )}
         {element.operacao === "MOVIMENTAÇÃO" && (
           <>
             <span className="historico-content-info">Usuário Responsável: {element.usuarioResponsavel}</span>
-            <span className="historico-content-info">Área: {element.area}</span>
+            <span className="historico-content-info">Setor: {element.area}</span>
             <span className="historico-content-info">Localização: {element.localizacao}</span>
           </>
         )}

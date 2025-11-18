@@ -49,12 +49,14 @@
 .ativo-list-table td:nth-of-type(2) {
   min-width: 40px;
   padding-left: 10px;
+  padding-right: 10px;
 }
 
 .ativo-list-table th:nth-of-type(4),
 .ativo-list-table td:nth-of-type(4) {
   min-width: 200px;
   padding-left: 10px;
+  padding-right: 10px;
 }
 
 .ativo-list-table th:nth-of-type(6),
@@ -159,7 +161,7 @@
 
   .ativo-list-table th:nth-of-type(7),
   .ativo-list-table td:nth-of-type(7) {
-    width: 5%;
+    width: auto;
     text-align: center;
   }
 

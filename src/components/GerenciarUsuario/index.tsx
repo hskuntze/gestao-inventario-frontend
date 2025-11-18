@@ -7,9 +7,11 @@ import { toast } from "react-toastify";
 import { Controller, useForm } from "react-hook-form";
 import { Perfil } from "@/types/perfil";
 import { User } from "@/types/user";
-import { formatarPerfil } from "@/utils/functions";
+import { fetchAllUsuariosResponsaveis, formatarPerfil } from "@/utils/functions";
 import { hasAnyRoles } from "@/utils/auth";
 import { getUserData } from "@/utils/storage";
+import Loader from "../Loader";
+import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 
 type FormData = {
   nome: string;
@@ -18,6 +20,7 @@ type FormData = {
   perfilUsuario: Perfil;
   senha: string;
   termoParceria: string;
+  usuarioResponsavel: UsuarioResponsavelType | null;
 };
 
 const GerenciarUsuario = () => {
@@ -25,7 +28,6 @@ const GerenciarUsuario = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [usuarios, setUsuarios] = useState<User[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -34,7 +36,10 @@ const GerenciarUsuario = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [usuarioId, setUsuarioId] = useState<number>();
 
+  const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
+
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isAdminTp, setIsAdminTp] = useState<boolean>(false);
 
   const {
     register,
@@ -42,16 +47,23 @@ const GerenciarUsuario = () => {
     handleSubmit,
     setValue,
     control,
-  } = useForm<FormData>();
+    reset,
+  } = useForm<FormData>({
+    defaultValues: {
+      nome: "",
+      email: "",
+      login: "",
+      senha: "",
+      perfilUsuario: { id: -1, autorizacao: "" },
+      termoParceria: "",
+      usuarioResponsavel: null,
+    },
+  });
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
 
-    setValue("nome", "");
-    setValue("email", "");
-    setValue("login", "");
-    setValue("senha", "");
-    setValue("perfilUsuario", { id: -1, autorizacao: "" });
+    reset();
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -104,6 +116,10 @@ const GerenciarUsuario = () => {
   };
 
   const onSubmit = (formData: FormData) => {
+    setLoading(true);
+
+    let usuarioResponsavelId = formData.usuarioResponsavel ? formData.usuarioResponsavel.id : null;
+
     const requestParams: AxiosRequestConfig = {
       url: isEditing ? `/usuarios/update/${usuarioId}` : "/usuarios/register",
       method: isEditing ? "PUT" : "POST",
@@ -119,6 +135,9 @@ const GerenciarUsuario = () => {
             id: formData.perfilUsuario.id,
           },
         ],
+        usuarioResponsavel: {
+          id: usuarioResponsavelId,
+        },
       },
     };
 
@@ -133,7 +152,9 @@ const GerenciarUsuario = () => {
         toast.error(message);
         handleToggleModal();
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleEditUsuario = (u: User) => {
@@ -145,6 +166,8 @@ const GerenciarUsuario = () => {
     setValue("email", u.email);
     setValue("login", u.login);
     setValue("perfilUsuario", u.perfis[0]);
+    setValue("termoParceria", u.termoParceria);
+    setValue("usuarioResponsavel", u.usuarioResponsavel);
   };
 
   const handleDeleteArea = (id: number) => {};
@@ -155,6 +178,26 @@ const GerenciarUsuario = () => {
 
   useEffect(() => {
     setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
+  }, []);
+
+  useEffect(() => {
+    setIsAdminTp(hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ADMIN_TP" }]));
+  }, []);
+
+  useEffect(() => {
+    async function getUsuariosResponsaveis() {
+      setUsuariosResponsaveis([]);
+
+      try {
+        const data = await fetchAllUsuariosResponsaveis();
+        setUsuariosResponsaveis(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar usuários responsáveis";
+        toast.error(errorMsg);
+      }
+    }
+
+    getUsuariosResponsaveis();
   }, []);
 
   return (
@@ -327,19 +370,28 @@ const GerenciarUsuario = () => {
             <div className="div-input-formulario">
               <span>Perfil</span>
               <Controller
-                name="perfilUsuario.id"
+                name="perfilUsuario"
                 control={control}
                 rules={{ required: "Campo obrigatório" }}
                 render={({ field }) => (
-                  <select id="perfil" className={`input-formulario ${errors.perfilUsuario ? "input-error" : ""}`} {...field} value={field.value}>
-                    <option>Selecione um perfil</option>
-                    <option key={"perfil" + 1} value={1}>
-                      Admin
+                  <select
+                    id="perfil"
+                    className={`input-formulario ${errors.perfilUsuario ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value.id}
+                    onChange={(e) => {
+                      const id = Number(e.target.value);
+                      field.onChange({ id, autorizacao: "" });
+                    }}
+                  >
+                    <option value="">Selecione um perfil</option>
+                    <option key={"perfil-" + 1} value={1}>
+                      Administrador
                     </option>
-                    <option key={"perfil" + 3} value={2}>
-                      Gerente
+                    <option key={"perfil-" + 2} value={2}>
+                      Admin. Termo de Parceria
                     </option>
-                    <option key={"perfil" + 2} value={3}>
+                    <option key={"perfil-" + 3} value={3}>
                       Usuário
                     </option>
                   </select>
@@ -348,28 +400,68 @@ const GerenciarUsuario = () => {
               <div className="invalid-feedback d-block">{errors.perfilUsuario?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Termo de Parceria</span>
+              <span>Responsável</span>
               <Controller
-                name="termoParceria"
+                name="usuarioResponsavel"
                 control={control}
                 rules={{ required: "Campo obrigatório" }}
                 render={({ field }) => (
-                  <select id="responsavel" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
+                  <select
+                    id="responsavel"
+                    className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedUser = usuariosResponsaveis.find((u) => u.id === selectedId) || null;
+
+                      field.onChange(selectedUser);
+                    }}
+                  >
                     <option value="">Selecione um responsável</option>
-                    <option value={"CCOMGEX"}>CCOMGEX</option>
-                    <option value={"DECEA"}>DECEA</option>
-                    <option value={"CISCEA"}>CISCEA</option>
-                    <option value={"PAME"}>PAME</option>
-                    <option value={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
+                    {usuariosResponsaveis.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.nome}
+                      </option>
+                    ))}
                   </select>
                 )}
               />
-              <div className="invalid-feedback d-block div-erro">{errors.termoParceria?.message}</div>
+              <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
             </div>
+            {!isAdminTp && (
+              <div className="div-input-formulario">
+                <span>Termo de Parceria</span>
+                <Controller
+                  name="termoParceria"
+                  control={control}
+                  rules={{ required: "Campo obrigatório" }}
+                  render={({ field }) => (
+                    <select id="responsavel" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
+                      <option value="">Selecione um termo de parceria</option>
+                      <option value={"CCOMGEX"}>CCOMGEX</option>
+                      <option value={"DECEA"}>DECEA</option>
+                      <option value={"CISCEA"}>CISCEA</option>
+                      <option value={"PAME"}>PAME</option>
+                      <option value={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
+                    </select>
+                  )}
+                />
+                <div className="invalid-feedback d-block div-erro">{errors.termoParceria?.message}</div>
+              </div>
+            )}
             <div className="div-input-formulario"></div>
-            <div className="form-buttons">
-              <button className="button submit-button">Salvar</button>
-            </div>
+            {loading ? (
+              <div className="loading-div">
+                <Loader />
+              </div>
+            ) : (
+              <div className="form-buttons">
+                <button type="submit" className="button submit-button">
+                  Salvar
+                </button>
+              </div>
+            )}
           </form>
         </Box>
       </Modal>
