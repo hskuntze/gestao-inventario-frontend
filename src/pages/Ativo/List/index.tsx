@@ -74,8 +74,8 @@ const AtivoList = () => {
         .includes(searchTerm) ??
         false) ||
       (a.categoria.toLowerCase().includes(searchTerm) ?? false) ||
-      ((a.localizacao.nome ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
-      ((a.usuarioResponsavel.nome ?? "-").toLowerCase().includes(searchTerm) ?? false)
+      ((a.localizacao ? a.localizacao.nome : "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((a.usuarioResponsavel ? a.usuarioResponsavel.nome : "-").toLowerCase().includes(searchTerm) ?? false)
     );
   });
 
@@ -105,7 +105,7 @@ const AtivoList = () => {
                 <input
                   type="text"
                   className="form-control filtro-input"
-                  id="nome-treinamento-filtro"
+                  id="nome-ativo-filtro"
                   placeholder="Digite um termo para filtrar"
                   onChange={handleFilterChange}
                 />

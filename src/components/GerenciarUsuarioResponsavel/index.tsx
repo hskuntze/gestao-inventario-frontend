@@ -4,18 +4,21 @@ import { useEffect, useState } from "react";
 import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
+import { SetorType } from "@/types/area";
+import { fetchAllSetores } from "@/utils/functions";
+import Loader from "../Loader";
 
 type FormData = {
   nome: string;
   email: string;
+  area: SetorType; //área = setor (mudança de nomenclatura)
 };
 
 const GerenciarUsuarioResponsavel = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [usuarios, setUsuarios] = useState<UsuarioResponsavelType[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -24,11 +27,14 @@ const GerenciarUsuarioResponsavel = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [usuarioId, setUsuarioId] = useState<number>();
 
+  const [setores, setSetores] = useState<SetorType[]>([]);
+
   const {
     register,
     formState: { errors },
     handleSubmit,
     setValue,
+    control,
   } = useForm<FormData>();
 
   const handleToggleModal = () => {
@@ -84,6 +90,8 @@ const GerenciarUsuarioResponsavel = () => {
   };
 
   const onSubmit = (formData: FormData) => {
+    setLoading(true);
+
     const requestParams: AxiosRequestConfig = {
       url: isEditing ? `/usuarios/responsaveis/update/${usuarioId}` : "/usuarios/responsaveis/register",
       method: isEditing ? "PUT" : "POST",
@@ -91,6 +99,9 @@ const GerenciarUsuarioResponsavel = () => {
       data: {
         nome: formData.nome,
         email: formData.email,
+        area: {
+          id: formData.area.id,
+        },
       },
     };
 
@@ -105,7 +116,9 @@ const GerenciarUsuarioResponsavel = () => {
         toast.error(message);
         handleToggleModal();
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleDeleteArea = (id: number) => {};
@@ -117,10 +130,27 @@ const GerenciarUsuarioResponsavel = () => {
 
     setValue("nome", u.nome);
     setValue("email", u.email);
+    setValue("area", u.area);
   };
 
   useEffect(() => {
     loadUsuarios();
+  }, []);
+
+  useEffect(() => {
+    async function getSetores() {
+      setSetores([]);
+
+      try {
+        const data = (await fetchAllSetores()) as SetorType[];
+        setSetores(data);
+      } catch (err) {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar os setores";
+        toast.error(errorMsg);
+      }
+    }
+
+    getSetores();
   }, []);
 
   return (
@@ -165,6 +195,7 @@ const GerenciarUsuarioResponsavel = () => {
                 <tr key={"tr-head-usuario-responsavel-list-table"}>
                   <th scope="col">Nome</th>
                   <th scope="col">E-mail</th>
+                  <th scope="col">Setor</th>
                   <th scope="col">Ações</th>
                 </tr>
               </thead>
@@ -177,6 +208,9 @@ const GerenciarUsuarioResponsavel = () => {
                       </td>
                       <td>
                         <div>{a.email ?? "-"}</div>
+                      </td>
+                      <td>
+                        <div>{a.area ? a.area.nome : "-"}</div>
                       </td>
                       <td>
                         <div className="table-action-buttons">
@@ -192,7 +226,7 @@ const GerenciarUsuarioResponsavel = () => {
                   ))
                 ) : (
                   <tr>
-                    <td className="no-data-on-table" colSpan={3}>
+                    <td className="no-data-on-table" colSpan={4}>
                       Sem dados a serem exibidos
                     </td>
                   </tr>
@@ -200,7 +234,7 @@ const GerenciarUsuarioResponsavel = () => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={4}>
                     <TablePagination
                       className="table-pagination-container"
                       component="div"
@@ -251,9 +285,50 @@ const GerenciarUsuarioResponsavel = () => {
               />
               <div className="invalid-feedback d-block div-erro">{errors.email?.message}</div>
             </div>
-            <div className="form-buttons">
-              <button className="button submit-button">Salvar</button>
+            <div className="div-input-formulario">
+              <span>Setor</span>
+              <Controller
+                name="area"
+                control={control}
+                rules={{
+                  required: "Campo obrigatório",
+                }}
+                render={({ field }) => (
+                  <select
+                    id="area"
+                    className={`input-formulario ${errors.area ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedSetor = setores.find((a) => a.id === selectedId) as SetorType;
+
+                      field.onChange(selectedSetor || null);
+                    }}
+                  >
+                    <option value="">Selecione um setor</option>
+                    {setores &&
+                      setores.length > 0 &&
+                      setores.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.nome}
+                        </option>
+                      ))}
+                  </select>
+                )}
+              />
+              <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
             </div>
+            <div className="div-input-formulario"></div>
+            {loading ? (
+              <div className="loading-div">
+                <Loader />
+              </div>
+            ) : (
+              <div className="form-buttons">
+                <button className="button submit-button">Salvar</button>
+              </div>
+            )}
           </form>
         </Box>
       </Modal>

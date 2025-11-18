@@ -1,9 +1,8 @@
 import { LocalizacaoType } from "./localizacao";
 
-export type AreaType = {
+export type SetorType = {
   id: number;
   nome: string;
   responsavel: string;
-  substitutoResponsavel: string;
   localizacoes: LocalizacaoType[];
 };

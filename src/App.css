@@ -85,10 +85,6 @@
   max-height: 100vh;
 }
 
-#main {
-  padding-bottom: 20px;
-}
-
 body {
   background-color: var(--bg-color);
   color: var(--text-color);

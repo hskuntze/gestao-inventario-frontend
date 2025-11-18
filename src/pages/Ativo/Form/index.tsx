@@ -2,31 +2,35 @@ import "./styles.css";
 import { Controller, useForm } from "react-hook-form";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { AxiosRequestConfig } from "axios";
-import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
-import UploadArquivos from "@/components/UploadArquivos";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AtivoType } from "@/types/ativo";
-import { HistoricoType } from "@/types/historico";
-import CardHistoricoAtivo from "@/components/CardHistoricoAtivo";
-import { AreaType } from "@/types/area";
-import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
-import { FornecedorType } from "@/types/fornecedor";
+import { Box, Modal } from "@mui/material";
+
+import { requestBackend } from "@/utils/requests";
 import {
-  fetchAllAreas,
+  fetchAllSetores,
   fetchAllContratos,
   fetchAllFornecedores,
   fetchAllFornecedoresByAreaId,
-  fetchAllUsuariosResponsaveis,
+  fetchAllUsuariosResponsaveisByAreaId,
 } from "@/utils/functions";
-import { LocalizacaoType } from "@/types/localizacao";
-import { Box, Modal } from "@mui/material";
-import PhotoCaptureModal from "@/components/PhotoCaptureModal";
-import { usePhotoCapture, PhotoCaptureResult } from "@/utils/hooks/usePhotoCapture";
-import AtivoFormLoaderSkeleton from "./AtivoFormLoaderSkeleton";
-import { ContratoType } from "@/types/contrato";
 import { hasAnyRoles } from "@/utils/auth";
+import { usePhotoCapture, PhotoCaptureResult } from "@/utils/hooks/usePhotoCapture";
 import { getOS, getUserData } from "@/utils/storage";
+
+import UploadArquivos from "@/components/UploadArquivos";
+import PhotoCaptureModal from "@/components/PhotoCaptureModal";
+
+import { AtivoType } from "@/types/ativo";
+import { HistoricoType } from "@/types/historico";
+import CardHistoricoAtivo from "@/components/CardHistoricoAtivo";
+import { SetorType } from "@/types/area";
+import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
+import { FornecedorType } from "@/types/fornecedor";
+import { LocalizacaoType } from "@/types/localizacao";
+import { ContratoType } from "@/types/contrato";
+
+import AtivoFormLoaderSkeleton from "./AtivoFormLoaderSkeleton";
 
 type FormData = {
   tipoAtivo: string | null;
@@ -35,7 +39,7 @@ type FormData = {
   idPatrimonial: string;
   categoria: string;
   descricao: string;
-  area: AreaType;
+  area: SetorType; //área = setor (mudança de nomenclatura)
   localizacao: LocalizacaoType;
   usuarioResponsavel: UsuarioResponsavelType;
   contrato: ContratoType | null;
@@ -68,14 +72,13 @@ const AtivoForm = () => {
   const [desabilitado, setDesabilitado] = useState(false);
   const [os, setOs] = useState<string | null>(null);
 
-  const [areas, setAreas] = useState<AreaType[]>([]);
+  const [setores, setSetores] = useState<SetorType[]>([]);
   const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
-  const [fornecedor, setFornecedor] = useState<FornecedorType>();
   const [allFornecedores, setAllFornecedores] = useState<FornecedorType[]>([]);
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
 
-  const [selectedArea, setSelectedArea] = useState<AreaType>();
+  const [selectedSetor, setSelectedSetor] = useState<SetorType>();
   const [selectedLocalizacao, setSelectedLocalizacao] = useState<LocalizacaoType>();
   const [selectedContrato, setSelectedContrato] = useState<ContratoType | null>(null);
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
@@ -177,24 +180,56 @@ const AtivoForm = () => {
     }
   };
 
-  const handleHabilitar = () => {
-    const requestParams: AxiosRequestConfig = {
-      url: "/ativos/habilitar",
-      method: "POST",
-      withCredentials: true,
-      params: {
-        id: urlParams.id,
-      },
-    };
+  const handleDevolver = () => {
+    let confirm = window.confirm("Deseja mesmo devolver este ativo? É uma operação irreversível.");
 
-    requestBackend(requestParams)
-      .then(() => {
-        toast.success("Ativo foi habilitado.");
-        navigate("/gestao-inventario/ativo");
-      })
-      .catch(() => {
-        toast.error("Erro ao tentar habilitar este ativo.");
-      });
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/ativos/devolver",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          id: urlParams.id,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Ativo foi devolvido.");
+          navigate("/gestao-inventario/ativo");
+        })
+        .catch(() => {
+          toast.error("Erro ao tentar devolver este ativo.");
+        });
+    }
+  };
+
+  const handleDescartar = () => {
+    let confirm = window.confirm("Deseja mesmo descartar este ativo? É uma operação irreversível.");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/ativos/descartar",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          id: urlParams.id,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Ativo foi descartado.");
+          navigate("/gestao-inventario/ativo");
+        })
+        .catch(() => {
+          toast.error("Erro ao tentar descartar este ativo.");
+        });
+    }
+  };
+
+  const handleReload = () => {
+    loadInfo();
   };
 
   const onSubmit = (formData: FormData) => {
@@ -223,10 +258,10 @@ const AtivoForm = () => {
             id: formData.fornecedor.id,
           },
           area: {
-            id: formData.area.id,
+            id: formData.area !== null ? formData.area.id : null,
           },
           localizacao: {
-            id: formData.localizacao.id,
+            id: formData.localizacao !== null ? formData.localizacao.id : null,
           },
           usuariosResponsavel: {
             id: formData.usuarioResponsavel.id,
@@ -297,7 +332,7 @@ const AtivoForm = () => {
         setTipoForm(data.tipoAtivo as "t" | "i" | "tl");
 
         setValue("area", data.area);
-        setSelectedArea(data.area);
+        setSelectedSetor(data.area);
 
         setValue("localizacao", data.localizacao);
         setSelectedLocalizacao(data.localizacao);
@@ -363,31 +398,27 @@ const AtivoForm = () => {
   }, [isEditing, loadInfo, loadHistoricoInfo]);
 
   useEffect(() => {
-    async function getAreas() {
-      //setLoadingAreas(true);
-      setAreas([]);
+    async function getSetores() {
+      setSetores([]);
 
       try {
-        const data = (await fetchAllAreas()) as AreaType[];
-        setAreas(data);
+        const data = (await fetchAllSetores()) as SetorType[];
+        setSetores(data);
       } catch (err) {
-        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar áreas";
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar setores";
         toast.error(errorMsg);
       }
     }
 
-    getAreas();
+    getSetores();
   }, []);
 
   useEffect(() => {
     async function getFornecedores() {
-      //setLoadingAreas(true);
-      //etFornecedores([]);
       setAllFornecedores([]);
 
       try {
         const data = (await fetchAllFornecedores()) as FornecedorType[];
-        //setFornecedores(data);
         setAllFornecedores(data);
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
@@ -400,7 +431,6 @@ const AtivoForm = () => {
 
   useEffect(() => {
     async function getContratos() {
-      //setLoadingFornecedores(true);
       setContratos([]);
 
       try {
@@ -417,12 +447,11 @@ const AtivoForm = () => {
 
   useEffect(() => {
     async function getLocalizacoes() {
-      //setLoadingLocalizacoes(true);
       setLocalizacoes([]);
 
       try {
-        if (selectedArea) {
-          const data = await fetchAllFornecedoresByAreaId(selectedArea.id);
+        if (selectedSetor) {
+          const data = await fetchAllFornecedoresByAreaId(selectedSetor.id);
           setLocalizacoes(data);
         }
       } catch (err) {
@@ -432,16 +461,17 @@ const AtivoForm = () => {
     }
 
     getLocalizacoes();
-  }, [selectedArea]);
+  }, [selectedSetor]);
 
   useEffect(() => {
     async function getUsuariosResponsaveis() {
-      //setLoadingUsuariosResponsaveis(true);
       setUsuariosResponsaveis([]);
 
       try {
-        const data = await fetchAllUsuariosResponsaveis();
-        setUsuariosResponsaveis(data);
+        if (selectedSetor) {
+          const data = await fetchAllUsuariosResponsaveisByAreaId(selectedSetor.id);
+          setUsuariosResponsaveis(data);
+        }
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar usuários responsáveis";
         toast.error(errorMsg);
@@ -449,7 +479,7 @@ const AtivoForm = () => {
     }
 
     getUsuariosResponsaveis();
-  }, []);
+  }, [selectedSetor]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -498,6 +528,14 @@ const AtivoForm = () => {
                         <button type="button" className="desabilitar-button" onClick={handleDesabilitar}>
                           Desabilitar
                         </button>
+                        <button type="button" className="descartar-button" onClick={handleDescartar}>
+                          Descartar
+                        </button>
+                        {ativo?.tipoAtivo === "tl" && (
+                          <button type="button" className="devolver-button" onClick={handleDevolver}>
+                            Devolver
+                          </button>
+                        )}
                       </div>
                     )}
                   </>
@@ -512,12 +550,12 @@ const AtivoForm = () => {
           <h2 style={{ textAlign: "center" }}>Movimentar ativo</h2>
           <form className="formulario" onSubmit={handleSubmit(onSubmitMovimentacao)}>
             <div className="div-input-formulario">
-              <span>Área</span>
+              <span>Setor</span>
               <Controller
                 name="area"
                 control={control}
                 rules={{
-                  required: "Campo obrigatório",
+                  validate: (value) => (!isEditing || (value && value.id) ? true : "Campo obrigatório"),
                 }}
                 render={({ field }) => (
                   <select
@@ -527,17 +565,17 @@ const AtivoForm = () => {
                     value={field.value?.id || ""}
                     onChange={(e) => {
                       const selectedId = Number(e.target.value);
-                      const selectedArea = areas.find((a) => a.id === selectedId) as AreaType;
+                      const selectedSetor = setores.find((a) => a.id === selectedId) as SetorType;
 
-                      field.onChange(selectedArea || null);
-                      setSelectedArea(selectedArea);
-                      setLocalizacoes(selectedArea ? selectedArea.localizacoes : []);
+                      field.onChange(selectedSetor || null);
+                      setSelectedSetor(selectedSetor);
+                      setLocalizacoes(selectedSetor ? selectedSetor.localizacoes : []);
                     }}
                   >
-                    <option value="">Selecione uma área</option>
-                    {areas &&
-                      areas.length > 0 &&
-                      areas.map((a) => (
+                    <option value="">Selecione um setor</option>
+                    {setores &&
+                      setores.length > 0 &&
+                      setores.map((a) => (
                         <option key={a.id} value={a.id}>
                           {a.nome}
                         </option>
@@ -549,7 +587,7 @@ const AtivoForm = () => {
             </div>
             <div className="div-input-formulario">
               <span>Responsável</span>
-              <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedArea?.responsavel} />
+              <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
             </div>
             <div className="div-input-formulario">
               <span>Localização</span>
@@ -557,7 +595,7 @@ const AtivoForm = () => {
                 name="localizacao"
                 control={control}
                 rules={{
-                  required: "Campo obrigatório",
+                  validate: (value) => (isEditing && selectedSetor && value && value.id ? true : "Campo obrigatório"),
                 }}
                 render={({ field }) => (
                   <select
@@ -584,7 +622,7 @@ const AtivoForm = () => {
                   </select>
                 )}
               />
-              <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
+              <div className="invalid-feedback d-block div-erro">{errors.localizacao?.message}</div>
             </div>
             <div className="div-input-formulario">
               <span>Usuário responsável</span>
@@ -636,6 +674,7 @@ const AtivoForm = () => {
         onCancel={handleCancelPhoto}
         loading={photoLoading}
       />
+
       {loading ? (
         <AtivoFormLoaderSkeleton />
       ) : (
@@ -746,12 +785,12 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.categoria?.message}</div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Área</span>
+                        <span>Setor</span>
                         <Controller
                           name="area"
                           control={control}
                           rules={{
-                            required: "Campo obrigatório",
+                            required: isEditing ? false : "Campo obrigatório",
                           }}
                           render={({ field }) => (
                             <select
@@ -761,18 +800,18 @@ const AtivoForm = () => {
                               value={field.value?.id || ""}
                               onChange={(e) => {
                                 const selectedId = Number(e.target.value);
-                                const selectedArea = areas.find((a) => a.id === selectedId) as AreaType;
+                                const selectedSetor = setores.find((a) => a.id === selectedId) as SetorType;
 
-                                field.onChange(selectedArea || null);
-                                setSelectedArea(selectedArea);
-                                setLocalizacoes(selectedArea ? selectedArea.localizacoes : []);
+                                field.onChange(selectedSetor || null);
+                                setSelectedSetor(selectedSetor);
+                                setLocalizacoes(selectedSetor ? selectedSetor.localizacoes : []);
                               }}
                               disabled={!isEditing ? false : true}
                             >
-                              <option value="">Selecione uma área</option>
-                              {areas &&
-                                areas.length > 0 &&
-                                areas.map((a) => (
+                              <option value="">Selecione um setor</option>
+                              {setores &&
+                                setores.length > 0 &&
+                                setores.map((a) => (
                                   <option key={a.id} value={a.id}>
                                     {a.nome}
                                   </option>
@@ -784,7 +823,7 @@ const AtivoForm = () => {
                       </div>
                       <div className="div-input-formulario">
                         <span>Responsável</span>
-                        <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedArea?.responsavel} />
+                        <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
                       </div>
                       <div className="div-input-formulario">
                         <span>Localização</span>
@@ -792,13 +831,15 @@ const AtivoForm = () => {
                           name="localizacao"
                           control={control}
                           rules={{
-                            required: "Campo obrigatório",
+                            required: isEditing ? false : "Campo obrigatório",
                           }}
                           render={({ field }) => (
                             <select
                               id="localizacao"
                               className={`input-formulario ${errors.localizacao ? "input-error" : ""} ${
-                                (localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing ? "" : "disabled-field"
+                                (localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing && selectedSetor !== undefined
+                                  ? ""
+                                  : "disabled-field"
                               }`}
                               {...field}
                               value={field.value?.id || ""}
@@ -809,7 +850,11 @@ const AtivoForm = () => {
                                 field.onChange(selectedLocalizacao || null);
                                 setSelectedLocalizacao(selectedLocalizacao);
                               }}
-                              disabled={(localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing ? false : true}
+                              disabled={
+                                (localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing && selectedSetor !== undefined
+                                  ? false
+                                  : true
+                              }
                             >
                               <option value="">Selecione uma localização</option>
                               {localizacoes &&
@@ -835,7 +880,9 @@ const AtivoForm = () => {
                           render={({ field }) => (
                             <select
                               id="usuarioResponsavel"
-                              className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""} ${!isEditing ? "" : "disabled-field"}`}
+                              className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""} ${
+                                !isEditing && selectedSetor !== undefined ? "" : "disabled-field"
+                              }`}
                               {...field}
                               value={field.value?.id || ""}
                               onChange={(e) => {
@@ -844,7 +891,7 @@ const AtivoForm = () => {
 
                                 field.onChange(selectedUsuarioResponsavel || null);
                               }}
-                              disabled={!isEditing ? false : true}
+                              disabled={!isEditing && selectedSetor !== undefined ? false : true}
                             >
                               <option value="">Selecione um usuário responsável</option>
                               {usuariosResponsaveis &&
@@ -887,7 +934,6 @@ const AtivoForm = () => {
                                   resetField("dataDevolucaoPrevista");
                                   // Libera o campo de fornecedor
                                   resetField("dataDevolucaoPrevista");
-                                  setFornecedor(undefined);
 
                                   // No form, o valor será null (sem contrato)
                                   field.onChange({ id: null });
@@ -899,12 +945,10 @@ const AtivoForm = () => {
                                     setSelectedContrato(sContrato);
                                     setValue("dataDevolucaoPrevista", sContrato.fimDataVigencia);
                                     setValue("fornecedor", sContrato.fornecedor); // preenche fornecedor automaticamente
-                                    setFornecedor(sContrato.fornecedor);
                                   } else {
                                     setSelectedContrato(null);
                                     resetField("dataDevolucaoPrevista");
                                     resetField("fornecedor");
-                                    setFornecedor(undefined);
                                   }
 
                                   field.onChange(sContrato);
@@ -948,7 +992,6 @@ const AtivoForm = () => {
 
                                 if (fornecedorSelecionado !== null) {
                                   field.onChange(fornecedorSelecionado);
-                                  setFornecedor(fornecedorSelecionado);
                                 }
                               }}
                               disabled={desabilitado || selectedContrato !== null}
@@ -1117,9 +1160,10 @@ const AtivoForm = () => {
                           idAtivo={String(ativo.id)}
                           defaultFiles={ativo?.imagens}
                           ativoDesabilitado={desabilitado}
+                          reloadPage={handleReload}
                         />
                       ) : (
-                        <UploadArquivos tipoAtivo={tipoForm} ativoDesabilitado={desabilitado} />
+                        <UploadArquivos tipoAtivo={tipoForm} ativoDesabilitado={desabilitado} reloadPage={handleReload} />
                       )}
 
                       {/* Inline preview of confirmed photo */}

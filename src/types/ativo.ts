@@ -1,4 +1,4 @@
-import { AreaType } from "./area";
+import { SetorType } from "./area";
 import { ContratoType } from "./contrato";
 import { FornecedorType } from "./fornecedor";
 import { Imagem } from "./imagem";
@@ -11,7 +11,7 @@ export type AtivoType = {
   gerarIdPatrimonial: boolean;
   categoria: string;
   descricao: string;
-  area: AreaType;
+  area: SetorType; //área = setor (mudança de nomenclatura)
   localizacao: LocalizacaoType;
   usuarioResponsavel: UsuarioResponsavelType;
   fornecedor: FornecedorType;

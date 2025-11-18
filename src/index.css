@@ -192,8 +192,9 @@
 }
 
 .filtro-input {
-  background-color: var(--bg-color);
+  background-color: var(--bg-input);
   height: 45px;
+  min-width: 260px;
   padding-left: 35px;
   padding-right: 12px;
   border: 0;
@@ -207,7 +208,7 @@
 .filtro-input-div i {
   position: absolute;
   top: 0;
-  transform: translateY(60%) translateX(50%);
+  transform: translateY(85%) translateX(50%);
 }
 
 [class^="tag-dot-"] {

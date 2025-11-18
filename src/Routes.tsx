@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes as Switch, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes as Switch, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Auth from "@/pages/Auth";
 import Home from "@/pages/Home";
@@ -11,6 +11,8 @@ import {} from "react-toastify";
 import { Modal, Box } from "@mui/material";
 import NaoEncontrado from "./pages/NaoEncontrado";
 import { setupInterceptors } from "./utils/functions";
+import PrimeiroAcesso from "./pages/PrimeiroAcesso";
+import { getUserData } from "./utils/storage";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -20,8 +22,11 @@ import { setupInterceptors } from "./utils/functions";
  * gerenciar o histórico de navegação.
  */
 const Routes = () => {
+  const userData = getUserData();
   const { authContextData } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [isFirstAccess, setIsFirstAccess] = useState<boolean>(false);
 
   // Back button handler component (needs to be inside Router so hooks work)
   const BackButtonHandler = () => {
@@ -89,6 +94,10 @@ const Routes = () => {
       setupInterceptors(navigate);
     }, []);
 
+    useEffect(() => {
+      setIsFirstAccess(userData.firstAccess);
+    }, []);
+
     return (
       <>
         <Modal open={showExitConfirm} onClose={() => setShowExitConfirm(false)}>
@@ -130,14 +139,30 @@ const Routes = () => {
           <Route path="/gestao-inventario/*" element={<Auth />} />
           <Route path="/gestao-inventario/nao-encontrado" element={<NaoEncontrado />} />
           <Route
+            path="/gestao-inventario/primeiro-acesso"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <PrimeiroAcesso />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/gestao-inventario"
             element={
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
                   { id: 3, autorizacao: "PERFIL_USUARIO" },
                 ]}
+                isFirstAccess={isFirstAccess}
               >
                 <Home />
               </PrivateRoute>
@@ -149,9 +174,10 @@ const Routes = () => {
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
                   { id: 3, autorizacao: "PERFIL_USUARIO" },
                 ]}
+                isFirstAccess={isFirstAccess}
               >
                 <Ativo />
               </PrivateRoute>
@@ -163,8 +189,9 @@ const Routes = () => {
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_ANALISTA_INVENTARIO" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
                 ]}
+                isFirstAccess={isFirstAccess}
               >
                 <Admin />
               </PrivateRoute>

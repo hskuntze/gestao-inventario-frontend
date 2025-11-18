@@ -260,14 +260,16 @@ const Home = () => {
           {loadingAtivosRecentes ? (
             <CARSkeletonLoader />
           ) : recentes.length > 0 ? (
-            recentes.map((r) => (
-              <CardAtivoRecente
-                idAtivo={r.id}
-                mensagem={r.descricao}
-                tipoAtivo={tiposAtivo[r.tipoAtivo] as TipoAtivoType}
-                categoria={r.categoria as CategoriaType}
-              />
-            ))
+            recentes
+              .slice(0, 3)
+              .map((r) => (
+                <CardAtivoRecente
+                  idAtivo={r.id}
+                  mensagem={r.descricao}
+                  tipoAtivo={tiposAtivo[r.tipoAtivo] as TipoAtivoType}
+                  categoria={r.categoria as CategoriaType}
+                />
+              ))
           ) : (
             <div className="section-subtitle">
               <span>Sem ativos recentes...</span>

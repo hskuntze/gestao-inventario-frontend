@@ -150,7 +150,6 @@ const GerenciarContrato = () => {
 
   useEffect(() => {
     async function getFornecedores() {
-      //setLoadingAreas(true);
       setFornecedores([]);
 
       try {
@@ -188,7 +187,7 @@ const GerenciarContrato = () => {
                 <input
                   type="text"
                   className="form-control filtro-input"
-                  id="nome-treinamento-filtro"
+                  id="nome-contrato-filtro"
                   placeholder="Digite um termo para filtrar"
                   onChange={handleFilterChange}
                 />

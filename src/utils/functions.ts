@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { requestBackend } from "./requests";
-import { AreaType } from "@/types/area";
+import { SetorType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
@@ -59,14 +59,14 @@ export function formatarDataParaMesAno(dataStr: string): string {
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
     PERFIL_ADMIN: "Administrador",
-    PERFIL_ANALISTA_INVENTARIO: "Analista de Inventário",
+    PERFIL_ADMIN_TP: "Analista de Inventário",
     PERFIL_USUARIO: "Usuário",
   };
 
   return perfis[perfil] ?? "Sem perfil definido";
 }
 
-export async function fetchAllAreas(): Promise<AreaType[]> {
+export async function fetchAllSetores(): Promise<SetorType[]> {
   const requestParams: AxiosRequestConfig = {
     url: "/areas/all",
     method: "GET",
@@ -75,9 +75,9 @@ export async function fetchAllAreas(): Promise<AreaType[]> {
 
   try {
     const res = await requestBackend(requestParams);
-    return res.data as AreaType[];
+    return res.data as SetorType[];
   } catch (err) {
-    throw new Error("Falha ao buscar as áreas.");
+    throw new Error("Falha ao buscar ps setores.");
   }
 }
 
@@ -114,6 +114,21 @@ export async function fetchAllFornecedores(): Promise<FornecedorType[]> {
 export async function fetchAllUsuariosResponsaveis(): Promise<UsuarioResponsavelType[]> {
   const requestParams: AxiosRequestConfig = {
     url: "/usuarios/responsaveis/all",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  try {
+    const res = await requestBackend(requestParams);
+    return res.data as UsuarioResponsavelType[];
+  } catch (err) {
+    throw new Error("Falha ao buscar os usuários.");
+  }
+}
+
+export async function fetchAllUsuariosResponsaveisByAreaId(id: number): Promise<UsuarioResponsavelType[]> {
+  const requestParams: AxiosRequestConfig = {
+    url: `/usuarios/responsaveis/area/${id}`,
     method: "GET",
     withCredentials: true,
   };

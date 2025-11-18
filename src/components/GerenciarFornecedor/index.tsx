@@ -6,6 +6,7 @@ import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { FornecedorType } from "@/types/fornecedor";
+import Loader from "../Loader";
 
 type FormData = {
   nome: string;
@@ -18,7 +19,6 @@ type FormData = {
 const GerenciarFornecedor = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [fornecedor, setFornecedor] = useState<FornecedorType[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -96,6 +96,8 @@ const GerenciarFornecedor = () => {
   };
 
   const onSubmit = (formData: FormData) => {
+    setLoading(true);
+
     const requestParams: AxiosRequestConfig = {
       url: isEditing ? `/fornecedores/update/${fornecedorId}` : "/fornecedores/register",
       method: isEditing ? "PUT" : "POST",
@@ -120,7 +122,9 @@ const GerenciarFornecedor = () => {
         toast.error(message);
         handleToggleModal();
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleDeleteArea = (id: number) => {};
@@ -312,9 +316,15 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.contatoTelefone?.message}</div>
             </div>
             <div className="div-input-formulario"></div>
-            <div className="form-buttons">
-              <button className="button submit-button">Salvar</button>
-            </div>
+            {loading ? (
+              <div className="loading-div">
+                <Loader />
+              </div>
+            ) : (
+              <div className="form-buttons">
+                <button className="button submit-button">Salvar</button>
+              </div>
+            )}
           </form>
         </Box>
       </Modal>

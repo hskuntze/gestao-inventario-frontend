@@ -1,5 +1,4 @@
 import Denied from "@/components/Denied";
-import { JSX } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { hasAnyRoles, isAuthenticated } from "@/utils/auth";
 import { Perfil } from "./types/perfil";
@@ -12,7 +11,13 @@ import { Perfil } from "./types/perfil";
  *
  * Utiliza as funções "hasAnyRoles" e "isAuthenticated" para fazer este controle.
  */
-const PrivateRoute = ({ children, roles }: { children: JSX.Element; roles: Array<Perfil> }) => {
+interface PrivateRouteProps {
+  children: React.ReactNode;
+  roles: Perfil[];
+  isFirstAccess: boolean; // Adicionada esta prop
+}
+
+const PrivateRoute = ({ children, roles, isFirstAccess }: PrivateRouteProps) => {
   const location = useLocation();
 
   const isAuth = isAuthenticated();
@@ -20,6 +25,14 @@ const PrivateRoute = ({ children, roles }: { children: JSX.Element; roles: Array
 
   if (!isAuth) {
     return <Navigate to="/gestao-inventario/login" state={{ from: location }} replace />;
+  }
+
+  if (isFirstAccess && location.pathname !== "/gestao-inventario/primeiro-acesso") {
+    return <Navigate to="/gestao-inventario/primeiro-acesso" replace />;
+  }
+
+  if (!isFirstAccess && location.pathname === "/gestao-inventario/primeiro-acesso") {
+    return <Navigate to="/gestao-inventario" replace />;
   }
 
   if (isAuth && !hasRoles) {

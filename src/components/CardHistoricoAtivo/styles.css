@@ -74,5 +74,17 @@
 }
 
 .habilitar-icon {
-  background-color: #00c3d1;
+  background-color: #06bfcc;
+}
+
+.devolver-icon {
+  background-color: #005fad;
+}
+
+.descartar-icon {
+  background-color: #c22802;
+}
+
+.arquivo-inserido-icon {
+  background-color: #9616ff;
 }

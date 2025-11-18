@@ -24,7 +24,7 @@
 
 ### Architecture: Role-Based Access Control (RBAC)
 - **Auth Flow**: OAuth2 password grant → JWT tokens stored in localStorage → Bearer auth for API calls
-- **Roles**: PERFIL_ADMIN, PERFIL_ANALISTA_INVENTARIO, PERFIL_USUARIO
+- **Roles**: PERFIL_ADMIN, PERFIL_ADMIN_TP, PERFIL_USUARIO
 - **Route Protection**: `PrivateRoute` wraps pages, checks `isAuthenticated()` + `hasAnyRoles()`
 - **Contexts**: `AuthContext` (auth state sync), `UserContext` (user data)
 
@@ -34,7 +34,7 @@
 - **`requests.ts`**: HTTP client with `requestBackend()` (adds Bearer token) and `requestBackendLogin()` (OAuth)
 - **`auth.ts`**: JWT utilities (`getTokenData()`, `isAuthenticated()`, `hasAnyRoles()`)
 - **`storage.ts`**: localStorage helpers for auth/user data (separate functions per domain)
-- **`functions.ts`**: Reusable async data fetchers (e.g., `fetchAllAreas()`) and formatters (`formatarData()`, `formatarPerfil()`)
+- **`functions.ts`**: Reusable async data fetchers (e.g., `fetchAllSetores()`) and formatters (`formatarData()`, `formatarPerfil()`)
 - **`contexts/`**: Two contexts only — avoid adding more
 - **`providers/`**: `AuthProvider` syncs auth state across browser tabs via `storage` event listener
 
@@ -52,7 +52,7 @@
 ### `src/types/` - Type Definitions
 - **One file per domain**: `ativo.ts`, `area.ts`, `fornecedor.ts`, `usuario_responsavel.ts`, etc.
 - Named pattern: `TypeNameType` (e.g., `AtivoType`, `NotificacaoType`)
-- Types compose each other (e.g., `AtivoType` includes `AreaType`, `LocalizacaoType`)
+- Types compose each other (e.g., `AtivoType` includes `SetorType`, `LocalizacaoType`)
 
 ## Development & Build
 
