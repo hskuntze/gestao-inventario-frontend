@@ -33,18 +33,13 @@
 
 .usuario-list-table th:nth-of-type(5),
 .usuario-list-table td:nth-of-type(5) {
-  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
   min-height: 100%;
 }
 
 .usuario-list-table th:nth-of-type(5) {
   text-align: center;
-}
-
-.usuario-list-table td:nth-of-type(5) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .usuario-list-table tbody tr td div {

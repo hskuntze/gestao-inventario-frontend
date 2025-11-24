@@ -39,16 +39,12 @@
 
 .contrato-list-table th:nth-of-type(5),
 .contrato-list-table td:nth-of-type(5) {
-  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
 }
 
 .contrato-list-table th:nth-of-type(5) {
   text-align: center;
-}
-
-.contrato-list-table td:nth-of-type(5) {
-  display: flex;
-  justify-content: center;
 }
 
 .contrato-list-table tbody tr td div {

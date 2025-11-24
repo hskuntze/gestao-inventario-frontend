@@ -8,6 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { FornecedorType } from "@/types/fornecedor";
 import { ContratoType } from "@/types/contrato";
 import { fetchAllFornecedores, formatarData } from "@/utils/functions";
+import Loader from "../Loader";
 
 type FormData = {
   titulo: string;
@@ -21,7 +22,6 @@ type FormData = {
 const GerenciarContrato = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
-  const [reload, setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -129,9 +129,27 @@ const GerenciarContrato = () => {
       .finally(() => {});
   };
 
-  const handleDeleteArea = (id: number) => {};
+  const handleDeleteContrato = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja excluir este contrato?");
 
-  const handleEditArea = (contrato: ContratoType) => {
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/contratos/delete/${id}`,
+        method: "DELETE",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Deletado com sucesso.");
+          loadContratos();
+        })
+        .catch(() => {})
+        .finally(() => {});
+    }
+  };
+
+  const handleEditContrato = (contrato: ContratoType) => {
     setOpenModal(true);
     setIsEditing(true);
     setContratoId(contrato.id);
@@ -229,10 +247,15 @@ const GerenciarContrato = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditArea(a)} className="button action-button nbr">
+                          <button onClick={() => handleEditContrato(a)} className="button action-button nbr" title="Editar contrato">
                             <i className="bi bi-pencil" />
                           </button>
-                          <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
+                          <button
+                            onClick={() => handleDeleteContrato(a.id)}
+                            type="button"
+                            className="button action-button delete-button nbr"
+                            title="Excluir contrato"
+                          >
                             <i className="bi bi-trash3" />
                           </button>
                         </div>
@@ -368,9 +391,15 @@ const GerenciarContrato = () => {
               ></textarea>
               <div className="invalid-feedback d-block div-erro">{errors.descricao?.message}</div>
             </div>
-            <div className="form-buttons">
-              <button className="button submit-button">Salvar</button>
-            </div>
+            {loading ? (
+              <div className="loading-div">
+                <Loader />
+              </div>
+            ) : (
+              <div className="form-buttons">
+                <button className="button submit-button">Salvar</button>
+              </div>
+            )}
           </form>
         </Box>
       </Modal>

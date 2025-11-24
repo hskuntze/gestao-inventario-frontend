@@ -62,7 +62,11 @@ const GerenciarUsuarioResponsavel = () => {
     const searchTerm = filter.trim();
     if (!searchTerm) return true;
 
-    return u.nome.toLowerCase().includes(searchTerm) || (u.email.toLowerCase().includes(searchTerm) ?? false);
+    return (
+      u.nome.toLowerCase().includes(searchTerm ?? false) ||
+      ((u.email ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((u.area ? u.area.nome : "-").toLowerCase().includes(searchTerm) ?? false)
+    );
   });
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -121,9 +125,27 @@ const GerenciarUsuarioResponsavel = () => {
       });
   };
 
-  const handleDeleteArea = (id: number) => {};
+  const handleDeleteUsuarioResponsavel = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja excluir este usuário responsável?");
 
-  const handleEditUsuario = (u: UsuarioResponsavelType) => {
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/usuarios/responsaveis/delete/${id}`,
+        method: "DELETE",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Deletado com sucesso.");
+          loadUsuarios();
+        })
+        .catch((err) => {})
+        .finally(() => {});
+    }
+  };
+
+  const handleEditUsuarioResponsavel = (u: UsuarioResponsavelType) => {
     setOpenModal(true);
     setIsEditing(true);
     setUsuarioId(u.id);
@@ -214,10 +236,19 @@ const GerenciarUsuarioResponsavel = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditUsuario(a)} className="button action-button nbr">
+                          <button
+                            onClick={() => handleEditUsuarioResponsavel(a)}
+                            className="button action-button nbr"
+                            title="Editar usuário responsável"
+                          >
                             <i className="bi bi-pencil" />
                           </button>
-                          <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
+                          <button
+                            onClick={() => handleDeleteUsuarioResponsavel(a.id)}
+                            type="button"
+                            className="button action-button delete-button nbr"
+                            title="Excluir usuário responsável"
+                          >
                             <i className="bi bi-trash3" />
                           </button>
                         </div>

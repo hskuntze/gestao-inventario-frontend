@@ -54,16 +54,12 @@
 
 .fornecedor-list-table th:nth-of-type(6),
 .fornecedor-list-table td:nth-of-type(6) {
-  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
 }
 
 .fornecedor-list-table th:nth-of-type(6) {
   text-align: center;
-}
-
-.fornecedor-list-table td:nth-of-type(6) {
-  display: flex;
-  justify-content: center;
 }
 
 .fornecedor-list-table tbody tr td div {

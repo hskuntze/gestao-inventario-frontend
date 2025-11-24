@@ -10,9 +10,12 @@ import Admin from "./pages/Admin";
 import {} from "react-toastify";
 import { Modal, Box } from "@mui/material";
 import NaoEncontrado from "./pages/NaoEncontrado";
-import { setupInterceptors } from "./utils/functions";
 import PrimeiroAcesso from "./pages/PrimeiroAcesso";
 import { getUserData } from "./utils/storage";
+import { setupInterceptors } from "./utils/interceptor";
+import NaoAutorizado from "./pages/NaoAutorizado";
+import PageUsuario from "./pages/Usuario";
+import { hasAnyRoles } from "./utils/auth";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -98,6 +101,14 @@ const Routes = () => {
       setIsFirstAccess(userData.firstAccess);
     }, []);
 
+    useEffect(() => {
+      const isUsuario = hasAnyRoles([{ id: 3, autorizacao: "PERFIL_USUARIO" }]);
+
+      if (isUsuario) {
+        navigate("/gestao-inventario/usuario");
+      }
+    });
+
     return (
       <>
         <Modal open={showExitConfirm} onClose={() => setShowExitConfirm(false)}>
@@ -138,6 +149,7 @@ const Routes = () => {
           <Route path="/" element={<Navigate to="/gestao-inventario" />} />
           <Route path="/gestao-inventario/*" element={<Auth />} />
           <Route path="/gestao-inventario/nao-encontrado" element={<NaoEncontrado />} />
+          <Route path="/gestao-inventario/nao-autorizado" element={<NaoAutorizado />} />
           <Route
             path="/gestao-inventario/primeiro-acesso"
             element={
@@ -150,6 +162,20 @@ const Routes = () => {
                 isFirstAccess={isFirstAccess}
               >
                 <PrimeiroAcesso />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/usuario"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <PageUsuario />
               </PrivateRoute>
             }
           />

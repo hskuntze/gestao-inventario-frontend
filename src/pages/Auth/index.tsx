@@ -73,7 +73,9 @@ const Auth = () => {
 
         loadUserInfo();
       })
-      .catch(() => toast.error("Não foi possível realizar o login."))
+      .catch((err) => {
+        console.log(err);
+      })
       .finally(() => setLoading(false));
   };
 

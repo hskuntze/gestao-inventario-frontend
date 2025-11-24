@@ -160,6 +160,10 @@
   color: #d81313;
 }
 
+.create-button {
+  color: #34d813;
+}
+
 .table-pagination-container {
   overflow-x: scroll;
   scrollbar-width: none; /* Firefox */
@@ -211,12 +215,8 @@
   transform: translateY(85%) translateX(50%);
 }
 
-[class^="tag-dot-"] {
-  width: 6px;
-  min-height: unset !important;
-  max-height: 6px !important;
-  height: 6px !important;
-  border-radius: 50%;
+[class*="tag-dot-"] {
+  margin-top: 2px;
   margin-right: 5px;
 }
 
@@ -243,15 +243,15 @@
 }
 
 .tag-dot-t {
-  background-color: #0e5e26;
+  color: #0e5e26;
 }
 
 .tag-dot-i {
-  background-color: #0861e7;
+  color: #0861e7;
 }
 
 .tag-dot-tl {
-  background-color: #992bec;
+  color: #992bec;
 }
 
 .div-table {

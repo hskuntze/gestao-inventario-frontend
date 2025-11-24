@@ -10,6 +10,6 @@
   flex-direction: column;
 }
 
-.nao-encontrado-container span {
+.nao-encontrado-container div {
   margin-top: 20px;
 }

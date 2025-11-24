@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "./requests";
 import { SetorType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
@@ -6,9 +6,7 @@ import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
 import { NotificacaoType } from "@/types/notificacao";
 import { ContratoType } from "@/types/contrato";
-import { HistoricoType } from "@/types/historico";
 import { AtivoType } from "@/types/ativo";
-import { NavigateFunction } from "react-router-dom";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -59,7 +57,7 @@ export function formatarDataParaMesAno(dataStr: string): string {
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
     PERFIL_ADMIN: "Administrador",
-    PERFIL_ADMIN_TP: "Analista de Inventário",
+    PERFIL_ADMIN_TP: "Gerente de Termo de Parceria",
     PERFIL_USUARIO: "Usuário",
   };
 
@@ -77,7 +75,7 @@ export async function fetchAllSetores(): Promise<SetorType[]> {
     const res = await requestBackend(requestParams);
     return res.data as SetorType[];
   } catch (err) {
-    throw new Error("Falha ao buscar ps setores.");
+    throw new Error("Falha ao buscar os setores.");
   }
 }
 
@@ -185,27 +183,6 @@ export async function fetchAllContratos(): Promise<ContratoType[]> {
     throw new Error("Falha ao buscar contratos.");
   }
 }
-
-export const setupInterceptors = (navigate: NavigateFunction) => {
-  axios.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error.response) {
-        const status = error.response.status;
-
-        if (status === 404) {
-          // redireciona para a tela de "não encontrado"
-          navigate("/gestao-inventario/nao-encontrado");
-        } else if (status === 401) {
-          // token inválido → volta pro login
-          navigate("/gestao-inventario/login");
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
-};
 
 export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
   try {

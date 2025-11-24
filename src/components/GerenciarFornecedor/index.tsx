@@ -127,9 +127,27 @@ const GerenciarFornecedor = () => {
       });
   };
 
-  const handleDeleteArea = (id: number) => {};
+  const handleDeleteFornecedor = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja excluir este fornecedor?");
 
-  const handleEditUsuario = (f: FornecedorType) => {
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/fornecedores/delete/${id}`,
+        method: "DELETE",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Deletado com sucesso.");
+          loadFornecedores();
+        })
+        .catch((err) => {})
+        .finally(() => {});
+    }
+  };
+
+  const handleEditFornecedor = (f: FornecedorType) => {
     setOpenModal(true);
     setIsEditing(true);
     setFornecedorId(f.id);
@@ -214,10 +232,15 @@ const GerenciarFornecedor = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditUsuario(a)} className="button action-button nbr">
+                          <button onClick={() => handleEditFornecedor(a)} className="button action-button nbr" title="Editar fornecedor">
                             <i className="bi bi-pencil" />
                           </button>
-                          <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
+                          <button
+                            onClick={() => handleDeleteFornecedor(a.id)}
+                            type="button"
+                            className="button action-button delete-button nbr"
+                            title="Excluir fornecedor"
+                          >
                             <i className="bi bi-trash3" />
                           </button>
                         </div>

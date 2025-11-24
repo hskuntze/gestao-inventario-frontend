@@ -143,7 +143,7 @@ const AtivoList = () => {
                         <td>
                           <div>
                             <span className={`tag-tipo-ativo-${a.tipoAtivo}`}>
-                              <div className={`tag-dot-${a.tipoAtivo}`}></div> {tiposAtivo[a.tipoAtivo]}
+                              <i className={`bi bi-tag-fill tag-dot-${a.tipoAtivo}`} /> {tiposAtivo[a.tipoAtivo]}
                             </span>
                           </div>
                         </td>

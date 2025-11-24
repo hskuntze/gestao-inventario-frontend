@@ -150,7 +150,6 @@ const GerenciarUsuario = () => {
       .catch((err) => {
         const message = err.response?.data?.message || "Erro ao tentar atualizar o usuário do sistema.";
         toast.error(message);
-        handleToggleModal();
       })
       .finally(() => {
         setLoading(false);
@@ -167,10 +166,63 @@ const GerenciarUsuario = () => {
     setValue("login", u.login);
     setValue("perfilUsuario", u.perfis[0]);
     setValue("termoParceria", u.termoParceria);
-    setValue("usuarioResponsavel", u.usuarioResponsavel);
+    setValue("usuarioResponsavel", u.usuarioResponsavel ?? null);
   };
 
-  const handleDeleteArea = (id: number) => {};
+  const handleDisableUser = (id: number) => {
+    let confirm = window.confirm("Deseja desabilitar este usuário?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/usuarios/operacao/desabilitar",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          userId: id,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Usuário desabilitado.");
+          loadUsuarios();
+        })
+        .catch((err) => {
+          let message = err.response.data.message;
+          if (message) {
+            toast.error(message);
+          } else {
+            toast.error("Erro ao tentar desabilitar usuário.");
+          }
+        })
+        .finally(() => {});
+    }
+  };
+
+  const handleEnableUser = (id: number) => {
+    let confirm = window.confirm("Deseja habilitar este usuário?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/usuarios/operacao/habilitar",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          userId: id,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Usuário habilitado.");
+          loadUsuarios();
+        })
+        .catch((err) => {
+          toast.error("Erro ao tentar habilitar usuário.");
+        })
+        .finally(() => {});
+    }
+  };
 
   useEffect(() => {
     loadUsuarios();
@@ -256,28 +308,44 @@ const GerenciarUsuario = () => {
               </thead>
               <tbody>
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((a) => (
-                    <tr key={a.id}>
+                  paginatedData.map((u) => (
+                    <tr key={u.id}>
                       <td>
-                        <div>{a.nome}</div>
+                        <div>{u.nome}</div>
                       </td>
                       <td>
-                        <div>{a.email}</div>
+                        <div>{u.email}</div>
                       </td>
                       <td>
-                        <div>{a.login}</div>
+                        <div>{u.login}</div>
                       </td>
                       <td>
-                        <div>{formatarPerfil(a.perfis[0].autorizacao)}</div>
+                        <div>{formatarPerfil(u.perfis[0].autorizacao)}</div>
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditUsuario(a)} className="button action-button nbr">
+                          <button onClick={() => handleEditUsuario(u)} className="button action-button nbr" title="Editar usuário">
                             <i className="bi bi-pencil" />
                           </button>
-                          <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
-                            <i className="bi bi-trash3" />
-                          </button>
+                          {u.userEnabled === true ? (
+                            <button
+                              onClick={() => handleDisableUser(u.id)}
+                              type="button"
+                              className="button action-button delete-button nbr"
+                              title="Desabilitar usuário"
+                            >
+                              <i className="bi bi-x-circle" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleEnableUser(u.id)}
+                              type="button"
+                              className="button action-button create-button nbr"
+                              title="Habilitar usuário"
+                            >
+                              <i className="bi bi-check-circle" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -384,12 +452,12 @@ const GerenciarUsuario = () => {
                       field.onChange({ id, autorizacao: "" });
                     }}
                   >
-                    <option value="">Selecione um perfil</option>
+                    <option value="" key={"key-perfil"}>Selecione um perfil</option>
                     <option key={"perfil-" + 1} value={1}>
                       Administrador
                     </option>
                     <option key={"perfil-" + 2} value={2}>
-                      Admin. Termo de Parceria
+                      Gerente de Termo de Parceria
                     </option>
                     <option key={"perfil-" + 3} value={3}>
                       Usuário
@@ -418,9 +486,9 @@ const GerenciarUsuario = () => {
                       field.onChange(selectedUser);
                     }}
                   >
-                    <option value="">Selecione um responsável</option>
+                    <option value="" key={"key-responsavel"}>Selecione um responsável</option>
                     {usuariosResponsaveis.map((a) => (
-                      <option key={a.id} value={a.id}>
+                      <option key={a.nome + a.id} value={a.id}>
                         {a.nome}
                       </option>
                     ))}
@@ -437,13 +505,13 @@ const GerenciarUsuario = () => {
                   control={control}
                   rules={{ required: "Campo obrigatório" }}
                   render={({ field }) => (
-                    <select id="responsavel" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
-                      <option value="">Selecione um termo de parceria</option>
-                      <option value={"CCOMGEX"}>CCOMGEX</option>
-                      <option value={"DECEA"}>DECEA</option>
-                      <option value={"CISCEA"}>CISCEA</option>
-                      <option value={"PAME"}>PAME</option>
-                      <option value={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
+                    <select id="termo-parceria" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
+                      <option value="" key={"key-termo-parceria"}>Selecione um termo de parceria</option>
+                      <option value={"CCOMGEX"} key={"CCOMGEX"}>CCOMGEX</option>
+                      <option value={"DECEA"} key={"DECEA"}>DECEA</option>
+                      <option value={"CISCEA"} key={"CISCEA"}>CISCEA</option>
+                      <option value={"PAME"} key={"PAME"}>PAME</option>
+                      <option value={"MATRIZ"} key={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
                     </select>
                   )}
                 />

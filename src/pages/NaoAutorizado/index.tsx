@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import "./styles.css";
+import Denied from "@/components/Denied";
 
-const NaoEncontrado = () => {
+const NaoAutorizado = () => {
   return (
     <div className="home-container">
       <div className="nao-encontrado-container">
@@ -10,10 +11,10 @@ const NaoEncontrado = () => {
             Ir para a página inicial
           </Link>
         </div>
-        <span className="nao-encontrado">Não foi possível encontrar este elemento ou esta página.</span>
+        <Denied />
       </div>
     </div>
   );
 };
 
-export default NaoEncontrado;
+export default NaoAutorizado;
