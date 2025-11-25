@@ -96,13 +96,16 @@ const GerenciarUsuarioResponsavel = () => {
   const onSubmit = (formData: FormData) => {
     setLoading(true);
 
+    let nome = formData.nome.trim().toUpperCase();
+    let email = formData.email + "@ctcea.org.br";
+
     const requestParams: AxiosRequestConfig = {
       url: isEditing ? `/usuarios/responsaveis/update/${usuarioId}` : "/usuarios/responsaveis/register",
       method: isEditing ? "PUT" : "POST",
       withCredentials: true,
       data: {
-        nome: formData.nome,
-        email: formData.email,
+        nome: nome,
+        email: email,
         area: {
           id: formData.area.id,
         },
@@ -278,6 +281,8 @@ const GerenciarUsuarioResponsavel = () => {
                       labelDisplayedRows={({ from, to, count }) => {
                         return `${from} - ${to} de ${count}`;
                       }}
+                      showFirstButton={true}
+                      showLastButton={true}
                       classes={{
                         selectLabel: "pagination-select-label",
                         displayedRows: "pagination-displayed-rows-label",
@@ -308,12 +313,23 @@ const GerenciarUsuarioResponsavel = () => {
             </div>
             <div className="div-input-formulario">
               <span>E-mail</span>
-              <input
-                type="text"
-                className={`input-formulario ${errors.email ? "input-error" : ""}`}
-                {...register("email", { required: "Campo obrigatório" })}
-                maxLength={255}
-              />
+              <div className="input-email-wrapper">
+                <input
+                  type="text"
+                  className={`input-formulario input-email-com-sufixo ${errors.email ? "input-error" : ""}`}
+                  {...register("email", {
+                    required: "Campo obrigatório",
+                    pattern: {
+                      value: /^[A-Za-z]+$/,
+                      message: "Use apenas letras (sem @, números ou símbolos)",
+                    },
+                  })}
+                  maxLength={255}
+                />
+                <div className="sufixo-email-ctcea">
+                  <span>@ctcea.org.br</span>
+                </div>
+              </div>
               <div className="invalid-feedback d-block div-erro">{errors.email?.message}</div>
             </div>
             <div className="div-input-formulario">

@@ -182,6 +182,8 @@ const AtivoList = () => {
                         labelDisplayedRows={({ from, to, count }) => {
                           return `${from} - ${to} de ${count}`;
                         }}
+                        showFirstButton={true}
+                        showLastButton={true}
                         classes={{
                           selectLabel: "pagination-select-label",
                           displayedRows: "pagination-displayed-rows-label",

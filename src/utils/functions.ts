@@ -57,7 +57,7 @@ export function formatarDataParaMesAno(dataStr: string): string {
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
     PERFIL_ADMIN: "Administrador",
-    PERFIL_ADMIN_TP: "Gerente de Termo de Parceria",
+    PERFIL_ADMIN_TP: "Administrador de Termo de Parceria",
     PERFIL_USUARIO: "Usuário",
   };
 

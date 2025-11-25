@@ -1,12 +1,16 @@
 import "./styles.css";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Modal, TablePagination } from "@mui/material";
-import { useEffect, useState } from "react";
-import { AxiosRequestConfig } from "axios";
-import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { AxiosRequestConfig } from "axios";
+
+import { requestBackend } from "@/utils/requests";
+
 import { FornecedorType } from "@/types/fornecedor";
+
 import Loader from "../Loader";
+
+import { Accordion, AccordionDetails, AccordionSummary, Box, Modal, TablePagination } from "@mui/material";
 
 type FormData = {
   nome: string;
@@ -15,6 +19,28 @@ type FormData = {
   contatoTelefone: string;
   cnpj: string;
 };
+
+function maskCNPJ(value: string): string {
+  return value
+    .replace(/\D/g, "")
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2")
+    .slice(0, 18);
+}
+
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.length <= 10) {
+    // telefone fixo
+    return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d{1,4})$/, "$1-$2");
+  }
+
+  // celular (9 dígitos)
+  return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2");
+}
 
 const GerenciarFornecedor = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,7 +58,10 @@ const GerenciarFornecedor = () => {
     formState: { errors },
     handleSubmit,
     setValue,
+    watch,
   } = useForm<FormData>();
+
+  const cnpjValue = watch("cnpj");
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
@@ -64,10 +93,10 @@ const GerenciarFornecedor = () => {
 
     return (
       f.nome.toLowerCase().includes(searchTerm) ||
-      (f.cnpj.toLowerCase().includes(searchTerm) ?? false) ||
-      (f.contatoNome.toLowerCase().includes(searchTerm) ?? false) ||
-      (f.contatoEmail.toLowerCase().includes(searchTerm) ?? false) ||
-      (f.contatoTelefone.toLowerCase().includes(searchTerm) ?? false)
+      ((f.cnpj ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((f.contatoNome ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((f.contatoEmail ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((f.contatoTelefone ?? "-").toLowerCase().includes(searchTerm) ?? false)
     );
   });
 
@@ -103,7 +132,7 @@ const GerenciarFornecedor = () => {
       method: isEditing ? "PUT" : "POST",
       withCredentials: true,
       data: {
-        nome: formData.nome,
+        nome: formData.nome.toUpperCase(),
         cnpj: formData.cnpj,
         contatoNome: formData.contatoNome,
         contatoEmail: formData.contatoEmail,
@@ -270,6 +299,8 @@ const GerenciarFornecedor = () => {
                       labelDisplayedRows={({ from, to, count }) => {
                         return `${from} - ${to} de ${count}`;
                       }}
+                      showFirstButton={true}
+                      showLastButton={true}
                       classes={{
                         selectLabel: "pagination-select-label",
                         displayedRows: "pagination-displayed-rows-label",
@@ -304,7 +335,12 @@ const GerenciarFornecedor = () => {
                 type="text"
                 className={`input-formulario ${errors.cnpj ? "input-error" : ""}`}
                 {...register("cnpj", { required: "Campo obrigatório" })}
-                maxLength={255}
+                maxLength={18}
+                value={cnpjValue}
+                onChange={(e) => {
+                  const masked = maskCNPJ(e.target.value);
+                  setValue("cnpj", masked, { shouldValidate: true });
+                }}
               />
               <div className="invalid-feedback d-block div-erro">{errors.cnpj?.message}</div>
             </div>
@@ -323,7 +359,13 @@ const GerenciarFornecedor = () => {
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoEmail ? "input-error" : ""}`}
-                {...register("contatoEmail", { required: "Campo obrigatório" })}
+                {...register("contatoEmail", {
+                  required: "Campo obrigatório",
+                  pattern: {
+                    value: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+                    message: "E-mail inválido",
+                  },
+                })}
                 maxLength={255}
               />
               <div className="invalid-feedback d-block div-erro">{errors.contatoEmail?.message}</div>
@@ -333,8 +375,18 @@ const GerenciarFornecedor = () => {
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoTelefone ? "input-error" : ""}`}
-                {...register("contatoTelefone", { required: "Campo obrigatório" })}
-                maxLength={255}
+                {...register("contatoTelefone", {
+                  required: "Campo obrigatório",
+                  pattern: {
+                    value: /^(\+55\s?)?(\(?\d{2}\)?\s?)\d{4,5}-\d{4}$/,
+                    message: "Telefone inválido — tente usar DDD e o dígito 9 (se aplicável) (ex.: (61) 99999-9999)",
+                  },
+                })}
+                onChange={(e) => {
+                  const masked = maskTelefone(e.target.value);
+                  setValue("contatoTelefone", masked, { shouldValidate: true });
+                }}
+                maxLength={16}
               />
               <div className="invalid-feedback d-block div-erro">{errors.contatoTelefone?.message}</div>
             </div>

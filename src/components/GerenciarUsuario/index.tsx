@@ -48,6 +48,7 @@ const GerenciarUsuario = () => {
     setValue,
     control,
     reset,
+    watch,
   } = useForm<FormData>({
     defaultValues: {
       nome: "",
@@ -59,6 +60,8 @@ const GerenciarUsuario = () => {
       usuarioResponsavel: null,
     },
   });
+
+  const emailValue = watch("email");
 
   const handleToggleModal = () => {
     setOpenModal(!openModal);
@@ -119,14 +122,15 @@ const GerenciarUsuario = () => {
     setLoading(true);
 
     let usuarioResponsavelId = formData.usuarioResponsavel ? formData.usuarioResponsavel.id : null;
+    let usuarioEmail = formData.email + "@ctcea.org.br";
 
     const requestParams: AxiosRequestConfig = {
       url: isEditing ? `/usuarios/update/${usuarioId}` : "/usuarios/register",
       method: isEditing ? "PUT" : "POST",
       withCredentials: true,
       data: {
-        nome: formData.nome,
-        email: formData.email,
+        nome: formData.usuarioResponsavel?.nome,
+        email: usuarioEmail,
         login: formData.login,
         password: formData.senha,
         termoParceria: isAdmin ? formData.termoParceria : user.termoParceria,
@@ -235,6 +239,10 @@ const GerenciarUsuario = () => {
   useEffect(() => {
     setIsAdminTp(hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ADMIN_TP" }]));
   }, []);
+
+  useEffect(() => {
+    setValue("login", emailValue || "", { shouldValidate: true });
+  }, [emailValue, setValue]);
 
   useEffect(() => {
     async function getUsuariosResponsaveis() {
@@ -373,6 +381,8 @@ const GerenciarUsuario = () => {
                       labelDisplayedRows={({ from, to, count }) => {
                         return `${from} - ${to} de ${count}`;
                       }}
+                      showFirstButton={true}
+                      showLastButton={true}
                       classes={{
                         selectLabel: "pagination-select-label",
                         displayedRows: "pagination-displayed-rows-label",
@@ -393,31 +403,67 @@ const GerenciarUsuario = () => {
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
               <span>Nome</span>
-              <input
-                type="text"
-                className={`input-formulario ${errors.nome ? "input-error" : ""}`}
-                {...register("nome", { required: "Campo obrigatório" })}
-                maxLength={255}
+              <Controller
+                name="usuarioResponsavel"
+                control={control}
+                rules={{ required: "Campo obrigatório" }}
+                render={({ field }) => (
+                  <select
+                    id="responsavel"
+                    className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value?.id || ""}
+                    onChange={(e) => {
+                      const selectedId = Number(e.target.value);
+                      const selectedUser = usuariosResponsaveis.find((u) => u.id === selectedId) || null;
+
+                      field.onChange(selectedUser);
+                    }}
+                  >
+                    <option value="" key={"key-responsavel"}>
+                      Selecione um nome
+                    </option>
+                    {usuariosResponsaveis
+                      .filter((u) => u.email !== null && u.area !== null)
+                      .map((u) => (
+                        <option key={u.nome + u.id} value={u.id}>
+                          {u.nome}
+                        </option>
+                      ))}
+                  </select>
+                )}
               />
-              <div className="invalid-feedback d-block div-erro">{errors.nome?.message}</div>
+              <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
             </div>
             <div className="div-input-formulario">
               <span>E-mail</span>
-              <input
-                type="text"
-                className={`input-formulario ${errors.email ? "input-error" : ""}`}
-                {...register("email", { required: "Campo obrigatório" })}
-                maxLength={255}
-              />
+              <div className="input-email-wrapper">
+                <input
+                  type="text"
+                  className={`input-formulario input-email-com-sufixo ${errors.email ? "input-error" : ""}`}
+                  {...register("email", {
+                    required: "Campo obrigatório",
+                    pattern: {
+                      value: /^[A-Za-z]+$/,
+                      message: "Use apenas letras (sem @, números ou símbolos)",
+                    },
+                  })}
+                  maxLength={255}
+                />
+                <div className="sufixo-email-ctcea">
+                  <span>@ctcea.org.br</span>
+                </div>
+              </div>
               <div className="invalid-feedback d-block div-erro">{errors.email?.message}</div>
             </div>
             <div className="div-input-formulario">
               <span>Login</span>
               <input
                 type="text"
-                className={`input-formulario ${errors.login ? "input-error" : ""}`}
-                {...register("login", { required: "Campo obrigatório" })}
-                maxLength={255}
+                className={`input-formulario disabled-field ${errors.login ? "input-error" : ""}`}
+                {...register("login")}
+                value={emailValue}
+                disabled={true}
               />
               <div className="invalid-feedback d-block div-erro">{errors.login?.message}</div>
             </div>
@@ -452,50 +498,24 @@ const GerenciarUsuario = () => {
                       field.onChange({ id, autorizacao: "" });
                     }}
                   >
-                    <option value="" key={"key-perfil"}>Selecione um perfil</option>
-                    <option key={"perfil-" + 1} value={1}>
-                      Administrador
+                    <option value="" key={"key-perfil"}>
+                      Selecione um perfil
                     </option>
+                    {isAdmin && (
+                      <option key={"perfil-" + 1} value={1}>
+                        Administrador de Sistema
+                      </option>
+                    )}
                     <option key={"perfil-" + 2} value={2}>
-                      Gerente de Termo de Parceria
+                      Administrador de Termo de Parceria
                     </option>
                     <option key={"perfil-" + 3} value={3}>
-                      Usuário
+                      Usuário do Sistema
                     </option>
                   </select>
                 )}
               />
               <div className="invalid-feedback d-block">{errors.perfilUsuario?.message}</div>
-            </div>
-            <div className="div-input-formulario">
-              <span>Responsável</span>
-              <Controller
-                name="usuarioResponsavel"
-                control={control}
-                rules={{ required: "Campo obrigatório" }}
-                render={({ field }) => (
-                  <select
-                    id="responsavel"
-                    className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
-                    {...field}
-                    value={field.value?.id || ""}
-                    onChange={(e) => {
-                      const selectedId = Number(e.target.value);
-                      const selectedUser = usuariosResponsaveis.find((u) => u.id === selectedId) || null;
-
-                      field.onChange(selectedUser);
-                    }}
-                  >
-                    <option value="" key={"key-responsavel"}>Selecione um responsável</option>
-                    {usuariosResponsaveis.map((a) => (
-                      <option key={a.nome + a.id} value={a.id}>
-                        {a.nome}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
             </div>
             {!isAdminTp && (
               <div className="div-input-formulario">
@@ -506,12 +526,24 @@ const GerenciarUsuario = () => {
                   rules={{ required: "Campo obrigatório" }}
                   render={({ field }) => (
                     <select id="termo-parceria" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
-                      <option value="" key={"key-termo-parceria"}>Selecione um termo de parceria</option>
-                      <option value={"CCOMGEX"} key={"CCOMGEX"}>CCOMGEX</option>
-                      <option value={"DECEA"} key={"DECEA"}>DECEA</option>
-                      <option value={"CISCEA"} key={"CISCEA"}>CISCEA</option>
-                      <option value={"PAME"} key={"PAME"}>PAME</option>
-                      <option value={"MATRIZ"} key={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
+                      <option value="" key={"key-termo-parceria"}>
+                        Selecione um termo de parceria
+                      </option>
+                      <option value={"CCOMGEX"} key={"CCOMGEX"}>
+                        CCOMGEX
+                      </option>
+                      <option value={"DECEA"} key={"DECEA"}>
+                        DECEA
+                      </option>
+                      <option value={"CISCEA"} key={"CISCEA"}>
+                        CISCEA
+                      </option>
+                      <option value={"PAME"} key={"PAME"}>
+                        PAME
+                      </option>
+                      <option value={"MATRIZ"} key={"MATRIZ"}>
+                        ADMINISTRAÇÃO CENTRAL
+                      </option>
                     </select>
                   )}
                 />

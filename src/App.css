@@ -60,8 +60,8 @@
   --border-color: #8e8e8f;
   --border-error-color: #d8262c;
 
-  --submit-button-color: #007aff;
-  --submit-button-hover-color: #1877dd;
+  --submit-button-color: #17c200;
+  --submit-button-hover-color: #119600;
   --button-color: #a1a1a1;
   --button-hover-color: #c0c0c0;
   --action-button-color: #007aff;
@@ -73,11 +73,14 @@
   --bg-card: #d3d3d3;
   --bg-card-hover: #b7b7b7;
   --bg-no-data: #e06969;
+  --bg-input: #b1afaf;
   --bg-filter-input: #2a2a2a;
   --bg-disabled-field: #b1afaf;
 
   --skeleton-loading: #c2c2c2;
   --skeleton-gradient: #dfdfdf;
+  --skeleton-element: #5a5a5a;
+
   --hist-line: #0000001f;
 }
 

@@ -92,7 +92,7 @@ const Auth = () => {
           <input
             type="text"
             id="login-username"
-            placeholder="Nome de usuário do SAFE"
+            placeholder="Nome de usuário"
             className={`input-element login-input ${errors.username ? "input-error" : ""}`}
             {...register("username", {
               required: "Campo obrigatório",
@@ -105,7 +105,7 @@ const Auth = () => {
           <input
             type={show ? "text" : "password"}
             id="login-password"
-            placeholder="Sua senha do SAFE"
+            placeholder="Sua senha"
             className={`input-element login-input ${errors.password ? "input-error" : ""}`}
             {...register("password", {
               required: "Campo obrigatório",
