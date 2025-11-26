@@ -93,7 +93,7 @@
   height: 60px;
   font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.20rem;
+  letter-spacing: 0.2rem;
   text-align: center;
   color: var(--text-color);
   background-color: var(--bg-no-data);
@@ -163,6 +163,8 @@
   .ativo-list-table td:nth-of-type(7) {
     width: auto;
     text-align: center;
+    max-width: 60px;
+    width: 60px;
   }
 
   .table-action-buttons {

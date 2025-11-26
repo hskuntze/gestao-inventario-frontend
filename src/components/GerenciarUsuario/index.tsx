@@ -23,6 +23,10 @@ type FormData = {
   usuarioResponsavel: UsuarioResponsavelType | null;
 };
 
+type FormDataSenha = {
+  senha: string;
+}
+
 const GerenciarUsuario = () => {
   const user = getUserData();
 
@@ -33,6 +37,8 @@ const GerenciarUsuario = () => {
   const [page, setPage] = useState(0);
 
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openSenhaModal, setOpenSenhaModal] = useState<boolean>(false);
+
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [usuarioId, setUsuarioId] = useState<number>();
 
@@ -47,7 +53,7 @@ const GerenciarUsuario = () => {
     handleSubmit,
     setValue,
     control,
-    reset,
+    reset: resetFormUsuario,
     watch,
   } = useForm<FormData>({
     defaultValues: {
@@ -61,12 +67,18 @@ const GerenciarUsuario = () => {
     },
   });
 
+  const {
+    register: registerSenha,
+    handleSubmit: handleSubmitSenha,
+    formState: { errors: errorsSenha },
+    reset: resetFormSenha
+  } = useForm<FormDataSenha>();
+
   const emailValue = watch("email");
 
   const handleToggleModal = () => {
+    resetFormUsuario();
     setOpenModal(!openModal);
-
-    reset();
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -149,7 +161,7 @@ const GerenciarUsuario = () => {
       .then((res) => {
         toast.success(`Usuário do sistema ${isEditing ? "editado" : "criado"} com sucesso.`);
         loadUsuarios();
-        handleToggleModal();
+        setOpenModal(false);
       })
       .catch((err) => {
         const message = err.response?.data?.message || "Erro ao tentar atualizar o usuário do sistema.";
@@ -160,17 +172,49 @@ const GerenciarUsuario = () => {
       });
   };
 
+  const onSubmitMudancaSenha = (formData: FormDataSenha) => {
+    console.log("submit disparou");
+    setLoading(true);
+
+    const requestParams: AxiosRequestConfig = {
+      url: "/usuarios/senha/admin/trocar",
+      method: "POST",
+      withCredentials: true,
+      data: {
+        userId: usuarioId,
+        novaSenha: formData.senha,
+      },
+    };
+
+    requestBackend(requestParams)
+      .then(() => {
+        toast.success("Nova senha provisória criada com sucesso.");
+        setOpenSenhaModal(false);
+      })
+      .catch((err) => {
+        let message = err.response?.data?.message;
+        toast.error(message ? message : "Erro ao tentar mudar a senha do usuário.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   const handleEditUsuario = (u: User) => {
-    setOpenModal(true);
     setIsEditing(true);
     setUsuarioId(u.id);
 
+    let atIndex = u.email.indexOf("@");
+    let email = u.email.substring(0, atIndex);
+
     setValue("nome", u.nome);
-    setValue("email", u.email);
+    setValue("email", email);
     setValue("login", u.login);
     setValue("perfilUsuario", u.perfis[0]);
     setValue("termoParceria", u.termoParceria);
     setValue("usuarioResponsavel", u.usuarioResponsavel ?? null);
+
+    setOpenModal(true);
   };
 
   const handleDisableUser = (id: number) => {
@@ -226,6 +270,13 @@ const GerenciarUsuario = () => {
         })
         .finally(() => {});
     }
+  };
+
+  const handleMudarSenha = (u: User) => {
+    setUsuarioId(u.id);
+    resetFormSenha();
+
+    setOpenSenhaModal(true);
   };
 
   useEffect(() => {
@@ -332,6 +383,9 @@ const GerenciarUsuario = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
+                          <button onClick={() => handleMudarSenha(u)} className="button action-button nbr" title="Mudar senha">
+                            <i className="bi bi-key" />
+                          </button>
                           <button onClick={() => handleEditUsuario(u)} className="button action-button nbr" title="Editar usuário">
                             <i className="bi bi-pencil" />
                           </button>
@@ -398,7 +452,7 @@ const GerenciarUsuario = () => {
           </div>
         </AccordionDetails>
       </Accordion>
-      <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
+      <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container" keepMounted>
         <Box className="modal-content">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
@@ -468,18 +522,16 @@ const GerenciarUsuario = () => {
               <div className="invalid-feedback d-block div-erro">{errors.login?.message}</div>
             </div>
             {!isEditing && (
-              <>
-                <div className="div-input-formulario">
-                  <span>Senha</span>
-                  <input
-                    type="password"
-                    className={`input-formulario ${errors.senha ? "input-error" : ""}`}
-                    {...register("senha", { required: "Campo obrigatório" })}
-                    maxLength={255}
-                  />
-                  <div className="invalid-feedback d-block div-erro">{errors.senha?.message}</div>
-                </div>
-              </>
+              <div className="div-input-formulario">
+                <span>Senha</span>
+                <input
+                  type="password"
+                  className={`input-formulario ${errors.senha ? "input-error" : ""}`}
+                  {...register("senha", { required: "Campo obrigatório" })}
+                  maxLength={255}
+                />
+                <div className="invalid-feedback d-block div-erro">{errors.senha?.message}</div>
+              </div>
             )}
             <div className="div-input-formulario">
               <span>Perfil</span>
@@ -551,6 +603,33 @@ const GerenciarUsuario = () => {
               </div>
             )}
             <div className="div-input-formulario"></div>
+            {loading ? (
+              <div className="loading-div">
+                <Loader />
+              </div>
+            ) : (
+              <div className="form-buttons">
+                <button type="submit" className="button submit-button">
+                  Salvar
+                </button>
+              </div>
+            )}
+          </form>
+        </Box>
+      </Modal>
+      <Modal open={openSenhaModal} onClose={() => setOpenSenhaModal(false)} className="modal-container" keepMounted>
+        <Box className="modal-content">
+          <form onSubmit={handleSubmitSenha(onSubmitMudancaSenha)}>
+            <div className="div-input-formulario">
+              <span>Nova senha provisória</span>
+              <input
+                type="password"
+                className={`input-formulario ${errorsSenha.senha ? "input-error" : ""}`}
+                {...registerSenha("senha", { required: "Campo obrigatório" })}
+                maxLength={255}
+              />
+              <div className="invalid-feedback d-block div-erro">{errorsSenha.senha?.message}</div>
+            </div>
             {loading ? (
               <div className="loading-div">
                 <Loader />
