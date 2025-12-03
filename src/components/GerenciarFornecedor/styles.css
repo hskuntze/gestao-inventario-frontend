@@ -54,8 +54,8 @@
 
 .fornecedor-list-table th:nth-of-type(6),
 .fornecedor-list-table td:nth-of-type(6) {
-  max-width: 120px;
-  width: 120px;
+  max-width: 180px;
+  width: 180px;
 }
 
 .fornecedor-list-table th:nth-of-type(6) {

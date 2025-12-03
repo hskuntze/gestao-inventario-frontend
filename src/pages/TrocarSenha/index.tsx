@@ -1,8 +1,7 @@
-import "./styles.css";
 import Loader from "@/components/Loader";
 import { requestBackend } from "@/utils/requests";
 import { AxiosRequestConfig } from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -28,13 +27,11 @@ function getPasswordStrength(password: string): "fraca" | "media" | "forte" {
   return "fraca";
 }
 
-const PrimeiroAcesso = () => {
+const TrocarSenha = () => {
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
 
   const searchParams = new URLSearchParams(window.location.search);
-  const fromEmail = searchParams.get("fromEmail");
-  const userUuid = searchParams.get("userUuid");
   const token = searchParams.get("token");
 
   const navigate = useNavigate();
@@ -53,11 +50,10 @@ const PrimeiroAcesso = () => {
     setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
-      url: "/usuarios/senha/primeiro/acesso/trocar",
+      url: "/usuarios/senha/troca/token",
       method: "POST",
-      params: {
-        userUuid: userUuid,
-        novaSenha: formData.novaSenha,
+      data: {
+        password: formData.novaSenha,
         token: token,
       },
     };
@@ -70,16 +66,6 @@ const PrimeiroAcesso = () => {
       .catch(() => toast.error("Não foi possível realizar a troca da senha."))
       .finally(() => setLoading(false));
   };
-
-  // Essa lógica vai ter que ser melhorada depois
-  useEffect(() => {
-    let isFromEmail = fromEmail === "true";
-
-    if (!isFromEmail) {
-      navigate("/gestao-inventario");
-      toast.error("Acesso negado.");
-    }
-  }, [fromEmail, navigate]);
 
   return (
     <div className="primeiro-acesso-section">
@@ -160,4 +146,4 @@ const PrimeiroAcesso = () => {
   );
 };
 
-export default PrimeiroAcesso;
+export default TrocarSenha;

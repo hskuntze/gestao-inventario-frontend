@@ -11,10 +11,9 @@ import {
   fetchAllSetores,
   fetchAllContratos,
   fetchAllFornecedores,
-  fetchAllFornecedoresByAreaId,
   fetchAllUsuariosResponsaveisByAreaId,
+  fetchAllLocalizacoesByAreaId,
 } from "@/utils/functions";
-import { hasAnyRoles } from "@/utils/auth";
 import { usePhotoCapture, PhotoCaptureResult } from "@/utils/hooks/usePhotoCapture";
 import { getOS, getUserData } from "@/utils/storage";
 
@@ -38,7 +37,7 @@ type FormData = {
 
   idPatrimonial: string;
   categoria: string;
-  descricao: string;
+  descricao: string; //descrição = nome (mudança de nomenclatura)
   area: SetorType; //área = setor (mudança de nomenclatura)
   localizacao: LocalizacaoType;
   usuarioResponsavel: UsuarioResponsavelType;
@@ -60,8 +59,6 @@ type UrlParams = {
 const AtivoForm = () => {
   const urlParams = useParams<UrlParams>();
   const isEditing = urlParams.id === "create" ? false : true;
-
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const user = getUserData();
 
@@ -229,7 +226,7 @@ const AtivoForm = () => {
   };
 
   const handleReload = () => {
-    loadInfo();
+    navigate(0);
   };
 
   const onSubmit = (formData: FormData) => {
@@ -266,14 +263,15 @@ const AtivoForm = () => {
           usuariosResponsavel: {
             id: formData.usuarioResponsavel.id,
           },
-          termoParceria: isAdmin ? formData.termoParceria : user.termoParceria,
+          termoParceria: user.termoParceria,
         },
       };
 
       requestBackend(requestParams)
         .then((res) => {
+          let data = res.data as AtivoType;
           toast.success(isEditing ? "Sucesso ao atualizar o cadastro do ativo" : "Sucesso ao cadastrar novo ativo");
-          navigate("/gestao-inventario/ativo");
+          navigate(`/gestao-inventario/ativo/formulario/${data.id}`);
         })
         .catch((err) => {
           toast.error(isEditing ? "Erro ao tentar atualizar o cadastro do ativo" : "Erro ao tentar realizar o cadastro do ativo");
@@ -419,7 +417,7 @@ const AtivoForm = () => {
 
       try {
         const data = (await fetchAllFornecedores()) as FornecedorType[];
-        setAllFornecedores(data);
+        setAllFornecedores(data.filter((f) => !f.desabilitado));
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
         toast.error(errorMsg);
@@ -435,7 +433,7 @@ const AtivoForm = () => {
 
       try {
         const data = await fetchAllContratos();
-        setContratos(data);
+        setContratos(data.filter((c) => !c.desabilitado));
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar contratos";
         toast.error(errorMsg);
@@ -451,7 +449,7 @@ const AtivoForm = () => {
 
       try {
         if (selectedSetor) {
-          const data = await fetchAllFornecedoresByAreaId(selectedSetor.id);
+          const data = await fetchAllLocalizacoesByAreaId(selectedSetor.id);
           setLocalizacoes(data);
         }
       } catch (err) {
@@ -470,7 +468,8 @@ const AtivoForm = () => {
       try {
         if (selectedSetor) {
           const data = await fetchAllUsuariosResponsaveisByAreaId(selectedSetor.id);
-          setUsuariosResponsaveis(data);
+          console.log(data);
+          setUsuariosResponsaveis(data.filter((u) => !u.desabilitado));
         }
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar usuários responsáveis";
@@ -489,10 +488,6 @@ const AtivoForm = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
   }, []);
 
   useEffect(() => {
@@ -550,7 +545,10 @@ const AtivoForm = () => {
           <h2 style={{ textAlign: "center" }}>Movimentar ativo</h2>
           <form className="formulario" onSubmit={handleSubmit(onSubmitMovimentacao)}>
             <div className="div-input-formulario">
-              <span>Setor</span>
+              <div>
+                <span>Setor</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <Controller
                 name="area"
                 control={control}
@@ -590,7 +588,10 @@ const AtivoForm = () => {
               <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
             </div>
             <div className="div-input-formulario">
-              <span>Localização</span>
+              <div>
+                <span>Localização</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <Controller
                 name="localizacao"
                 control={control}
@@ -625,7 +626,10 @@ const AtivoForm = () => {
               <div className="invalid-feedback d-block div-erro">{errors.localizacao?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Usuário responsável</span>
+              <div>
+                <span>Usuário responsável</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <Controller
                 name="usuarioResponsavel"
                 control={control}
@@ -658,8 +662,11 @@ const AtivoForm = () => {
               />
               <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
             </div>
-            <div className="form-buttons">
-              <button className="button submit-button">Salvar</button>
+            <div className="form-bottom">
+              <div className="legenda">* Campos obrigatórios</div>
+              <div className="form-buttons">
+                <button className="button submit-button">Salvar</button>
+              </div>
             </div>
           </form>
         </Box>
@@ -709,7 +716,10 @@ const AtivoForm = () => {
                     <span className="form-title">Informações do Ativo</span>
                     <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
                       <div className="div-input-formulario text-area-formulario">
-                        <span>Descrição</span>
+                        <div>
+                          <span>Nome</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <textarea
                           id="descricao"
                           className={`input-formulario ${errors.descricao ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
@@ -722,10 +732,15 @@ const AtivoForm = () => {
                       </div>
                       <div className="row-input-fields">
                         <div className="div-input-formulario">
-                          <span>ID Patrimonial</span>
+                          <div>
+                            <span>ID Patrimonial</span>
+                            <span className="obrigatorio-ast">*</span>
+                          </div>
                           <input
                             type="text"
-                            className={`input-formulario ${gerarIdPatrimonial || desabilitado ? "disabled-field" : ""}`}
+                            className={`input-formulario ${errors.idPatrimonial ? "input-error" : ""} ${
+                              gerarIdPatrimonial || desabilitado ? "disabled-field" : ""
+                            }`}
                             {...register("idPatrimonial", {
                               required: gerarIdPatrimonial ? false : "Campo obrigatório",
                             })}
@@ -756,7 +771,10 @@ const AtivoForm = () => {
                         </div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Categoria</span>
+                        <div>
+                          <span>Categoria</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <Controller
                           name="categoria"
                           control={control}
@@ -785,7 +803,10 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.categoria?.message}</div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Setor</span>
+                        <div>
+                          <span>Setor</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <Controller
                           name="area"
                           control={control}
@@ -826,7 +847,10 @@ const AtivoForm = () => {
                         <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
                       </div>
                       <div className="div-input-formulario">
-                        <span>Localização</span>
+                        <div>
+                          <span>Localização</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <Controller
                           name="localizacao"
                           control={control}
@@ -870,7 +894,10 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Usuário responsável</span>
+                        <div>
+                          <span>Usuário responsável</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <Controller
                           name="usuarioResponsavel"
                           control={control}
@@ -907,7 +934,10 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Contrato</span>
+                        <div>
+                          <span>Contrato</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <Controller
                           name="contrato"
                           control={control}
@@ -918,6 +948,7 @@ const AtivoForm = () => {
                               }
                               return true; // Tudo ok
                             },
+                            required: "Campo obrigatório",
                           }}
                           render={({ field }) => (
                             <select
@@ -957,12 +988,11 @@ const AtivoForm = () => {
                               disabled={desabilitado}
                             >
                               <option value="">Selecione um contrato</option>
-                              <option value={-1}>Não possui contrato</option>
                               {contratos &&
                                 contratos.length > 0 &&
                                 contratos.map((a) => (
                                   <option key={a.id} value={a.id}>
-                                    {a.titulo}
+                                    {a.numeroContrato}
                                   </option>
                                 ))}
                             </select>
@@ -975,15 +1005,10 @@ const AtivoForm = () => {
                         <Controller
                           name="fornecedor"
                           control={control}
-                          rules={{
-                            required: "Campo obrigatório",
-                          }}
                           render={({ field }) => (
                             <select
                               id="fornecedor"
-                              className={`input-formulario ${errors.fornecedor ? "input-error" : ""} ${
-                                desabilitado || selectedContrato !== null ? "disabled-field" : ""
-                              }`}
+                              className={`input-formulario ${errors.fornecedor ? "input-error" : ""} disabled-field`}
                               {...field}
                               value={field.value?.id || ""}
                               onChange={(e) => {
@@ -994,7 +1019,7 @@ const AtivoForm = () => {
                                   field.onChange(fornecedorSelecionado);
                                 }
                               }}
-                              disabled={desabilitado || selectedContrato !== null}
+                              disabled={true}
                             >
                               <option value="">Selecione um fornecedor</option>
                               {allFornecedores &&
@@ -1010,7 +1035,10 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.fornecedor?.message}</div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Data aquisição</span>
+                        <div>
+                          <span>Data aquisição</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <input
                           type="date"
                           className={`input-formulario data-input ${errors.dataAquisicao ? "input-error" : ""} ${
@@ -1024,7 +1052,10 @@ const AtivoForm = () => {
                       {tipoForm === "tl" && (
                         <>
                           <div className="div-input-formulario">
-                            <span>Data de devolução prevista</span>
+                            <div>
+                              <span>Data de devolução prevista</span>
+                              <span className="obrigatorio-ast">*</span>
+                            </div>
                             <input
                               type="date"
                               className={`input-formulario data-input ${errors.dataDevolucaoPrevista ? "input-error" : ""} ${
@@ -1035,6 +1066,10 @@ const AtivoForm = () => {
                             />
                             <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoPrevista?.message}</div>
                           </div>
+                          {/*
+                          * ============================================================================================================
+                          * ========== Este trecho de código será movido para o modal em que se realiza a ação de "devolução" ==========
+                          * ============================================================================================================
                           <div className="div-input-formulario">
                             <span>Data em que foi realizada a devolução</span>
                             <input
@@ -1046,12 +1081,15 @@ const AtivoForm = () => {
                               disabled={desabilitado}
                             />
                             <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoRealizada?.message}</div>
-                          </div>
+                          </div> */}
                         </>
                       )}
                       {tipoForm !== "i" && (
                         <div className="div-input-formulario">
-                          <span>Estado de conservação</span>
+                          <div>
+                            <span>Estado de conservação</span>
+                            <span className="obrigatorio-ast">*</span>
+                          </div>
                           <Controller
                             name="estadoConservacao"
                             control={control}
@@ -1079,34 +1117,11 @@ const AtivoForm = () => {
                           <div className="invalid-feedback d-block div-erro">{errors.estadoConservacao?.message}</div>
                         </div>
                       )}
-                      {isAdmin && (
-                        <div className="div-input-formulario">
-                          <span>Termo de Parceria</span>
-                          <Controller
-                            name="termoParceria"
-                            control={control}
-                            rules={{ required: "Campo obrigatório" }}
-                            render={({ field }) => (
-                              <select
-                                id="responsavel"
-                                className={`input-formulario ${errors.termoParceria ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
-                                disabled={desabilitado}
-                                {...field}
-                              >
-                                <option value="">Selecione um responsável</option>
-                                <option value={"CCOMGEX"}>CCOMGEX</option>
-                                <option value={"DECEA"}>DECEA</option>
-                                <option value={"CISCEA"}>CISCEA</option>
-                                <option value={"PAME"}>PAME</option>
-                                <option value={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
-                              </select>
-                            )}
-                          />
-                          <div className="invalid-feedback d-block div-erro">{errors.termoParceria?.message}</div>
-                        </div>
-                      )}
                       <div className="div-input-formulario">
-                        <span>Código de série</span>
+                        <div>
+                          <span>Código de série</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
                         <input
                           type="text"
                           className={`input-formulario ${errors.codigoSerie ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
@@ -1116,8 +1131,9 @@ const AtivoForm = () => {
                         />
                         <div className="invalid-feedback d-block div-erro">{errors.codigoSerie?.message}</div>
                       </div>
+                      <div className="div-input-formulario"></div>
                       <div className="div-input-formulario text-area-formulario">
-                        <span>Observações</span>
+                        <span>Descrição/Observações</span>
                         <textarea
                           id="observacoes"
                           className={`input-formulario ${desabilitado ? "disabled-field" : ""}`}
@@ -1127,10 +1143,13 @@ const AtivoForm = () => {
                           disabled={desabilitado}
                         ></textarea>
                       </div>
-                      <div className="form-buttons">
-                        <button className={`button submit-button ${desabilitado ? "disabled-field" : ""}`} disabled={desabilitado}>
-                          Salvar
-                        </button>
+                      <div className="form-bottom">
+                        <div className="legenda">* Campos obrigatórios</div>
+                        <div className="form-buttons">
+                          <button className={`button submit-button ${desabilitado ? "disabled-field" : ""}`} disabled={desabilitado}>
+                            Salvar
+                          </button>
+                        </div>
                       </div>
                     </form>
                   </div>

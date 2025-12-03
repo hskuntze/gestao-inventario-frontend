@@ -56,9 +56,10 @@ export function formatarDataParaMesAno(dataStr: string): string {
 
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
-    PERFIL_ADMIN: "Administrador",
-    PERFIL_ADMIN_TP: "Administrador de Termo de Parceria",
-    PERFIL_USUARIO: "Usuário",
+    PERFIL_ADMIN: "Administrador do Sistema",
+    PERFIL_ADMIN_TP: "Analista de Inventário",
+    PERFIL_GERENTE: "Gerente",
+    PERFIL_USUARIO: "Usuário de Sistema",
   };
 
   return perfis[perfil] ?? "Sem perfil definido";
@@ -79,7 +80,7 @@ export async function fetchAllSetores(): Promise<SetorType[]> {
   }
 }
 
-export async function fetchAllFornecedoresByAreaId(id: number): Promise<LocalizacaoType[]> {
+export async function fetchAllLocalizacoesByAreaId(id: number): Promise<LocalizacaoType[]> {
   const requestParams: AxiosRequestConfig = {
     url: `/localizacoes/all/${id}`,
     method: "GET",

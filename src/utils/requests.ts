@@ -7,7 +7,7 @@ import { getAuthData } from "./storage";
  * LOCALHOST
  */
 export const BASE_URL =
-  process.env.REACT_APP_BACKEND_URL ?? "http://172.20.71.103:9005/gestaoinventario/api";
+  process.env.REACT_APP_BACKEND_URL ?? "http://172.20.71.101:9005/gestaoinventario/api";
 
 /**
  * HOMOL

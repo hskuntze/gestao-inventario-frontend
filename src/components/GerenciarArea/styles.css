@@ -29,25 +29,30 @@
 
 .area-list-table th:nth-of-type(1),
 .area-list-table td:nth-of-type(1) {
-  min-width: 48px;
+  min-width: 120px;
 }
 
 .area-list-table th:nth-of-type(2),
 .area-list-table td:nth-of-type(2) {
-  min-width: 200px;
+  min-width: 48px;
 }
 
 .area-list-table th:nth-of-type(3),
 .area-list-table td:nth-of-type(3) {
+  min-width: 200px;
+}
+
+.area-list-table th:nth-of-type(4),
+.area-list-table td:nth-of-type(4) {
   max-width: 60px;
   width: 60px;
 }
 
-.area-list-table th:nth-of-type(3) {
+.area-list-table th:nth-of-type(4) {
   text-align: center;
 }
 
-.area-list-table td:nth-of-type(3) {
+.area-list-table td:nth-of-type(4) {
   display: flex;
   justify-content: center;
 }

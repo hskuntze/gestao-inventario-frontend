@@ -5,4 +5,5 @@ export type FornecedorType = {
 	contatoNome: string;
 	contatoTelefone: string;
 	cnpj: string;
+  desabilitado: boolean;
 };

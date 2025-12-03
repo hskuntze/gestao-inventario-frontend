@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { AxiosRequestConfig } from "axios";
+import { cnpj } from "cpf-cnpj-validator";
 
 import { requestBackend } from "@/utils/requests";
 
@@ -42,7 +43,11 @@ function maskTelefone(value: string): string {
   return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 }
 
-const GerenciarFornecedor = () => {
+interface Props {
+  reloadPage: () => void;
+}
+
+const GerenciarFornecedor = ({ reloadPage }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [fornecedor, setFornecedor] = useState<FornecedorType[]>([]);
   const [filter, setFilter] = useState("");
@@ -59,18 +64,14 @@ const GerenciarFornecedor = () => {
     handleSubmit,
     setValue,
     watch,
+    reset,
   } = useForm<FormData>();
 
   const cnpjValue = watch("cnpj");
 
   const handleToggleModal = () => {
-    setOpenModal(!openModal);
-
-    setValue("nome", "");
-    setValue("cnpj", "");
-    setValue("contatoEmail", "");
-    setValue("contatoNome", "");
-    setValue("contatoTelefone", "");
+    reset();
+    setOpenModal(true);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -143,13 +144,13 @@ const GerenciarFornecedor = () => {
     requestBackend(requestParams)
       .then((res) => {
         toast.success(`Fornecedor ${isEditing ? "editado" : "criado"} com sucesso.`);
-        loadFornecedores();
-        handleToggleModal();
+        //loadFornecedores(); se estamos fazendo o "reloadPage" não precisa chamar aqui. Vai ser invocado no reload.
+        setOpenModal(false);
+        reloadPage();
       })
       .catch((err) => {
         const message = err.response?.data?.message || "Erro ao tentar atualizar o fornecedor.";
         toast.error(message);
-        handleToggleModal();
       })
       .finally(() => {
         setLoading(false);
@@ -169,7 +170,29 @@ const GerenciarFornecedor = () => {
       requestBackend(requestParams)
         .then((res) => {
           toast.success("Deletado com sucesso.");
-          loadFornecedores();
+          //loadFornecedores(); se estamos fazendo o "reloadPage" não precisa chamar aqui. Vai ser invocado no reload.
+          reloadPage();
+        })
+        .catch((err) => {})
+        .finally(() => {});
+    }
+  };
+
+  const handleDisableFornecedor = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja desabilitar este fornecedor?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/fornecedores/desabilitar/${id}`,
+        method: "POST",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Desabilitado com sucesso.");
+          //loadFornecedores(); se estamos fazendo o "reloadPage" não precisa chamar aqui. Vai ser invocado no reload.
+          reloadPage();
         })
         .catch((err) => {})
         .finally(() => {});
@@ -177,7 +200,6 @@ const GerenciarFornecedor = () => {
   };
 
   const handleEditFornecedor = (f: FornecedorType) => {
-    setOpenModal(true);
     setIsEditing(true);
     setFornecedorId(f.id);
 
@@ -186,6 +208,8 @@ const GerenciarFornecedor = () => {
     setValue("contatoNome", f.contatoNome);
     setValue("contatoTelefone", f.contatoTelefone);
     setValue("cnpj", f.cnpj);
+
+    setOpenModal(true);
   };
 
   useEffect(() => {
@@ -222,7 +246,14 @@ const GerenciarFornecedor = () => {
               </div>
             </div>
             <div>
-              <button onClick={handleToggleModal} type="button" className="button submit-button auto-width pd-2">
+              <button
+                onClick={() => {
+                  handleToggleModal();
+                  setIsEditing(false);
+                }}
+                type="button"
+                className="button submit-button auto-width pd-2"
+              >
                 <i className="bi bi-plus" />
                 Adicionar Fornecedor
               </button>
@@ -232,7 +263,7 @@ const GerenciarFornecedor = () => {
             <table className="fornecedor-list-table">
               <thead>
                 <tr key={"tr-head-fornecedor-list-table"}>
-                  <th scope="col">Nome</th>
+                  <th scope="col">Empresa</th>
                   <th scope="col">CNPJ</th>
                   <th scope="col">Contato nome</th>
                   <th scope="col">Contato e-mail</th>
@@ -243,7 +274,7 @@ const GerenciarFornecedor = () => {
               <tbody>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((a) => (
-                    <tr key={a.id}>
+                    <tr key={a.id} className={`${a.desabilitado ? "tr-desabilitado" : ""}`}>
                       <td>
                         <div>{a.nome}</div>
                       </td>
@@ -261,13 +292,28 @@ const GerenciarFornecedor = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditFornecedor(a)} className="button action-button nbr" title="Editar fornecedor">
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleEditFornecedor(a)}
+                            className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Editar fornecedor"
+                          >
                             <i className="bi bi-pencil" />
                           </button>
                           <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleDisableFornecedor(a.id)}
+                            type="button"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Desabilitar fornecedor"
+                          >
+                            <i className="bi bi-x-circle" />
+                          </button>
+                          <button
+                            disabled={a.desabilitado}
                             onClick={() => handleDeleteFornecedor(a.id)}
                             type="button"
-                            className="button action-button delete-button nbr"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
                             title="Excluir fornecedor"
                           >
                             <i className="bi bi-trash3" />
@@ -316,11 +362,14 @@ const GerenciarFornecedor = () => {
           </div>
         </AccordionDetails>
       </Accordion>
-      <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
+      <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container">
         <Box className="modal-content">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
-              <span>Nome</span>
+              <div>
+                <span>Empresa</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.nome ? "input-error" : ""}`}
@@ -330,11 +379,14 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.nome?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>CNPJ</span>
+              <div>
+                <span>CNPJ</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.cnpj ? "input-error" : ""}`}
-                {...register("cnpj", { required: "Campo obrigatório" })}
+                {...register("cnpj", { required: "Campo obrigatório", validate: (v) => cnpj.isValid(cnpj.strip(v)) || "CNPJ inválido" })}
                 maxLength={18}
                 value={cnpjValue}
                 onChange={(e) => {
@@ -345,7 +397,10 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.cnpj?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Contato nome</span>
+              <div>
+                <span>Contato nome</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoNome ? "input-error" : ""}`}
@@ -355,7 +410,10 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.contatoNome?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Contato e-mail</span>
+              <div>
+                <span>Contato e-mail</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoEmail ? "input-error" : ""}`}
@@ -371,7 +429,10 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.contatoEmail?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Contato telefone</span>
+              <div>
+                <span>Contato telefone</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoTelefone ? "input-error" : ""}`}
@@ -396,8 +457,11 @@ const GerenciarFornecedor = () => {
                 <Loader />
               </div>
             ) : (
-              <div className="form-buttons">
-                <button className="button submit-button">Salvar</button>
+              <div className="form-bottom">
+                <div className="legenda">* Campos obrigatórios</div>
+                <div className="form-buttons">
+                  <button className="button submit-button">Salvar</button>
+                </div>
               </div>
             )}
           </form>

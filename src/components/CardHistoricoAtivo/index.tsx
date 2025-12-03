@@ -17,6 +17,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DESCARTAR: "bi bi-trash3 descartar-icon",
     DEVOLVER: "bi bi-sign-turn-left devolver-icon",
     "ARQUIVO INSERIDO": "bi bi-file-earmark-arrow-up arquivo-inserido-icon",
+    "ARQUIVO EXCLUÍDO": "bi bi bi-file-earmark-minus arquivo-excluido-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -29,6 +30,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DESCARTAR: "Ativo descartado",
     DEVOLVER: "Ativo devolvido",
     "ARQUIVO INSERIDO": "Arquivo(s) inserido(s)",
+    "ARQUIVO EXCLUÍDO": "Arquivo(s) excluído(s)",
   };
 
   return (
@@ -51,6 +53,9 @@ const CardHistoricoAtivo = ({ element }: Props) => {
             <span className="historico-content-info">Setor: {element.area}</span>
             <span className="historico-content-info">Localização: {element.localizacao}</span>
           </>
+        )}
+        {element.operacao === "ARQUIVO EXCLUÍDO" && (
+          <span className="historico-content-info">Realizado por: {element.userNome}</span>
         )}
       </div>
     </div>

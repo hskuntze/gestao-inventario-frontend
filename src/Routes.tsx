@@ -16,6 +16,7 @@ import { setupInterceptors } from "./utils/interceptor";
 import NaoAutorizado from "./pages/NaoAutorizado";
 import PageUsuario from "./pages/Usuario";
 import { hasAnyRoles } from "./utils/auth";
+import TrocarSenha from "./pages/TrocarSenha";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -150,21 +151,8 @@ const Routes = () => {
           <Route path="/gestao-inventario/*" element={<Auth />} />
           <Route path="/gestao-inventario/nao-encontrado" element={<NaoEncontrado />} />
           <Route path="/gestao-inventario/nao-autorizado" element={<NaoAutorizado />} />
-          <Route
-            path="/gestao-inventario/primeiro-acesso"
-            element={
-              <PrivateRoute
-                roles={[
-                  { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
-                ]}
-                isFirstAccess={isFirstAccess}
-              >
-                <PrimeiroAcesso />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/gestao-inventario/primeiro-acesso" element={<PrimeiroAcesso />} />
+          <Route path="/gestao-inventario/recuperar-senha" element={<TrocarSenha />} />
           <Route
             path="/gestao-inventario/usuario"
             element={

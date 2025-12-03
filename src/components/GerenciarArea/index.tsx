@@ -203,6 +203,7 @@ const GerenciarArea = () => {
               <thead>
                 <tr key={"tr-head-area-list-table"}>
                   <th scope="col">Nome</th>
+                  <th scope="col">Sigla</th>
                   <th scope="col">Responsável</th>
                   <th scope="col">Ações</th>
                 </tr>
@@ -213,6 +214,9 @@ const GerenciarArea = () => {
                     <tr key={a.id}>
                       <td>
                         <div>{a.nome}</div>
+                      </td>
+                      <td>
+                        <div>{a.sigla}</div>
                       </td>
                       <td>
                         <div>{a.responsavel ?? "-"}</div>
@@ -231,7 +235,7 @@ const GerenciarArea = () => {
                   ))
                 ) : (
                   <tr>
-                    <td className="no-data-on-table" colSpan={3}>
+                    <td className="no-data-on-table" colSpan={4}>
                       Sem dados a serem exibidos
                     </td>
                   </tr>
@@ -239,7 +243,7 @@ const GerenciarArea = () => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={3}>
+                  <td colSpan={4}>
                     <TablePagination
                       className="table-pagination-container"
                       component="div"

@@ -9,6 +9,7 @@ import { FornecedorType } from "@/types/fornecedor";
 import { ContratoType } from "@/types/contrato";
 import { fetchAllFornecedores, formatarData } from "@/utils/functions";
 import Loader from "../Loader";
+import { getUserData } from "@/utils/storage";
 
 type FormData = {
   prefixoTipoContrato: string;
@@ -34,6 +35,8 @@ const GerenciarContrato = () => {
 
   const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
 
+  const user = getUserData();
+
   const {
     register,
     control,
@@ -41,6 +44,7 @@ const GerenciarContrato = () => {
     handleSubmit,
     setValue,
     watch,
+    reset,
   } = useForm<FormData>();
 
   const dataMinima = new Date("2003-11-04");
@@ -96,7 +100,7 @@ const GerenciarContrato = () => {
         descricao: formData.descricao,
         inicioDataVigencia: formData.inicioDataVigencia,
         fimDataVigencia: formData.fimDataVigencia,
-        termoParceria: formData.termoParceria,
+        termoParceria: user.termoParceria,
         fornecedor: formData.fornecedor,
       },
     };
@@ -105,7 +109,7 @@ const GerenciarContrato = () => {
       .then((res) => {
         toast.success(`Contrato ${isEditing ? "editado" : "criado"} com sucesso.`);
         loadContratos();
-        handleToggleModal();
+        setOpenModal(false);
       })
       .catch((err) => {
         const message = err.response?.data?.message || "Erro ao tentar atualizar o contrato.";
@@ -134,6 +138,26 @@ const GerenciarContrato = () => {
     }
   };
 
+  const handleDisableContrato = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja desabilitar este contrato?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/contratos/desabilitar/${id}`,
+        method: "POST",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Desabilitado com sucesso.");
+          loadContratos();
+        })
+        .catch(() => {})
+        .finally(() => {});
+    }
+  };
+
   const handleEditContrato = (contrato: ContratoType) => {
     setOpenModal(true);
     setIsEditing(true);
@@ -154,16 +178,8 @@ const GerenciarContrato = () => {
   };
 
   const handleToggleModal = () => {
-    setOpenModal(!openModal);
-
-    setValue("prefixoTipoContrato", "");
-    setValue("numeroContrato", "");
-    setValue("objetoContrato", "");
-    setValue("descricao", "");
-    setValue("termoParceria", "");
-    setValue("inicioDataVigencia", "");
-    setValue("fimDataVigencia", "");
-    setValue("fornecedor", null);
+    reset();
+    setOpenModal(true);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -190,7 +206,7 @@ const GerenciarContrato = () => {
 
       try {
         const data = (await fetchAllFornecedores()) as FornecedorType[];
-        setFornecedores(data);
+        setFornecedores(data.filter((f) => !f.desabilitado));
       } catch (err) {
         const errorMsg = (err as Error).message || "Erro desconhecido ao carregar fornecedores";
         toast.error(errorMsg);
@@ -230,7 +246,14 @@ const GerenciarContrato = () => {
               </div>
             </div>
             <div>
-              <button onClick={handleToggleModal} type="button" className="button submit-button auto-width pd-2">
+              <button
+                onClick={() => {
+                  handleToggleModal();
+                  setIsEditing(false);
+                }}
+                type="button"
+                className="button submit-button auto-width pd-2"
+              >
                 <i className="bi bi-plus" />
                 Adicionar Contrato
               </button>
@@ -250,7 +273,7 @@ const GerenciarContrato = () => {
               <tbody>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((a) => (
-                    <tr key={a.id}>
+                    <tr key={a.id} className={`${a.desabilitado ? "tr-desabilitado" : ""}`}>
                       <td>
                         <div>{a.numeroContrato}</div>
                       </td>
@@ -265,13 +288,28 @@ const GerenciarContrato = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditContrato(a)} className="button action-button nbr" title="Editar contrato">
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleEditContrato(a)}
+                            className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Editar contrato"
+                          >
                             <i className="bi bi-pencil" />
                           </button>
                           <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleDisableContrato(a.id)}
+                            type="button"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Desabilitar fornecedor"
+                          >
+                            <i className="bi bi-x-circle" />
+                          </button>
+                          <button
+                            disabled={a.desabilitado}
                             onClick={() => handleDeleteContrato(a.id)}
                             type="button"
-                            className="button action-button delete-button nbr"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
                             title="Excluir contrato"
                           >
                             <i className="bi bi-trash3" />
@@ -320,11 +358,14 @@ const GerenciarContrato = () => {
           </div>
         </AccordionDetails>
       </Accordion>
-      <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
+      <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container">
         <Box className="modal-content">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
-              <span>Número do contrato</span>
+              <div>
+                <span>Número do contrato</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <div className="numero-contrato-wrapper">
                 <div className="seletor-tipo-wrapper">
                   <Controller
@@ -379,18 +420,10 @@ const GerenciarContrato = () => {
               <div className="invalid-feedback d-block div-erro div-erro-numero-contrato">{errors.numeroContrato?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Objeto do Contrato</span>
-              <input
-                id="objetoContrato"
-                className={`input-formulario ${errors.objetoContrato ? "input-error" : ""}`}
-                type="text"
-                {...register("objetoContrato", { required: "Campo obrigatório" })}
-                maxLength={255}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.objetoContrato?.message}</div>
-            </div>
-            <div className="div-input-formulario">
-              <span>Fornecedor</span>
+              <div>
+                <span>Fornecedor</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <Controller
                 name="fornecedor"
                 control={control}
@@ -419,7 +452,10 @@ const GerenciarContrato = () => {
               <div className="invalid-feedback d-block div-erro">{errors.fornecedor?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Início da vigência</span>
+              <div>
+                <span>Início da vigência</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="date"
                 className={`input-formulario data-input ${errors.inicioDataVigencia ? "input-error" : ""}`}
@@ -439,7 +475,10 @@ const GerenciarContrato = () => {
               <div className="invalid-feedback d-block div-erro">{errors.inicioDataVigencia?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Fim da vigência</span>
+              <div>
+                <span>Fim da vigência</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="date"
                 className={`input-formulario data-input ${errors.fimDataVigencia ? "input-error" : ""}`}
@@ -461,31 +500,25 @@ const GerenciarContrato = () => {
               <div className="invalid-feedback d-block div-erro">{errors.fimDataVigencia?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Termo de Parceria</span>
-              <Controller
-                name="termoParceria"
-                control={control}
-                rules={{ required: "Campo obrigatório" }}
-                render={({ field }) => (
-                  <select id="responsavel" className={`input-formulario ${errors.termoParceria ? "input-error" : ""}`} {...field}>
-                    <option value="">Selecione um responsável</option>
-                    <option value={"CCOMGEX"}>CCOMGEX</option>
-                    <option value={"DECEA"}>DECEA</option>
-                    <option value={"CISCEA"}>CISCEA</option>
-                    <option value={"PAME"}>PAME</option>
-                    <option value={"MATRIZ"}>ADMINISTRAÇÃO CENTRAL</option>
-                  </select>
-                )}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.termoParceria?.message}</div>
+              <div>
+                <span>Objeto do Contrato</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
+              <textarea
+                id="objetoContrato"
+                className={`input-formulario input-textarea-formulario ${errors.objetoContrato ? "input-error" : ""}`}
+                {...register("objetoContrato", { required: "Campo obrigatório" })}
+                maxLength={255}
+                style={{ paddingTop: 5 }}
+              ></textarea>
+              <div className="invalid-feedback d-block div-erro">{errors.objetoContrato?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Descrição</span>
+              <span>Observação</span>
               <textarea
                 id="descricao"
-                className={`input-formulario ${errors.descricao ? "input-error" : ""}`}
-                rows={4}
-                {...register("descricao", { required: "Campo obrigatório" })}
+                className={`input-formulario input-textarea-formulario ${errors.descricao ? "input-error" : ""}`}
+                {...register("descricao")}
                 maxLength={255}
                 style={{ paddingTop: 5 }}
               ></textarea>
@@ -497,8 +530,11 @@ const GerenciarContrato = () => {
                 <Loader />
               </div>
             ) : (
-              <div className="form-buttons">
-                <button className="button submit-button">Salvar</button>
+              <div className="form-bottom">
+                <div className="legenda">* Campos obrigatórios</div>
+                <div className="form-buttons">
+                  <button className="button submit-button">Salvar</button>
+                </div>
               </div>
             )}
           </form>

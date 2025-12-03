@@ -35,12 +35,24 @@
 .contrato-list-table th:nth-of-type(2),
 .contrato-list-table td:nth-of-type(2) {
   min-width: 200px;
+  padding-right: 5px;
+}
+
+.contrato-list-table th:nth-of-type(3),
+.contrato-list-table td:nth-of-type(3) {
+  min-width: 130px;
+  padding-right: 5px;
+}
+
+.contrato-list-table th:nth-of-type(4),
+.contrato-list-table td:nth-of-type(4) {
+  min-width: 130px;
 }
 
 .contrato-list-table th:nth-of-type(5),
 .contrato-list-table td:nth-of-type(5) {
-  max-width: 120px;
-  width: 120px;
+  max-width: 180px;
+  width: 180px;
 }
 
 .contrato-list-table th:nth-of-type(5) {

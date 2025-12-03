@@ -78,7 +78,7 @@ const GerenciarUsuario = () => {
 
   const handleToggleModal = () => {
     resetFormUsuario();
-    setOpenModal(!openModal);
+    setOpenModal(true);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -173,7 +173,6 @@ const GerenciarUsuario = () => {
   };
 
   const onSubmitMudancaSenha = (formData: FormDataSenha) => {
-    console.log("submit disparou");
     setLoading(true);
 
     const requestParams: AxiosRequestConfig = {
@@ -559,9 +558,12 @@ const GerenciarUsuario = () => {
                       </option>
                     )}
                     <option key={"perfil-" + 2} value={2}>
-                      Administrador de Termo de Parceria
+                      Analista de Inventário
                     </option>
                     <option key={"perfil-" + 3} value={3}>
+                      Gerente
+                    </option>
+                    <option key={"perfil-" + 4} value={4}>
                       Usuário do Sistema
                     </option>
                   </select>
@@ -604,7 +606,7 @@ const GerenciarUsuario = () => {
             )}
             <div className="div-input-formulario"></div>
             {loading ? (
-              <div className="loading-div">
+              <div className="loading-div" style={{ margin: "20px" }}>
                 <Loader />
               </div>
             ) : (

@@ -5,6 +5,7 @@ export type HistoricoType = {
   ativo: number;
   userId: number;
   userLogin: string;
+  userNome: string;
   area: string; //área = setor (mudança de nomenclatura)
   localizacao: string;
   usuarioResponsavel: string;
