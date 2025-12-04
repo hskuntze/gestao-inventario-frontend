@@ -43,7 +43,7 @@ type FormData = {
   usuarioResponsavel: UsuarioResponsavelType;
   contrato: ContratoType | null;
   fornecedor: FornecedorType;
-  dataAquisicao: string;
+  dataAquisicao: string; //data aquisição = data do recebimento (mudança de nomenclatura)
   codigoSerie: string;
   observacoes: string;
   estadoConservacao: string;
@@ -76,8 +76,6 @@ const AtivoForm = () => {
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
 
   const [selectedSetor, setSelectedSetor] = useState<SetorType>();
-  const [selectedLocalizacao, setSelectedLocalizacao] = useState<LocalizacaoType>();
-  const [selectedContrato, setSelectedContrato] = useState<ContratoType | null>(null);
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
 
   const [openModal, setOpenModal] = useState(false);
@@ -201,30 +199,6 @@ const AtivoForm = () => {
     }
   };
 
-  const handleDescartar = () => {
-    let confirm = window.confirm("Deseja mesmo descartar este ativo? É uma operação irreversível.");
-
-    if (confirm) {
-      const requestParams: AxiosRequestConfig = {
-        url: "/ativos/descartar",
-        method: "POST",
-        withCredentials: true,
-        params: {
-          id: urlParams.id,
-        },
-      };
-
-      requestBackend(requestParams)
-        .then(() => {
-          toast.success("Ativo foi descartado.");
-          navigate("/gestao-inventario/ativo");
-        })
-        .catch(() => {
-          toast.error("Erro ao tentar descartar este ativo.");
-        });
-    }
-  };
-
   const handleReload = () => {
     navigate(0);
   };
@@ -244,6 +218,11 @@ const AtivoForm = () => {
       tl: `/tangiveis/locacao/atualizar/${urlParams.id}`,
     };
 
+    let areaId = formData.area !== undefined && formData.area !== null ? formData.area.id : null;
+    let fornecedorId = formData.fornecedor !== undefined && formData.fornecedor !== null ? formData.fornecedor.id : null;
+    let localizacaoId = formData.localizacao !== undefined && formData.localizacao !== null ? formData.localizacao.id : null;
+    let usuarioResponsavelId = formData.usuarioResponsavel !== undefined && formData.usuarioResponsavel !== null ? formData.usuarioResponsavel.id : null;
+
     if (tipoForm !== null) {
       const requestParams: AxiosRequestConfig = {
         url: isEditing ? urlsPut[tipoForm] : urlsPost[tipoForm],
@@ -252,16 +231,16 @@ const AtivoForm = () => {
         data: {
           ...formData,
           fornecedor: {
-            id: formData.fornecedor.id,
+            id: fornecedorId,
           },
           area: {
-            id: formData.area !== null ? formData.area.id : null,
+            id: areaId,
           },
           localizacao: {
-            id: formData.localizacao !== null ? formData.localizacao.id : null,
+            id: localizacaoId,
           },
           usuariosResponsavel: {
-            id: formData.usuarioResponsavel.id,
+            id: usuarioResponsavelId,
           },
           termoParceria: user.termoParceria,
         },
@@ -329,20 +308,18 @@ const AtivoForm = () => {
         setValue("tipoAtivo", data.tipoAtivo);
         setTipoForm(data.tipoAtivo as "t" | "i" | "tl");
 
+        // ----- [INÍCIO] POSSÍVEIS ELEMENTOS NULOS [INÍCIO] -----
         setValue("area", data.area);
         setSelectedSetor(data.area);
 
         setValue("localizacao", data.localizacao);
-        setSelectedLocalizacao(data.localizacao);
-
-        if (data.contrato === null) {
-          setValue("contrato", null);
-          setSelectedContrato(null);
-        } else {
-          setValue("contrato", data.contrato);
-        }
-
+        setValue("contrato", data.contrato);
         setValue("fornecedor", data.fornecedor);
+        setValue("usuarioResponsavel", data.usuarioResponsavel);
+
+        setValue("dataDevolucaoPrevista", data.dataDevolucaoPrevista ?? "");
+        setValue("dataDevolucaoRealizada", data.dataDevolucaoRealizada ?? "");
+        // ----- [FIM] POSSÍVEIS ELEMENTOS NULOS [FIM] -----
 
         setValue("categoria", data.categoria);
         setValue("codigoSerie", data.codigoSerie);
@@ -351,12 +328,7 @@ const AtivoForm = () => {
         setValue("estadoConservacao", data.estadoConservacao);
         setValue("idPatrimonial", data.idPatrimonial);
         setValue("observacoes", data.observacoes);
-        setValue("usuarioResponsavel", data.usuarioResponsavel);
         setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
-
-        setValue("dataDevolucaoPrevista", data.dataDevolucaoPrevista ?? "");
-        setValue("dataDevolucaoRealizada", data.dataDevolucaoRealizada ?? "");
-
         setValue("termoParceria", data.termoParceria);
       })
       .catch((err) => {
@@ -468,7 +440,6 @@ const AtivoForm = () => {
       try {
         if (selectedSetor) {
           const data = await fetchAllUsuariosResponsaveisByAreaId(selectedSetor.id);
-          console.log(data);
           setUsuariosResponsaveis(data.filter((u) => !u.desabilitado));
         }
       } catch (err) {
@@ -520,12 +491,11 @@ const AtivoForm = () => {
                         <button type="button" disabled={desabilitado} className="movimentacao-button" onClick={handleToggleModal}>
                           Movimentar
                         </button>
-                        <button type="button" className="desabilitar-button" onClick={handleDesabilitar}>
-                          Desabilitar
-                        </button>
-                        <button type="button" className="descartar-button" onClick={handleDescartar}>
-                          Descartar
-                        </button>
+                        {ativo?.tipoAtivo === "t" && (
+                          <button type="button" className="desabilitar-button" onClick={handleDesabilitar}>
+                            Desabilitar
+                          </button>
+                        )}
                         {ativo?.tipoAtivo === "tl" && (
                           <button type="button" className="devolver-button" onClick={handleDevolver}>
                             Devolver
@@ -540,6 +510,10 @@ const AtivoForm = () => {
           </div>
         </div>
       </div>
+
+      {/* 
+        MODAL PARA MOVIMENTAÇÃO DO ATIVO
+      */}
       <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
         <Box className="modal-content">
           <h2 style={{ textAlign: "center" }}>Movimentar ativo</h2>
@@ -609,7 +583,6 @@ const AtivoForm = () => {
                       const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
 
                       field.onChange(selectedLocalizacao || null);
-                      setSelectedLocalizacao(selectedLocalizacao);
                     }}
                   >
                     <option value="">Selecione uma localização</option>
@@ -804,137 +777,6 @@ const AtivoForm = () => {
                       </div>
                       <div className="div-input-formulario">
                         <div>
-                          <span>Setor</span>
-                          <span className="obrigatorio-ast">*</span>
-                        </div>
-                        <Controller
-                          name="area"
-                          control={control}
-                          rules={{
-                            required: isEditing ? false : "Campo obrigatório",
-                          }}
-                          render={({ field }) => (
-                            <select
-                              id="area"
-                              className={`input-formulario ${errors.area ? "input-error" : ""} ${!isEditing ? "" : "disabled-field"}`}
-                              {...field}
-                              value={field.value?.id || ""}
-                              onChange={(e) => {
-                                const selectedId = Number(e.target.value);
-                                const selectedSetor = setores.find((a) => a.id === selectedId) as SetorType;
-
-                                field.onChange(selectedSetor || null);
-                                setSelectedSetor(selectedSetor);
-                                setLocalizacoes(selectedSetor ? selectedSetor.localizacoes : []);
-                              }}
-                              disabled={!isEditing ? false : true}
-                            >
-                              <option value="">Selecione um setor</option>
-                              {setores &&
-                                setores.length > 0 &&
-                                setores.map((a) => (
-                                  <option key={a.id} value={a.id}>
-                                    {a.nome}
-                                  </option>
-                                ))}
-                            </select>
-                          )}
-                        />
-                        <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
-                      </div>
-                      <div className="div-input-formulario">
-                        <span>Responsável</span>
-                        <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
-                      </div>
-                      <div className="div-input-formulario">
-                        <div>
-                          <span>Localização</span>
-                          <span className="obrigatorio-ast">*</span>
-                        </div>
-                        <Controller
-                          name="localizacao"
-                          control={control}
-                          rules={{
-                            required: isEditing ? false : "Campo obrigatório",
-                          }}
-                          render={({ field }) => (
-                            <select
-                              id="localizacao"
-                              className={`input-formulario ${errors.localizacao ? "input-error" : ""} ${
-                                (localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing && selectedSetor !== undefined
-                                  ? ""
-                                  : "disabled-field"
-                              }`}
-                              {...field}
-                              value={field.value?.id || ""}
-                              onChange={(e) => {
-                                const selectedId = Number(e.target.value);
-                                const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
-
-                                field.onChange(selectedLocalizacao || null);
-                                setSelectedLocalizacao(selectedLocalizacao);
-                              }}
-                              disabled={
-                                (localizacoes !== undefined || selectedLocalizacao !== undefined) && !isEditing && selectedSetor !== undefined
-                                  ? false
-                                  : true
-                              }
-                            >
-                              <option value="">Selecione uma localização</option>
-                              {localizacoes &&
-                                localizacoes.length > 0 &&
-                                localizacoes.map((a) => (
-                                  <option key={a.id} value={a.id}>
-                                    {a.nome}
-                                  </option>
-                                ))}
-                            </select>
-                          )}
-                        />
-                        <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
-                      </div>
-                      <div className="div-input-formulario">
-                        <div>
-                          <span>Usuário responsável</span>
-                          <span className="obrigatorio-ast">*</span>
-                        </div>
-                        <Controller
-                          name="usuarioResponsavel"
-                          control={control}
-                          rules={{
-                            required: "Campo obrigatório",
-                          }}
-                          render={({ field }) => (
-                            <select
-                              id="usuarioResponsavel"
-                              className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""} ${
-                                !isEditing && selectedSetor !== undefined ? "" : "disabled-field"
-                              }`}
-                              {...field}
-                              value={field.value?.id || ""}
-                              onChange={(e) => {
-                                const selectedId = Number(e.target.value);
-                                const selectedUsuarioResponsavel = usuariosResponsaveis.find((a) => a.id === selectedId);
-
-                                field.onChange(selectedUsuarioResponsavel || null);
-                              }}
-                              disabled={!isEditing && selectedSetor !== undefined ? false : true}
-                            >
-                              <option value="">Selecione um usuário responsável</option>
-                              {usuariosResponsaveis &&
-                                usuariosResponsaveis.length > 0 &&
-                                usuariosResponsaveis.map((a) => (
-                                  <option key={a.id} value={a.id}>
-                                    {a.nome}
-                                  </option>
-                                ))}
-                            </select>
-                          )}
-                        />
-                        <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
-                      </div>
-                      <div className="div-input-formulario">
-                        <div>
                           <span>Contrato</span>
                           <span className="obrigatorio-ast">*</span>
                         </div>
@@ -960,7 +802,6 @@ const AtivoForm = () => {
                                 const selectedValue = e.target.value;
                                 if (selectedValue === "-1") {
                                   // Se não tiver contrato...
-                                  setSelectedContrato(null);
                                   setValue("dataDevolucaoPrevista", "");
                                   resetField("dataDevolucaoPrevista");
                                   // Libera o campo de fornecedor
@@ -973,11 +814,9 @@ const AtivoForm = () => {
                                   const sContrato = contratos.find((a) => a.id === selectedId) || null;
 
                                   if (sContrato !== null) {
-                                    setSelectedContrato(sContrato);
                                     setValue("dataDevolucaoPrevista", sContrato.fimDataVigencia);
                                     setValue("fornecedor", sContrato.fornecedor); // preenche fornecedor automaticamente
                                   } else {
-                                    setSelectedContrato(null);
                                     resetField("dataDevolucaoPrevista");
                                     resetField("fornecedor");
                                   }
@@ -1001,7 +840,9 @@ const AtivoForm = () => {
                         <div className="invalid-feedback d-block div-erro">{errors.contrato?.message}</div>
                       </div>
                       <div className="div-input-formulario">
-                        <span>Fornecedor</span>
+                        <div>
+                          <span>Fornecedor</span>
+                        </div>
                         <Controller
                           name="fornecedor"
                           control={control}
@@ -1034,35 +875,17 @@ const AtivoForm = () => {
                         />
                         <div className="invalid-feedback d-block div-erro">{errors.fornecedor?.message}</div>
                       </div>
-                      <div className="div-input-formulario">
-                        <div>
-                          <span>Data aquisição</span>
-                          <span className="obrigatorio-ast">*</span>
-                        </div>
-                        <input
-                          type="date"
-                          className={`input-formulario data-input ${errors.dataAquisicao ? "input-error" : ""} ${
-                            desabilitado ? "disabled-field" : ""
-                          }`}
-                          {...register("dataAquisicao", { required: "Campo obrigatório" })}
-                          disabled={desabilitado}
-                        />
-                        <div className="invalid-feedback d-block div-erro">{errors.dataAquisicao?.message}</div>
-                      </div>
                       {tipoForm === "tl" && (
                         <>
                           <div className="div-input-formulario">
                             <div>
                               <span>Data de devolução prevista</span>
-                              <span className="obrigatorio-ast">*</span>
                             </div>
                             <input
                               type="date"
-                              className={`input-formulario data-input ${errors.dataDevolucaoPrevista ? "input-error" : ""} ${
-                                desabilitado || selectedContrato !== null ? "disabled-field" : ""
-                              }`}
-                              {...register("dataDevolucaoPrevista", { required: "Campo obrigatório" })}
-                              disabled={desabilitado || selectedContrato !== null}
+                              className={`input-formulario data-input ${errors.dataDevolucaoPrevista ? "input-error" : ""} disabled-field`}
+                              {...register("dataDevolucaoPrevista")}
+                              disabled={true}
                             />
                             <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoPrevista?.message}</div>
                           </div>
@@ -1084,6 +907,22 @@ const AtivoForm = () => {
                           </div> */}
                         </>
                       )}
+                      <div className="div-input-formulario">
+                        <div>
+                          <span>Data do recebimento</span>
+                          <span className="obrigatorio-ast">*</span>
+                        </div>
+                        <input
+                          type="date"
+                          defaultValue={new Date().toISOString().split("T")[0]}
+                          className={`input-formulario data-input ${errors.dataAquisicao ? "input-error" : ""} ${
+                            desabilitado ? "disabled-field" : ""
+                          }`}
+                          {...register("dataAquisicao", { required: "Campo obrigatório" })}
+                          disabled={desabilitado}
+                        />
+                        <div className="invalid-feedback d-block div-erro">{errors.dataAquisicao?.message}</div>
+                      </div>
                       {tipoForm !== "i" && (
                         <div className="div-input-formulario">
                           <div>
@@ -1207,6 +1046,9 @@ const AtivoForm = () => {
                   )}
                 </>
               </div>
+              {/* 
+              OMITIDO PARA FINS DE APRESENTAÇÃO DAS HISTÓRIAS DE USUÁRIO DE CADASTRO DO ATIVO
+              
               <div className="page-side-section">
                 <div className="content-container">
                   <span className="form-title">Histórico do Ativo</span>
@@ -1226,7 +1068,7 @@ const AtivoForm = () => {
                     <img className="qr-image" src={`data:image/png;base64,${ativo.qrCodeImage}`} alt="QRCode" />
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
           )}
         </>

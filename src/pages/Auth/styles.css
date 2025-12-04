@@ -92,6 +92,27 @@
   border: 1px solid var(--border-error-color) !important;
 }
 
+.esqueci-minha-senha-div {
+  position: relative;
+  width: 90%;
+  height: 20px;
+  margin: 0 auto 15px auto;
+  display: flex;
+  justify-content: end;
+}
+
+.esqueci-minha-senha-button {
+  color: #65a8c7;
+  text-decoration: underline;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.03rem;
+}
+
+.esqueci-minha-senha-button:hover {
+  color: #277194;
+}
+
 @media (min-width: 576px) {
   .login-welcome {
     width: 100%;

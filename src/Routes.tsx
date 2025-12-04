@@ -17,6 +17,7 @@ import NaoAutorizado from "./pages/NaoAutorizado";
 import PageUsuario from "./pages/Usuario";
 import { hasAnyRoles } from "./utils/auth";
 import TrocarSenha from "./pages/TrocarSenha";
+import EsqueciMinhaSenha from "./pages/EsqueciMinhaSenha";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -153,6 +154,7 @@ const Routes = () => {
           <Route path="/gestao-inventario/nao-autorizado" element={<NaoAutorizado />} />
           <Route path="/gestao-inventario/primeiro-acesso" element={<PrimeiroAcesso />} />
           <Route path="/gestao-inventario/recuperar-senha" element={<TrocarSenha />} />
+          <Route path="/gestao-inventario/recuperacao-senha" element={<EsqueciMinhaSenha />} />
           <Route
             path="/gestao-inventario/usuario"
             element={

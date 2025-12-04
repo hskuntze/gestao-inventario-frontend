@@ -17,7 +17,7 @@ type FormData = {
   numeroContrato: string;
   descricao: string;
   termoParceria: string;
-  inicioDataVigencia: string;
+  inicioDataVigencia: string; //Início da vigência = Data de assinatura do contrato (mudança de nomenclatura)
   fimDataVigencia: string;
   fornecedor: FornecedorType | null;
 };
@@ -265,7 +265,7 @@ const GerenciarContrato = () => {
                 <tr key={"tr-head-contrato-list-table"}>
                   <th scope="col">Número do Contrato</th>
                   <th scope="col">Objeto do Contrato</th>
-                  <th scope="col">Início da vigência</th>
+                  <th scope="col">Data de assinatura do contrato</th>
                   <th scope="col">Fim da vigência</th>
                   <th scope="col">Ações</th>
                 </tr>
@@ -453,7 +453,7 @@ const GerenciarContrato = () => {
             </div>
             <div className="div-input-formulario">
               <div>
-                <span>Início da vigência</span>
+                <span>Data de assinatura do contrato</span>
                 <span className="obrigatorio-ast">*</span>
               </div>
               <input

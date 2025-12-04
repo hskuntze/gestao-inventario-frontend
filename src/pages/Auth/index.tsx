@@ -1,7 +1,7 @@
 import "./styles.css";
 
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { AxiosRequestConfig } from "axios";
@@ -73,9 +73,7 @@ const Auth = () => {
 
         loadUserInfo();
       })
-      .catch((err) => {
-        console.log(err);
-      })
+      .catch((err) => {})
       .finally(() => setLoading(false));
   };
 
@@ -129,6 +127,11 @@ const Auth = () => {
             </div>
           </>
         )}
+        <div className="esqueci-minha-senha-div">
+          <Link to={"/gestao-inventario/recuperacao-senha"} className="esqueci-minha-senha-button" type="button">
+            Esqueci minha senha
+          </Link>
+        </div>
       </form>
     </div>
   );

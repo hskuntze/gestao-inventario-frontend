@@ -126,39 +126,41 @@ const AtivoList = () => {
                 </thead>
                 <tbody>
                   {paginatedData.length > 0 ? (
-                    paginatedData.map((a) => (
-                      <tr key={a.id} className="clickable-table-row" onClick={() => navigate(`/gestao-inventario/ativo/formulario/${a.id}`)}>
-                        <td>
-                          <div>{a.descricao}</div>
-                        </td>
-                        <td>
-                          <div className="text-info">{a.idPatrimonial ?? "N/A"}</div>
-                        </td>
-                        <td>
-                          <div className="text-info">{a.categoria}</div>
-                        </td>
-                        <td>
-                          <div className="text-info">{a.localizacao ? a.localizacao.nome : "-"}</div>
-                        </td>
-                        <td>
-                          <div>
-                            <span className={`tag-tipo-ativo-${a.tipoAtivo}`}>
-                              <i className={`bi bi-tag-fill tag-dot-${a.tipoAtivo}`} /> {tiposAtivo[a.tipoAtivo]}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="text-info">{a.usuarioResponsavel.nome ?? "-"}</div>
-                        </td>
-                        <td>
-                          <div className="table-action-buttons">
-                            <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button nbr">
-                              <i className="bi bi-pencil" />
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    paginatedData
+                      .filter((a) => !a.desabilitado || !a.devolvido)
+                      .map((a) => (
+                        <tr key={a.id} className="clickable-table-row" onClick={() => navigate(`/gestao-inventario/ativo/formulario/${a.id}`)}>
+                          <td>
+                            <div>{a.descricao}</div>
+                          </td>
+                          <td>
+                            <div className="text-info">{a.idPatrimonial}</div>
+                          </td>
+                          <td>
+                            <div className="text-info">{a.categoria}</div>
+                          </td>
+                          <td>
+                            <div className="text-info">{a.localizacao ? a.localizacao.nome : "-"}</div>
+                          </td>
+                          <td>
+                            <div>
+                              <span className={`tag-tipo-ativo-${a.tipoAtivo}`}>
+                                <i className={`bi bi-tag-fill tag-dot-${a.tipoAtivo}`} /> {tiposAtivo[a.tipoAtivo]}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="text-info">{a.usuarioResponsavel ? a.usuarioResponsavel.nome : "-"}</div>
+                          </td>
+                          <td>
+                            <div className="table-action-buttons">
+                              <Link to={`/gestao-inventario/ativo/formulario/${a.id}`} className="button action-button nbr">
+                                <i className="bi bi-pencil" />
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
                   ) : (
                     <tr>
                       <td className="no-data-on-table" colSpan={7}>

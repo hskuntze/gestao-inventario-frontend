@@ -481,46 +481,42 @@ const GerenciarUsuarioResponsavel = ({ reloadPage }: Props) => {
                         <div>{a.area ? a.area.nome : "-"}</div>
                       </td>
                       <td>
-                        {a.id === 1 || a.id === 2 ? ( // ID 1 e 2 representam os valores "DISPONÍVEL PARA UTILIZAÇÃO" e "INSTALADO NO DISPOSITIVO" e não devem ser listados
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "240px" }}>-</div>
-                        ) : (
-                          <div className="table-action-buttons">
-                            <button
-                              disabled={a.desabilitado}
-                              onClick={() => handleMudarSenha(a.email)}
-                              className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
-                              title="Mudar senha"
-                            >
-                              <i className="bi bi-key" />
-                            </button>
-                            <button
-                              disabled={a.desabilitado}
-                              onClick={() => handleEditUsuarioResponsavel(a)}
-                              className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
-                              title="Editar usuário responsável"
-                            >
-                              <i className="bi bi-pencil" />
-                            </button>
-                            <button
-                              disabled={a.desabilitado}
-                              onClick={() => handleDisableUser(a.email)}
-                              type="button"
-                              className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
-                              title="Desabilitar usuário"
-                            >
-                              <i className="bi bi-x-circle" />
-                            </button>
-                            <button
-                              disabled={a.desabilitado}
-                              onClick={() => handleDeleteUsuarioResponsavel(a.id)}
-                              type="button"
-                              className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
-                              title="Excluir usuário responsável"
-                            >
-                              <i className="bi bi-trash3" />
-                            </button>
-                          </div>
-                        )}
+                        <div className="table-action-buttons">
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleMudarSenha(a.email)}
+                            className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Mudar senha"
+                          >
+                            <i className="bi bi-key" />
+                          </button>
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleEditUsuarioResponsavel(a)}
+                            className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Editar usuário responsável"
+                          >
+                            <i className="bi bi-pencil" />
+                          </button>
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleDisableUser(a.email)}
+                            type="button"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Desabilitar usuário"
+                          >
+                            <i className="bi bi-x-circle" />
+                          </button>
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleDeleteUsuarioResponsavel(a.id)}
+                            type="button"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Excluir usuário responsável"
+                          >
+                            <i className="bi bi-trash3" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

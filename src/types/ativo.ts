@@ -25,6 +25,8 @@ export type AtivoType = {
   qrCodeImage: string;
   tipoAtivo: string;
   desabilitado: boolean;
+  descartado: boolean;
+  devolvido: boolean;
   razaoDesabilitado: string;
   imagens: Imagem[];
   dataDevolucaoPrevista?: string;
