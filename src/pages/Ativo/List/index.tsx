@@ -127,7 +127,8 @@ const AtivoList = () => {
                 <tbody>
                   {paginatedData.length > 0 ? (
                     paginatedData
-                      .filter((a) => !a.desabilitado || !a.devolvido)
+                      .filter((a) => !a.desabilitado)
+                      .filter((a) => !a.devolvido)
                       .map((a) => (
                         <tr key={a.id} className="clickable-table-row" onClick={() => navigate(`/gestao-inventario/ativo/formulario/${a.id}`)}>
                           <td>

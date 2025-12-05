@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import IconePdf from "@/assets/images/icone-pdf.png";
 import "./styles.css";
 
 interface ImageCarouselProps {
@@ -6,22 +7,29 @@ interface ImageCarouselProps {
 }
 
 const ImagePreviewCarousel = ({ blobs }: ImageCarouselProps) => {
-  const [urls, setUrls] = useState<string[]>([]);
+  const [urls, setUrls] = useState<{ url: string; type: string }[]>([]);
   const [current, setCurrent] = useState(0);
 
   // Gera URLs temporárias a partir dos blobs recebidos
   useEffect(() => {
-    const objectUrls = blobs.map((blob) => URL.createObjectURL(blob));
+    const objectUrls = blobs.map((blob) => ({
+      url: URL.createObjectURL(blob),
+      type: blob.type,
+    }));
+
     setUrls(objectUrls);
 
     // Libera memória quando o componente desmontar
     return () => {
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls.forEach((obj) => ({
+        url: URL.revokeObjectURL(obj.url),
+        type: obj.type,
+      }));
     };
   }, [blobs]);
 
   if (urls.length === 0) {
-    return <p>Nenhuma imagem disponível</p>;
+    return <p className="text-info">Nenhuma imagem disponível</p>;
   }
 
   const total = urls.length;
@@ -39,9 +47,13 @@ const ImagePreviewCarousel = ({ blobs }: ImageCarouselProps) => {
         </button>
       )}
       <div className="carousel-img-wrapper">
-        {visibleImages.map((url, index) => (
-          <img key={`${current}-${index}`} src={url} alt={`Imagem ${current + index}`} className="carousel-img" />
-        ))}
+        {visibleImages.map((obj, index) =>
+          obj.type === "image/jpg" ? (
+            <img key={`${current}-${index}`} src={obj.url} alt={`Imagem ${current + index}`} className="carousel-img" />
+          ) : (
+            <img key={`${current}-${index}`} src={IconePdf} alt={`Imagem ${current + index}`} className="carousel-img" />
+          )
+        )}
       </div>
       {total > 3 && (
         <button onClick={next} className="button-carousel right">

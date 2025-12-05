@@ -137,7 +137,7 @@
 }
 
 .desabilitar-button {
-  background-color: #B50C00;
+  background-color: #b50c00;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +247,7 @@
 }
 
 .acoes-toggle {
-  background-color: #00974F;
+  background-color: #00974f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,6 +321,34 @@
   background-color: var(--bg-card);
 }
 
+.div-input-checkbox {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: row-reverse;
+  padding-top: 20px;
+  width: auto;
+}
+
+.div-input-checkbox span {
+  width: 100%;
+}
+
+.desabilitar-modal .upload-card {
+  margin-top: 10px;
+  margin-right: 20px;
+  width: calc(100% - 20px);
+}
+
+.desabilitar-modal .upload-card .form-buttons {
+  margin-top: 15px;
+  margin-right: 0;
+}
+
+.desabilitar-modal .text-info {
+  margin-bottom: 0;
+}
+
 @media (min-width: 576px) {
   .row-input-fields {
     display: flex;
@@ -345,10 +373,11 @@
     align-items: center;
     flex-direction: row-reverse;
     padding-top: 20px;
+    width: auto;
   }
 
   .div-input-checkbox span {
-    width: 50%;
+    width: 100%;
   }
 
   .modal-content {

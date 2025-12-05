@@ -185,7 +185,7 @@ export async function fetchAllContratos(): Promise<ContratoType[]> {
   }
 }
 
-export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
+export function base64ToBlob(base64: string, nome: string): Blob {
   try {
     // Remove quebras de linha e espaços que possam ter vindo do banco
     const cleanedBase64 = base64.replace(/[\r\n\s]/g, "");
@@ -195,6 +195,14 @@ export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
 
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    let mimeType = "";
+
+    if(nome.includes(".pdf")) {
+      mimeType = "application/pdf";
+    } else {
+      mimeType = "image/jpg";
     }
 
     const byteArray = new Uint8Array(byteNumbers);

@@ -52,6 +52,11 @@ type FormData = {
   termoParceria: string;
 };
 
+type FormDataDesabilitar = {
+  razaoDesabilitado: string;
+  observacoesDesabilitado: string;
+};
+
 type UrlParams = {
   id: string;
 };
@@ -66,7 +71,7 @@ const AtivoForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [ativo, setAtivo] = useState<AtivoType>();
   const [historicoAtivo, setHistoricoAtivo] = useState<HistoricoType[]>();
-  const [desabilitado, setDesabilitado] = useState(false);
+  const [desabilitado, setDesabilitado] = useState<boolean>(false);
   const [os, setOs] = useState<string | null>(null);
 
   const [setores, setSetores] = useState<SetorType[]>([]);
@@ -77,9 +82,12 @@ const AtivoForm = () => {
 
   const [selectedSetor, setSelectedSetor] = useState<SetorType>();
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
+  const [codigoSerieNA, setCodigoSerieNA] = useState<boolean>(false);
+  const [codigoSerieAtivoNuvem, setCodigoSerieAtivoNuvem] = useState<boolean>(false);
 
-  const [openModal, setOpenModal] = useState(false);
-  const [openAcoes, setOpenAcoes] = useState(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openModalDesabilitar, setOpenModalDesabilitar] = useState<boolean>(false);
+  const [openAcoes, setOpenAcoes] = useState<boolean>(false);
   const acoesDropdownRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
@@ -93,15 +101,18 @@ const AtivoForm = () => {
     resetField,
   } = useForm<FormData>();
 
+  const {
+    register: registerDesabilitar,
+    control: controlDesabilitar,
+    formState: { errors: errorsDesabilitar },
+    handleSubmit: handleSubmitDesabilitar,
+  } = useForm<FormDataDesabilitar>();
+
   // Photo capture hook + modal state
   const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, reset: resetPhoto } = usePhotoCapture();
 
   const [photoModalOpen, setPhotoModalOpen] = useState<boolean>(false);
   const [confirmedPhoto, setConfirmedPhoto] = useState<PhotoCaptureResult | null>(null);
-
-  const handleToggleModal = () => {
-    setOpenModal(!openModal);
-  };
 
   const handleConfirmPhoto = async () => {
     // Close modal while fetching location
@@ -147,31 +158,6 @@ const AtivoForm = () => {
     } else {
       setValue("tipoAtivo", null);
       setTipoForm(null);
-    }
-  };
-
-  const handleDesabilitar = () => {
-    let confirm = window.confirm("Deseja mesmo desabilitar este ativo?");
-
-    if (confirm) {
-      const requestParams: AxiosRequestConfig = {
-        url: "/ativos/desabilitar",
-        method: "POST",
-        withCredentials: true,
-        params: {
-          id: urlParams.id,
-          razao: "",
-        },
-      };
-
-      requestBackend(requestParams)
-        .then(() => {
-          toast.success("Ativo foi desabilitado.");
-          navigate("/gestao-inventario/ativo");
-        })
-        .catch(() => {
-          toast.error("Erro ao tentar desabilitar este ativo.");
-        });
     }
   };
 
@@ -221,7 +207,8 @@ const AtivoForm = () => {
     let areaId = formData.area !== undefined && formData.area !== null ? formData.area.id : null;
     let fornecedorId = formData.fornecedor !== undefined && formData.fornecedor !== null ? formData.fornecedor.id : null;
     let localizacaoId = formData.localizacao !== undefined && formData.localizacao !== null ? formData.localizacao.id : null;
-    let usuarioResponsavelId = formData.usuarioResponsavel !== undefined && formData.usuarioResponsavel !== null ? formData.usuarioResponsavel.id : null;
+    let usuarioResponsavelId =
+      formData.usuarioResponsavel !== undefined && formData.usuarioResponsavel !== null ? formData.usuarioResponsavel.id : null;
 
     if (tipoForm !== null) {
       const requestParams: AxiosRequestConfig = {
@@ -276,15 +263,45 @@ const AtivoForm = () => {
 
     requestBackend(requestParams)
       .then((res) => {
-        handleToggleModal();
         toast.success("Ativo movimentado com sucesso.");
         loadInfo();
         loadHistoricoInfo();
+        setOpenModal(false);
       })
       .catch((err) => {
         toast.error("Erro ao tentar movimentar ativo.");
       })
       .finally(() => {});
+  };
+
+  const onSubmitDesabilitar = (formData: FormDataDesabilitar) => {
+    let confirm = window.confirm("Deseja mesmo desabilitar este ativo? Trata-se de uma operação irreversível.");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/ativos/desabilitar",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          id: urlParams.id,
+          razao: formData.razaoDesabilitado,
+          observacao: formData.observacoesDesabilitado,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Ativo foi desabilitado.");
+          navigate("/gestao-inventario/ativo");
+        })
+        .catch(() => {
+          toast.error("Erro ao tentar desabilitar este ativo.");
+        });
+    }
+  };
+
+  const submitDesabilitar = () => {
+    handleSubmitDesabilitar(onSubmitDesabilitar)();
   };
 
   const loadInfo = useCallback(() => {
@@ -323,6 +340,12 @@ const AtivoForm = () => {
 
         setValue("categoria", data.categoria);
         setValue("codigoSerie", data.codigoSerie);
+        if (data.codigoSerie === "N/A") {
+          setCodigoSerieNA(true);
+        } else if (data.codigoSerie === "Ativação realizada na Nuvem") {
+          setCodigoSerieAtivoNuvem(true);
+        }
+
         setValue("dataAquisicao", data.dataAquisicao);
         setValue("descricao", data.descricao);
         setValue("estadoConservacao", data.estadoConservacao);
@@ -488,11 +511,11 @@ const AtivoForm = () => {
 
                     {openAcoes && (
                       <div className="acoes-menu">
-                        <button type="button" disabled={desabilitado} className="movimentacao-button" onClick={handleToggleModal}>
+                        <button type="button" disabled={desabilitado} className="movimentacao-button" onClick={() => setOpenModal(true)}>
                           Movimentar
                         </button>
                         {ativo?.tipoAtivo === "t" && (
-                          <button type="button" className="desabilitar-button" onClick={handleDesabilitar}>
+                          <button type="button" className="desabilitar-button" onClick={() => setOpenModalDesabilitar(true)}>
                             Desabilitar
                           </button>
                         )}
@@ -514,7 +537,7 @@ const AtivoForm = () => {
       {/* 
         MODAL PARA MOVIMENTAÇÃO DO ATIVO
       */}
-      <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
+      <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container">
         <Box className="modal-content">
           <h2 style={{ textAlign: "center" }}>Movimentar ativo</h2>
           <form className="formulario" onSubmit={handleSubmit(onSubmitMovimentacao)}>
@@ -642,6 +665,68 @@ const AtivoForm = () => {
               </div>
             </div>
           </form>
+        </Box>
+      </Modal>
+
+      {/* 
+        MODAL PARA DESABILITAR ATIVO
+      */}
+      <Modal open={openModalDesabilitar} onClose={() => setOpenModalDesabilitar(false)} className="modal-container">
+        <Box className="modal-content desabilitar-modal">
+          <h2 style={{ textAlign: "center" }}>Desabilitar ativo</h2>
+          <form className="formulario" onSubmit={handleSubmitDesabilitar(onSubmitDesabilitar)}>
+            <div className="div-input-formulario w-100">
+              <div>
+                <span>Motivo</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
+              <Controller
+                name="razaoDesabilitado"
+                control={controlDesabilitar}
+                rules={{
+                  required: "Campo obrigatório",
+                }}
+                render={({ field }) => (
+                  <select
+                    id="localizacao"
+                    className={`input-formulario ${errorsDesabilitar.razaoDesabilitado ? "input-error" : ""}`}
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      const razao = e.target.value;
+                      field.onChange(razao);
+                    }}
+                  >
+                    <option value="">Selecione um motivo</option>
+                    <option value="OBSOLECÊNCIA">ATIVO OBSOLETO</option>
+                    <option value="IRRECUPERÁVEL">IRRECUPERÁVEL</option>
+                    <option value="INUTILIZÁVEL">INUTILIZÁVEL</option>
+                    <option value="OUTROS">OUTROS</option>
+                  </select>
+                )}
+              />
+              <div className="invalid-feedback d-block div-erro">{errorsDesabilitar.razaoDesabilitado?.message}</div>
+            </div>
+            <div className="div-input-formulario text-area-formulario">
+              <span>Observações</span>
+              <textarea
+                id="observacoesDesabilitado"
+                className={`input-formulario`}
+                rows={4}
+                {...registerDesabilitar("observacoesDesabilitado")}
+                maxLength={255}
+              ></textarea>
+            </div>
+          </form>
+          {ativo && tipoForm && (
+            <UploadArquivos
+              tipoAtivo={tipoForm}
+              idAtivo={String(ativo.id)}
+              defaultFiles={ativo?.imagens}
+              ativoDesabilitado={desabilitado}
+              submitParentForm={submitDesabilitar}
+            />
+          )}
         </Box>
       </Modal>
 
@@ -956,21 +1041,69 @@ const AtivoForm = () => {
                           <div className="invalid-feedback d-block div-erro">{errors.estadoConservacao?.message}</div>
                         </div>
                       )}
-                      <div className="div-input-formulario">
-                        <div>
-                          <span>Código de série</span>
-                          <span className="obrigatorio-ast">*</span>
-                        </div>
-                        <input
-                          type="text"
-                          className={`input-formulario ${errors.codigoSerie ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
-                          {...register("codigoSerie", { required: "Campo obrigatório" })}
-                          maxLength={255}
-                          disabled={desabilitado}
-                        />
-                        <div className="invalid-feedback d-block div-erro">{errors.codigoSerie?.message}</div>
-                      </div>
                       <div className="div-input-formulario"></div>
+                      <div className="row-input-fields w-100">
+                        <div className="div-input-formulario">
+                          <div>
+                            <span>Código de série</span>
+                            <span className="obrigatorio-ast">*</span>
+                          </div>
+                          <input
+                            type="text"
+                            className={`input-formulario ${errors.codigoSerie ? "input-error" : ""} 
+                              ${desabilitado ? "disabled-field" : ""} 
+                              ${codigoSerieNA || codigoSerieAtivoNuvem ? "disabled-field" : ""}`}
+                            {...register("codigoSerie", { required: "Campo obrigatório" })}
+                            maxLength={255}
+                            disabled={desabilitado || codigoSerieNA || codigoSerieAtivoNuvem}
+                          />
+                          <div className="invalid-feedback d-block div-erro">{errors.codigoSerie?.message}</div>
+                        </div>
+                        <div className="div-input-formulario div-input-checkbox">
+                          <span>N/A</span>
+                          <input
+                            type="checkbox"
+                            id="check-codigo-na"
+                            className={`checkbox-input-formulario`}
+                            checked={codigoSerieNA}
+                            onChange={(e) => {
+                              let value = e.target.checked;
+                              setCodigoSerieNA(value);
+
+                              if (value === true) {
+                                setValue("codigoSerie", "N/A");
+                                setCodigoSerieAtivoNuvem(false);
+                              } else {
+                                resetField("codigoSerie");
+                              }
+                            }}
+                            disabled={codigoSerieAtivoNuvem}
+                          />
+                        </div>
+                        {tipoForm === "i" && (
+                          <div className="div-input-formulario div-input-checkbox">
+                            <span>Ativação realizada na Nuvem</span>
+                            <input
+                              type="checkbox"
+                              id="check-codigo-na"
+                              className={`checkbox-input-formulario`}
+                              checked={codigoSerieAtivoNuvem}
+                              onChange={(e) => {
+                                let value = e.target.checked;
+                                setCodigoSerieAtivoNuvem(value);
+
+                                if (value === true) {
+                                  setValue("codigoSerie", "Ativação realizada na Nuvem");
+                                  setCodigoSerieNA(false);
+                                } else {
+                                  resetField("codigoSerie");
+                                }
+                              }}
+                              disabled={codigoSerieNA}
+                            />
+                          </div>
+                        )}
+                      </div>
                       <div className="div-input-formulario text-area-formulario">
                         <span>Descrição/Observações</span>
                         <textarea
@@ -1016,7 +1149,7 @@ const AtivoForm = () => {
                         <UploadArquivos
                           tipoAtivo={tipoForm}
                           idAtivo={String(ativo.id)}
-                          defaultFiles={ativo?.imagens}
+                          defaultFiles={ativo.imagens}
                           ativoDesabilitado={desabilitado}
                           reloadPage={handleReload}
                         />

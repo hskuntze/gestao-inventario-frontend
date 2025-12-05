@@ -28,6 +28,7 @@ export type AtivoType = {
   descartado: boolean;
   devolvido: boolean;
   razaoDesabilitado: string;
+  observacoesDesabilitado: string;
   imagens: Imagem[];
   dataDevolucaoPrevista?: string;
   dataDevolucaoRealizada?: string;
