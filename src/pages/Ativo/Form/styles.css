@@ -48,7 +48,8 @@
 }
 
 .div-input-formulario select,
-.select-tipo-ativo select {
+.select-tipo-ativo select,
+.filtro-input-div select {
   appearance: none; /* remove seta padrão */
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -67,6 +68,7 @@
   color: var(--white-text);
   padding-left: 10px;
   padding-right: 10px;
+  padding-left: 10px !important;
   border: 0;
   margin-top: 12px;
   width: calc(100% - 20px);

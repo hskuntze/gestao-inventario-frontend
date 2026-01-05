@@ -82,7 +82,7 @@ const Navbar = () => {
         </button>
 
         {dropdown && (
-          <div className="user-dropdown">
+          <div className="user-dropdown" ref={dropdownRef} onMouseLeave={() => setDropdown(false)}>
             <div className="user-info">
               <strong>{userData.nome}</strong>
               <span>{userData.email}</span>

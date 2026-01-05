@@ -17,7 +17,9 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DESCARTAR: "bi bi-trash3 descartar-icon",
     DEVOLVER: "bi bi-sign-turn-left devolver-icon",
     "ARQUIVO INSERIDO": "bi bi-file-earmark-arrow-up arquivo-inserido-icon",
-    "ARQUIVO EXCLUÍDO": "bi bi bi-file-earmark-minus arquivo-excluido-icon",
+    "ARQUIVO EXCLUÍDO": "bi bi-file-earmark-minus arquivo-excluido-icon",
+    "EM MANUTENÇÃO": "bi bi bi-wrench-adjustable-circle em-manutencao-icon",
+    "RETIRADO MANUTENÇÃO": "bi bi-wrench-adjustable-circle-fill retirado-manutencao-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -31,6 +33,8 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DEVOLVER: "Ativo devolvido",
     "ARQUIVO INSERIDO": "Arquivo(s) inserido(s)",
     "ARQUIVO EXCLUÍDO": "Arquivo(s) excluído(s)",
+    "EM MANUTENÇÃO": "Ativo em manutenção",
+    "RETIRADO MANUTENÇÃO": "Ativo retirado da manutenção",
   };
 
   return (
@@ -54,7 +58,8 @@ const CardHistoricoAtivo = ({ element }: Props) => {
             <span className="historico-content-info">Localização: {element.localizacao}</span>
           </>
         )}
-        {element.operacao === "ARQUIVO EXCLUÍDO" && (
+        {element.operacao === "ARQUIVO EXCLUÍDO" && <span className="historico-content-info">Realizado por: {element.userNome}</span>}
+        {(element.operacao === "EM MANUTENÇÃO" || element.operacao === "RETIRADO MANUTENÇÃO") && (
           <span className="historico-content-info">Realizado por: {element.userNome}</span>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { TipoAtivoType } from "@/types/tipoativo";
 import "./styles.css";
 import { TipoNotificacao } from "@/types/tiponotificacao";
+import { Link } from "react-router-dom";
 
 interface Props {
   idAtivo: number;
@@ -18,7 +19,7 @@ const CardNotificacao = ({ idAtivo, mensagem, tipo, tipoAtivo, titulo }: Props) 
   };
 
   return (
-    <div className="card-notificacao-container">
+    <Link to={`/gestao-inventario/ativo/formulario/${idAtivo}`} className="card-notificacao-container">
       <div className="card-icon">
         <i className={iconeAtivo[tipo]} />
       </div>
@@ -26,7 +27,7 @@ const CardNotificacao = ({ idAtivo, mensagem, tipo, tipoAtivo, titulo }: Props) 
         <span className="card-title">{titulo}</span>
         <span className="card-message">{mensagem}</span>
       </div>
-    </div>
+    </Link>
   );
 };
 

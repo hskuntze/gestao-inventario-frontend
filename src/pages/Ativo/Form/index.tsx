@@ -30,6 +30,10 @@ import { LocalizacaoType } from "@/types/localizacao";
 import { ContratoType } from "@/types/contrato";
 
 import AtivoFormLoaderSkeleton from "./AtivoFormLoaderSkeleton";
+import Loader from "@/components/Loader";
+
+type TipoMovimentacao = "MOVIMENTAR" | "MANUTENÇÃO" | "RETIRAR MANUTENÇÃO" | "ESTOQUE";
+type TipoForm = "t" | "i" | "tl";
 
 type FormData = {
   tipoAtivo: string | null;
@@ -44,6 +48,7 @@ type FormData = {
   contrato: ContratoType | null;
   fornecedor: FornecedorType;
   dataAquisicao: string; //data aquisição = data do recebimento (mudança de nomenclatura)
+  numeroParte: string;
   codigoSerie: string;
   observacoes: string;
   estadoConservacao: string;
@@ -57,6 +62,11 @@ type FormDataDesabilitar = {
   observacoesDesabilitado: string;
 };
 
+type FormDataManutencao = {
+  manutencao: boolean;
+  observacoesManutencao: string;
+};
+
 type UrlParams = {
   id: string;
 };
@@ -67,8 +77,10 @@ const AtivoForm = () => {
 
   const user = getUserData();
 
-  const [tipoForm, setTipoForm] = useState<"t" | "i" | "tl" | null>(null);
+  const [tipoForm, setTipoForm] = useState<TipoForm | null>(null);
+  const [tipoMovimentar, setTipoMovimentar] = useState<TipoMovimentacao | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingPrint, setLoadingPrint] = useState<boolean>(false);
   const [ativo, setAtivo] = useState<AtivoType>();
   const [historicoAtivo, setHistoricoAtivo] = useState<HistoricoType[]>();
   const [desabilitado, setDesabilitado] = useState<boolean>(false);
@@ -107,6 +119,12 @@ const AtivoForm = () => {
     formState: { errors: errorsDesabilitar },
     handleSubmit: handleSubmitDesabilitar,
   } = useForm<FormDataDesabilitar>();
+
+  const {
+    register: registerManutencao,
+    formState: { errors: errorsManutencao },
+    handleSubmit: handleSubmitManutencao,
+  } = useForm<FormDataManutencao>();
 
   // Photo capture hook + modal state
   const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, reset: resetPhoto } = usePhotoCapture();
@@ -154,7 +172,7 @@ const AtivoForm = () => {
 
     if (value !== "") {
       setValue("tipoAtivo", value);
-      setTipoForm(e.target.value as "t" | "i" | "tl");
+      setTipoForm(e.target.value as TipoForm);
     } else {
       setValue("tipoAtivo", null);
       setTipoForm(null);
@@ -300,6 +318,55 @@ const AtivoForm = () => {
     }
   };
 
+  const onSubmitManutencao = (formData: FormDataManutencao) => {
+    let confirm = window.confirm("Deseja mesmo colocar este ativo em manutenção?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/ativos/manutencao/colocar",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          id: urlParams.id,
+          observacao: formData.observacoesManutencao,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Ativo colocado em manutenção.");
+          navigate("/gestao-inventario/ativo");
+        })
+        .catch(() => {
+          toast.error("Erro ao tentar colocar ativo em manutenção.");
+        });
+    }
+  };
+
+  const onSubmitRetirarManutencao = () => {
+    let confirm = window.confirm("Deseja mesmo retirar este ativo da manutenção?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: "/ativos/manutencao/retirar",
+        method: "POST",
+        withCredentials: true,
+        params: {
+          id: urlParams.id,
+        },
+      };
+
+      requestBackend(requestParams)
+        .then(() => {
+          toast.success("Ativo retirado da manutenção.");
+          navigate("/gestao-inventario/ativo");
+        })
+        .catch(() => {
+          toast.error("Erro ao tentar retirar ativo da manutenção.");
+        });
+    }
+  };
+
   const submitDesabilitar = () => {
     handleSubmitDesabilitar(onSubmitDesabilitar)();
   };
@@ -339,6 +406,7 @@ const AtivoForm = () => {
         // ----- [FIM] POSSÍVEIS ELEMENTOS NULOS [FIM] -----
 
         setValue("categoria", data.categoria);
+        setValue("numeroParte", data.numeroParte);
         setValue("codigoSerie", data.codigoSerie);
         if (data.codigoSerie === "N/A") {
           setCodigoSerieNA(true);
@@ -379,8 +447,42 @@ const AtivoForm = () => {
       .finally(() => {});
   }, [urlParams.id]);
 
-  const printQrCode = (image: string) => {
-    window.print();
+  const imprimirPdf = (pdfBlob: Blob) => {
+    const blobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: "application/pdf" }));
+
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = blobUrl;
+
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      iframe.contentWindow?.print();
+    };
+  };
+
+  const printQrCode = (ativo: AtivoType) => {
+    setLoadingPrint(true);
+
+    const urls: { [key: string]: string } = {
+      t: `/tangiveis/qrcode/${ativo.id}`,
+      i: `/intangiveis/qrcode/${ativo.id}`,
+      tl: `/tangiveis/locacao/qrcode/${ativo.id}`,
+    };
+
+    const requestParams: AxiosRequestConfig = {
+      url: urls[ativo.tipoAtivo],
+      method: "GET",
+      withCredentials: true,
+      responseType: "blob",
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        imprimirPdf(res.data);
+      })
+      .catch((err) => {})
+      .finally(() => setLoadingPrint(false));
   };
 
   useEffect(() => {
@@ -537,134 +639,192 @@ const AtivoForm = () => {
       {/* 
         MODAL PARA MOVIMENTAÇÃO DO ATIVO
       */}
-      <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container">
+      <Modal
+        open={openModal}
+        onClose={() => {
+          setOpenModal(false);
+          setTipoMovimentar(null);
+        }}
+        className="modal-container"
+      >
         <Box className="modal-content">
           <h2 style={{ textAlign: "center" }}>Movimentar ativo</h2>
-          <form className="formulario" onSubmit={handleSubmit(onSubmitMovimentacao)}>
-            <div className="div-input-formulario">
-              <div>
-                <span>Setor</span>
-                <span className="obrigatorio-ast">*</span>
-              </div>
-              <Controller
-                name="area"
-                control={control}
-                rules={{
-                  validate: (value) => (!isEditing || (value && value.id) ? true : "Campo obrigatório"),
-                }}
-                render={({ field }) => (
-                  <select
-                    id="area"
-                    className={`input-formulario ${errors.area ? "input-error" : ""}`}
-                    {...field}
-                    value={field.value?.id || ""}
-                    onChange={(e) => {
-                      const selectedId = Number(e.target.value);
-                      const selectedSetor = setores.find((a) => a.id === selectedId) as SetorType;
+          <div className="div-input-formulario">
+            <select
+              className={`input-formulario`}
+              name="tipo-movimentacao"
+              id="tipo-movimentacao"
+              onChange={(e) => setTipoMovimentar(e.target.value as TipoMovimentacao)}
+            >
+              <option value="">Selecione um tipo de movimentação</option>
+              <option value="MOVIMENTAR">Movimentação</option>
+              {!ativo?.manutencao && <option value="MANUTENÇÃO">Manutenção</option>}
+              {ativo?.manutencao && <option value="RETIRAR MANUTENÇÃO">Retirar da Manutenção</option>}
+              <option value="ESTOQUE">Estoque</option>
+            </select>
+          </div>
+          {tipoMovimentar === "MOVIMENTAR" && (
+            <form className="formulario" onSubmit={handleSubmit(onSubmitMovimentacao)}>
+              <div className="div-input-formulario">
+                <div>
+                  <span>Setor</span>
+                  <span className="obrigatorio-ast">*</span>
+                </div>
+                <Controller
+                  name="area"
+                  control={control}
+                  rules={{
+                    validate: (value) => (!isEditing || (value && value.id) ? true : "Campo obrigatório"),
+                  }}
+                  render={({ field }) => (
+                    <select
+                      id="area"
+                      className={`input-formulario ${errors.area ? "input-error" : ""}`}
+                      {...field}
+                      value={field.value?.id || ""}
+                      onChange={(e) => {
+                        const selectedId = Number(e.target.value);
+                        const selectedSetor = setores.find((a) => a.id === selectedId) as SetorType;
 
-                      field.onChange(selectedSetor || null);
-                      setSelectedSetor(selectedSetor);
-                      setLocalizacoes(selectedSetor ? selectedSetor.localizacoes : []);
-                    }}
-                  >
-                    <option value="">Selecione um setor</option>
-                    {setores &&
-                      setores.length > 0 &&
-                      setores.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.nome}
-                        </option>
-                      ))}
-                  </select>
-                )}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
-            </div>
-            <div className="div-input-formulario">
-              <span>Responsável</span>
-              <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
-            </div>
-            <div className="div-input-formulario">
-              <div>
-                <span>Localização</span>
-                <span className="obrigatorio-ast">*</span>
+                        field.onChange(selectedSetor || null);
+                        setSelectedSetor(selectedSetor);
+                        setLocalizacoes(selectedSetor ? selectedSetor.localizacoes : []);
+                      }}
+                    >
+                      <option value="">Selecione um setor</option>
+                      {setores &&
+                        setores.length > 0 &&
+                        setores.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.nome}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                />
+                <div className="invalid-feedback d-block div-erro">{errors.area?.message}</div>
               </div>
-              <Controller
-                name="localizacao"
-                control={control}
-                rules={{
-                  validate: (value) => (isEditing && selectedSetor && value && value.id ? true : "Campo obrigatório"),
-                }}
-                render={({ field }) => (
-                  <select
-                    id="localizacao"
-                    className={`input-formulario ${errors.localizacao ? "input-error" : ""}`}
-                    {...field}
-                    value={field.value?.id || ""}
-                    onChange={(e) => {
-                      const selectedId = Number(e.target.value);
-                      const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
-
-                      field.onChange(selectedLocalizacao || null);
-                    }}
-                  >
-                    <option value="">Selecione uma localização</option>
-                    {localizacoes &&
-                      localizacoes.length > 0 &&
-                      localizacoes.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.nome}
-                        </option>
-                      ))}
-                  </select>
-                )}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.localizacao?.message}</div>
-            </div>
-            <div className="div-input-formulario">
-              <div>
-                <span>Usuário responsável</span>
-                <span className="obrigatorio-ast">*</span>
+              <div className="div-input-formulario">
+                <span>Responsável</span>
+                <input type="text" className={`input-formulario disabled-field`} disabled={true} value={selectedSetor?.responsavel} />
               </div>
-              <Controller
-                name="usuarioResponsavel"
-                control={control}
-                rules={{
-                  required: "Campo obrigatório",
-                }}
-                render={({ field }) => (
-                  <select
-                    id="usuarioResponsavel"
-                    className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
-                    {...field}
-                    value={field.value?.id || ""}
-                    onChange={(e) => {
-                      const selectedId = Number(e.target.value);
-                      const selectedUsuarioResponsavel = usuariosResponsaveis.find((a) => a.id === selectedId);
+              <div className="div-input-formulario">
+                <div>
+                  <span>Localização</span>
+                  <span className="obrigatorio-ast">*</span>
+                </div>
+                <Controller
+                  name="localizacao"
+                  control={control}
+                  rules={{
+                    validate: (value) => (isEditing && selectedSetor && value && value.id ? true : "Campo obrigatório"),
+                  }}
+                  render={({ field }) => (
+                    <select
+                      id="localizacao"
+                      className={`input-formulario ${errors.localizacao ? "input-error" : ""}`}
+                      {...field}
+                      value={field.value?.id || ""}
+                      onChange={(e) => {
+                        const selectedId = Number(e.target.value);
+                        const selectedLocalizacao = localizacoes.find((a) => a.id === selectedId);
 
-                      field.onChange(selectedUsuarioResponsavel || null);
-                    }}
-                  >
-                    <option value="">Selecione um usuário responsável</option>
-                    {usuariosResponsaveis &&
-                      usuariosResponsaveis.length > 0 &&
-                      usuariosResponsaveis.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.nome}
-                        </option>
-                      ))}
-                  </select>
-                )}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
-            </div>
+                        field.onChange(selectedLocalizacao || null);
+                      }}
+                    >
+                      <option value="">Selecione uma localização</option>
+                      {localizacoes &&
+                        localizacoes.length > 0 &&
+                        localizacoes.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.nome}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                />
+                <div className="invalid-feedback d-block div-erro">{errors.localizacao?.message}</div>
+              </div>
+              <div className="div-input-formulario">
+                <div>
+                  <span>Usuário responsável</span>
+                  <span className="obrigatorio-ast">*</span>
+                </div>
+                <Controller
+                  name="usuarioResponsavel"
+                  control={control}
+                  rules={{
+                    required: "Campo obrigatório",
+                  }}
+                  render={({ field }) => (
+                    <select
+                      id="usuarioResponsavel"
+                      className={`input-formulario ${errors.usuarioResponsavel ? "input-error" : ""}`}
+                      {...field}
+                      value={field.value?.id || ""}
+                      onChange={(e) => {
+                        const selectedId = Number(e.target.value);
+                        const selectedUsuarioResponsavel = usuariosResponsaveis.find((a) => a.id === selectedId);
+
+                        field.onChange(selectedUsuarioResponsavel || null);
+                      }}
+                    >
+                      <option value="">Selecione um usuário responsável</option>
+                      {usuariosResponsaveis &&
+                        usuariosResponsaveis.length > 0 &&
+                        usuariosResponsaveis.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.nome}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                />
+                <div className="invalid-feedback d-block div-erro">{errors.usuarioResponsavel?.message}</div>
+              </div>
+              <div className="form-bottom">
+                <div className="legenda">* Campos obrigatórios</div>
+                <div className="form-buttons">
+                  <button className="button submit-button">Salvar</button>
+                </div>
+              </div>
+            </form>
+          )}
+          {tipoMovimentar === "MANUTENÇÃO" && (
+            <form className="formulario" onSubmit={handleSubmitManutencao(onSubmitManutencao)}>
+              <div className="div-input-formulario text-area-formulario">
+                <div>
+                  <span>Observações</span>
+                  <span className="obrigatorio-ast">*</span>
+                </div>
+                <textarea
+                  id="observacoesManutencao"
+                  className={`input-formulario ${errors.descricao ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
+                  rows={4}
+                  {...registerManutencao("observacoesManutencao", {
+                    required: "Campo obrigatório",
+                  })}
+                  maxLength={255}
+                ></textarea>
+                <div className="invalid-feedback d-block div-erro">{errors.descricao?.message}</div>
+              </div>
+              <div className="form-bottom">
+                <div className="legenda">* Campos obrigatórios</div>
+                <div className="form-buttons">
+                  <button className="button submit-button">Salvar</button>
+                </div>
+              </div>
+            </form>
+          )}
+          {tipoMovimentar === "RETIRAR MANUTENÇÃO" && (
             <div className="form-bottom">
-              <div className="legenda">* Campos obrigatórios</div>
               <div className="form-buttons">
-                <button className="button submit-button">Salvar</button>
+                <button className="button submit-button" onClick={onSubmitRetirarManutencao}>
+                  Salvar
+                </button>
               </div>
             </div>
-          </form>
+          )}
         </Box>
       </Modal>
 
@@ -773,20 +933,31 @@ const AtivoForm = () => {
                   <div className="content-container bg-card-container">
                     <span className="form-title">Informações do Ativo</span>
                     <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
-                      <div className="div-input-formulario text-area-formulario">
+                      <div className="div-input-formulario w-100">
                         <div>
                           <span>Nome</span>
                           <span className="obrigatorio-ast">*</span>
                         </div>
-                        <textarea
+                        <input
                           id="descricao"
-                          className={`input-formulario ${errors.descricao ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
-                          rows={4}
+                          className={`input-formulario ${errors.descricao ? "input-error" : ""} ${isEditing ? "disabled-field" : ""}`}
+                          type="text"
                           {...register("descricao", { required: "Campo obrigatório" })}
                           maxLength={255}
-                          disabled={desabilitado}
-                        ></textarea>
+                          disabled={isEditing}
+                        />
                         <div className="invalid-feedback d-block div-erro">{errors.descricao?.message}</div>
+                      </div>
+                      <div className="div-input-formulario text-area-formulario">
+                        <span>Descrição</span>
+                        <textarea
+                          id="observacoes"
+                          className={`input-formulario ${isEditing ? "disabled-field" : ""}`}
+                          rows={4}
+                          {...register("observacoes")}
+                          maxLength={255}
+                          disabled={isEditing}
+                        ></textarea>
                       </div>
                       <div className="row-input-fields">
                         <div className="div-input-formulario">
@@ -797,13 +968,13 @@ const AtivoForm = () => {
                           <input
                             type="text"
                             className={`input-formulario ${errors.idPatrimonial ? "input-error" : ""} ${
-                              gerarIdPatrimonial || desabilitado ? "disabled-field" : ""
+                              gerarIdPatrimonial || isEditing ? "disabled-field" : ""
                             }`}
                             {...register("idPatrimonial", {
                               required: gerarIdPatrimonial ? false : "Campo obrigatório",
                             })}
                             maxLength={255}
-                            disabled={gerarIdPatrimonial || desabilitado}
+                            disabled={gerarIdPatrimonial || isEditing}
                           />
                           <div className="invalid-feedback d-block div-erro">{errors.idPatrimonial?.message}</div>
                         </div>
@@ -842,10 +1013,10 @@ const AtivoForm = () => {
                           render={({ field }) => (
                             <select
                               id="categoria"
-                              className={`input-formulario ${errors.categoria ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
+                              className={`input-formulario ${errors.categoria ? "input-error" : ""} ${isEditing ? "disabled-field" : ""}`}
                               {...field}
                               value={field.value}
-                              disabled={desabilitado}
+                              disabled={isEditing}
                             >
                               <option value="">Selecione uma categoria</option>
                               <option value="ELETRONICO">Eletrônico</option>
@@ -880,7 +1051,7 @@ const AtivoForm = () => {
                           render={({ field }) => (
                             <select
                               id="contrato"
-                              className={`input-formulario ${errors.contrato ? "input-error" : ""} ${desabilitado ? "disabled-field" : ""}`}
+                              className={`input-formulario ${errors.contrato ? "input-error" : ""} ${isEditing ? "disabled-field" : ""}`}
                               {...field}
                               value={field.value === null ? "-1" : field.value?.id?.toString()}
                               onChange={(e) => {
@@ -909,7 +1080,7 @@ const AtivoForm = () => {
                                   field.onChange(sContrato);
                                 }
                               }}
-                              disabled={desabilitado}
+                              disabled={isEditing}
                             >
                               <option value="">Selecione um contrato</option>
                               {contratos &&
@@ -1000,11 +1171,9 @@ const AtivoForm = () => {
                         <input
                           type="date"
                           defaultValue={new Date().toISOString().split("T")[0]}
-                          className={`input-formulario data-input ${errors.dataAquisicao ? "input-error" : ""} ${
-                            desabilitado ? "disabled-field" : ""
-                          }`}
+                          className={`input-formulario data-input ${errors.dataAquisicao ? "input-error" : ""} ${isEditing ? "disabled-field" : ""}`}
                           {...register("dataAquisicao", { required: "Campo obrigatório" })}
-                          disabled={desabilitado}
+                          disabled={isEditing}
                         />
                         <div className="invalid-feedback d-block div-erro">{errors.dataAquisicao?.message}</div>
                       </div>
@@ -1023,12 +1192,10 @@ const AtivoForm = () => {
                             render={({ field }) => (
                               <select
                                 id="estadoConservacao"
-                                className={`input-formulario ${errors.estadoConservacao ? "input-error" : ""} ${
-                                  desabilitado ? "disabled-field" : ""
-                                }`}
+                                className={`input-formulario ${errors.estadoConservacao ? "input-error" : ""} ${isEditing ? "disabled-field" : ""}`}
                                 {...field}
                                 value={field.value}
-                                disabled={desabilitado}
+                                disabled={isEditing}
                               >
                                 <option value="">Selecione um estado de conservação</option>
                                 <option value="Novo">Novo</option>
@@ -1041,21 +1208,36 @@ const AtivoForm = () => {
                           <div className="invalid-feedback d-block div-erro">{errors.estadoConservacao?.message}</div>
                         </div>
                       )}
+                      {tipoForm !== "i" && (
+                        <div className="div-input-formulario">
+                          <div>
+                            <span>PartNumber (PN)</span>
+                          </div>
+                          <input
+                            type="text"
+                            className={`input-formulario ${errors.numeroParte ? "input-error" : ""} ${isEditing ? "disabled-field" : ""}`}
+                            {...register("numeroParte")}
+                            maxLength={255}
+                            disabled={isEditing}
+                          />
+                          <div className="invalid-feedback d-block div-erro">{errors.numeroParte?.message}</div>
+                        </div>
+                      )}
                       <div className="div-input-formulario"></div>
                       <div className="row-input-fields w-100">
                         <div className="div-input-formulario">
                           <div>
-                            <span>Código de série</span>
+                            <span>Número de série</span>
                             <span className="obrigatorio-ast">*</span>
                           </div>
                           <input
                             type="text"
                             className={`input-formulario ${errors.codigoSerie ? "input-error" : ""} 
-                              ${desabilitado ? "disabled-field" : ""} 
+                              ${isEditing ? "disabled-field" : ""} 
                               ${codigoSerieNA || codigoSerieAtivoNuvem ? "disabled-field" : ""}`}
                             {...register("codigoSerie", { required: "Campo obrigatório" })}
                             maxLength={255}
-                            disabled={desabilitado || codigoSerieNA || codigoSerieAtivoNuvem}
+                            disabled={isEditing || codigoSerieNA || codigoSerieAtivoNuvem}
                           />
                           <div className="invalid-feedback d-block div-erro">{errors.codigoSerie?.message}</div>
                         </div>
@@ -1077,7 +1259,7 @@ const AtivoForm = () => {
                                 resetField("codigoSerie");
                               }
                             }}
-                            disabled={codigoSerieAtivoNuvem}
+                            disabled={codigoSerieAtivoNuvem || isEditing}
                           />
                         </div>
                         {tipoForm === "i" && (
@@ -1099,26 +1281,15 @@ const AtivoForm = () => {
                                   resetField("codigoSerie");
                                 }
                               }}
-                              disabled={codigoSerieNA}
+                              disabled={codigoSerieNA || isEditing}
                             />
                           </div>
                         )}
                       </div>
-                      <div className="div-input-formulario text-area-formulario">
-                        <span>Descrição/Observações</span>
-                        <textarea
-                          id="observacoes"
-                          className={`input-formulario ${desabilitado ? "disabled-field" : ""}`}
-                          rows={4}
-                          {...register("observacoes")}
-                          maxLength={255}
-                          disabled={desabilitado}
-                        ></textarea>
-                      </div>
                       <div className="form-bottom">
                         <div className="legenda">* Campos obrigatórios</div>
                         <div className="form-buttons">
-                          <button className={`button submit-button ${desabilitado ? "disabled-field" : ""}`} disabled={desabilitado}>
+                          <button className={`button submit-button ${isEditing ? "disabled-field" : ""}`} disabled={isEditing}>
                             Salvar
                           </button>
                         </div>
@@ -1179,9 +1350,6 @@ const AtivoForm = () => {
                   )}
                 </>
               </div>
-              {/* 
-              OMITIDO PARA FINS DE APRESENTAÇÃO DAS HISTÓRIAS DE USUÁRIO DE CADASTRO DO ATIVO
-              
               <div className="page-side-section">
                 <div className="content-container">
                   <span className="form-title">Histórico do Ativo</span>
@@ -1195,13 +1363,19 @@ const AtivoForm = () => {
                 </div>
                 {ativo && (
                   <div className="content-container qr-container">
-                    <button onClick={() => printQrCode(ativo.qrCodeImage)} type="button" className="print-button">
-                      <i className="bi bi-printer print-qr-code-icon" />
-                    </button>
+                    {loadingPrint ? (
+                      <div className="loading-div" style={{ marginBottom: "10px", height: "40px" }}>
+                        <Loader />
+                      </div>
+                    ) : (
+                      <button onClick={() => printQrCode(ativo)} type="button" className="print-button">
+                        <i className="bi bi-printer print-qr-code-icon" />
+                      </button>
+                    )}
                     <img className="qr-image" src={`data:image/png;base64,${ativo.qrCodeImage}`} alt="QRCode" />
                   </div>
                 )}
-              </div> */}
+              </div>
             </div>
           )}
         </>

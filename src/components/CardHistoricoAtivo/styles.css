@@ -54,7 +54,7 @@
 }
 
 .registro-icon {
-  background-color: #00A0EB;
+  background-color: #00a0eb;
 }
 
 .atualizacao-icon {
@@ -66,7 +66,7 @@
 }
 
 .movimentacao-icon {
-  background-color: #00963E;
+  background-color: #00963e;
 }
 
 .desabilitar-icon {
@@ -91,4 +91,12 @@
 
 .arquivo-excluido-icon {
   background-color: #ff1629;
+}
+
+.em-manutencao-icon {
+  background-color: #a50b00;
+}
+
+.retirado-manutencao-icon {
+  background-color: #00a560;
 }

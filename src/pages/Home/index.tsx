@@ -1,27 +1,29 @@
 import "./styles.css";
 import { AxiosRequestConfig } from "axios";
 import { useEffect, useState } from "react";
-import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
-import { QuantidadeAtivosType } from "@/types/qtdativos";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import { requestBackend } from "@/utils/requests";
+import { usePhotoCapture } from "@/utils/hooks/usePhotoCapture";
+import { useBarcodeScanner } from "@/utils/hooks/useBarcodeScanner";
+import { getOS } from "@/utils/storage";
+import { fetchAllAtivosRecentes, fetchAllNotificacoes } from "@/utils/functions";
+
 import CardAtivoQtd from "@/components/CardAtivoQtd";
 import CardNotificacao from "@/components/CardNotificacao";
 import CardAtivoRecente from "@/components/CardAtivoRecente";
 import CNSkeletonLoader from "@/components/CardNotificacao/CNSkeletonLoader";
 import CAQSkeletonLoader from "@/components/CardAtivoQtd/CAQSkeletonLoader";
 import CARSkeletonLoader from "@/components/CardAtivoRecente/CARSkeletonLoader";
-import { Link } from "react-router-dom";
+import PhotoCaptureModal from "@/components/PhotoCaptureModal";
+
 import { NotificacaoType } from "@/types/notificacao";
-import { fetchAllAtivosRecentes, fetchAllNotificacoes, tiposAtivo } from "@/utils/functions";
 import { TipoNotificacao } from "@/types/tiponotificacao";
 import { TipoAtivoType } from "@/types/tipoativo";
 import { AtivoType } from "@/types/ativo";
-import { CategoriaType } from "@/types/categoria";
-import PhotoCaptureModal from "@/components/PhotoCaptureModal";
-import { usePhotoCapture } from "@/utils/hooks/usePhotoCapture";
-import { useBarcodeScanner } from "@/utils/hooks/useBarcodeScanner";
-import { useNavigate } from "react-router-dom";
-import { getOS } from "@/utils/storage";
+import { QuantidadeAtivosType } from "@/types/qtdativos";
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
@@ -167,9 +169,11 @@ const Home = () => {
                 Adicionar Ativo
               </button>
             </Link>
-            <button type="button" className="button general-button auto-width pd-2">
-              Gerar Relatório
-            </button>
+            <Link to={"/gestao-inventario/relatorios"}>
+              <button type="button" className="button general-button auto-width pd-2">
+                Gerar Relatório
+              </button>
+            </Link>
           </>
         )}
         {(os === "Android" || os === "iOS") && (
@@ -261,15 +265,9 @@ const Home = () => {
             <CARSkeletonLoader />
           ) : recentes.length > 0 ? (
             recentes
+              .sort((a, b) => b.id - a.id)
               .slice(0, 3)
-              .map((r) => (
-                <CardAtivoRecente
-                  idAtivo={r.id}
-                  mensagem={r.descricao}
-                  tipoAtivo={tiposAtivo[r.tipoAtivo] as TipoAtivoType}
-                  categoria={r.categoria as CategoriaType}
-                />
-              ))
+              .map((r) => <CardAtivoRecente ativo={r} />)
           ) : (
             <div className="section-subtitle">
               <span>Sem ativos recentes...</span>

@@ -18,6 +18,7 @@ export type AtivoType = {
   contrato: ContratoType;
   dataAquisicao: string;
   codigoSerie: string;
+  numeroParte: string;
   observacoes: string;
   linkDocumento: string;
   estadoConservacao: string;
@@ -27,6 +28,9 @@ export type AtivoType = {
   desabilitado: boolean;
   descartado: boolean;
   devolvido: boolean;
+  estoque: boolean;
+  manutencao: boolean;
+  observacoesManutencao: string;
   razaoDesabilitado: string;
   observacoesDesabilitado: string;
   imagens: Imagem[];

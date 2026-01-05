@@ -32,6 +32,7 @@ const GerenciarContrato = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [contratoId, setContratoId] = useState<number>();
+  const [tipoContrato, setTipoContrato] = useState<"OS" | "AF" | "CT" | null>(null);
 
   const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
 
@@ -89,6 +90,7 @@ const GerenciarContrato = () => {
 
   const onSubmit = (formData: FormData) => {
     let numeroContrato = formData.prefixoTipoContrato + formData.numeroContrato;
+    let fimContrato = formData.fimDataVigencia;
 
     const requestParams: AxiosRequestConfig = {
       url: isEditing ? `/contratos/update/${contratoId}` : "/contratos/register",
@@ -99,7 +101,7 @@ const GerenciarContrato = () => {
         objetoContrato: formData.objetoContrato,
         descricao: formData.descricao,
         inicioDataVigencia: formData.inicioDataVigencia,
-        fimDataVigencia: formData.fimDataVigencia,
+        fimDataVigencia: tipoContrato !== "CT" ? null : fimContrato,
         termoParceria: user.termoParceria,
         fornecedor: formData.fornecedor,
       },
@@ -168,6 +170,8 @@ const GerenciarContrato = () => {
     let numero = contrato.numeroContrato.substring(2, lengthNumeroContrato);
 
     setValue("prefixoTipoContrato", prefixo);
+    setTipoContrato(prefixo as "CT" | "AF" | "OS");
+
     setValue("numeroContrato", numero);
     setValue("objetoContrato", contrato.objetoContrato);
     setValue("descricao", contrato.descricao);
@@ -328,7 +332,7 @@ const GerenciarContrato = () => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={5}>
                     <TablePagination
                       className="table-pagination-container"
                       component="div"
@@ -378,7 +382,10 @@ const GerenciarContrato = () => {
                         id="prefixo-numero-contrato"
                         {...field}
                         value={field.value}
-                        onChange={(e) => field.onChange(e)}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setTipoContrato(e.target.value as "OS" | "CT" | "AF");
+                        }}
                       >
                         <option value="">Tipo</option>
                         <option value="OS">OS</option>
@@ -474,31 +481,33 @@ const GerenciarContrato = () => {
               />
               <div className="invalid-feedback d-block div-erro">{errors.inicioDataVigencia?.message}</div>
             </div>
-            <div className="div-input-formulario">
-              <div>
-                <span>Fim da vigência</span>
-                <span className="obrigatorio-ast">*</span>
+            {tipoContrato === "CT" && (
+              <div className="div-input-formulario">
+                <div>
+                  <span>Fim da vigência</span>
+                  <span className="obrigatorio-ast">*</span>
+                </div>
+                <input
+                  type="date"
+                  className={`input-formulario data-input ${errors.fimDataVigencia ? "input-error" : ""}`}
+                  min={"2003-11-05"}
+                  {...register("fimDataVigencia", {
+                    required: tipoContrato !== "CT" ? false : "Campo obrigatório",
+                    validate: (value) => {
+                      const inicio = new Date(inicioVigencia);
+                      const fim = new Date(value);
+
+                      if (isNaN(fim.getTime())) return "Data inválida";
+                      if (isNaN(inicio.getTime())) return "Preencha a data de início";
+                      if (fim <= inicio) return "A data final deve ser pelo menos 1 dia após a data de início";
+
+                      return true;
+                    },
+                  })}
+                />
+                <div className="invalid-feedback d-block div-erro">{errors.fimDataVigencia?.message}</div>
               </div>
-              <input
-                type="date"
-                className={`input-formulario data-input ${errors.fimDataVigencia ? "input-error" : ""}`}
-                min={"2003-11-05"}
-                {...register("fimDataVigencia", {
-                  required: "Campo obrigatório",
-                  validate: (value) => {
-                    const inicio = new Date(inicioVigencia);
-                    const fim = new Date(value);
-
-                    if (isNaN(fim.getTime())) return "Data inválida";
-                    if (isNaN(inicio.getTime())) return "Preencha a data de início";
-                    if (fim <= inicio) return "A data final deve ser pelo menos 1 dia após a data de início";
-
-                    return true;
-                  },
-                })}
-              />
-              <div className="invalid-feedback d-block div-erro">{errors.fimDataVigencia?.message}</div>
-            </div>
+            )}
             <div className="div-input-formulario">
               <div>
                 <span>Objeto do Contrato</span>

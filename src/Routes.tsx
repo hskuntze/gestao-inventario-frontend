@@ -18,6 +18,7 @@ import PageUsuario from "./pages/Usuario";
 import { hasAnyRoles } from "./utils/auth";
 import TrocarSenha from "./pages/TrocarSenha";
 import EsqueciMinhaSenha from "./pages/EsqueciMinhaSenha";
+import Relatorios from "./pages/Relatorios";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -210,6 +211,21 @@ const Routes = () => {
                 isFirstAccess={isFirstAccess}
               >
                 <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/relatorios/*"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                  { id: 3, autorizacao: "PERFIL_GERENTE" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <Relatorios />
               </PrivateRoute>
             }
           />

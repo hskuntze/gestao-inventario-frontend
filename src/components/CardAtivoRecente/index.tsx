@@ -1,15 +1,12 @@
-import { CategoriaType } from "@/types/categoria";
 import "./styles.css";
-import { TipoAtivoType } from "@/types/tipoativo";
+import { AtivoType } from "@/types/ativo";
+import { Link } from "react-router-dom";
 
 interface Props {
-  idAtivo: number;
-  tipoAtivo: TipoAtivoType;
-  categoria: CategoriaType;
-  mensagem: string;
+  ativo: AtivoType;
 }
 
-const CardAtivoRecente = ({ idAtivo, mensagem, categoria, tipoAtivo }: Props) => {
+const CardAtivoRecente = ({ ativo }: Props) => {
   const iconeAtivo: { [key: string]: string } = {
     ACESSORIO: "bi bi-easel",
     ELETRONICO: "bi bi-phone",
@@ -20,14 +17,15 @@ const CardAtivoRecente = ({ idAtivo, mensagem, categoria, tipoAtivo }: Props) =>
   };
 
   return (
-    <div className="card-ativo-recente-container">
+    <Link to={`/gestao-inventario/ativo/formulario/${ativo.id}`} className="card-ativo-recente-container">
       <div className="card-icon-white">
-        <i className={iconeAtivo[categoria]} />
+        <i className={iconeAtivo[ativo.categoria]} />
       </div>
       <div className="card-info">
-        <span className="card-title">{mensagem}</span>
+        <span className="card-title">{ativo.descricao}</span>
+        <span>Patrimônio: {ativo.idPatrimonial}</span>
       </div>
-    </div>
+    </Link>
   );
 };
 
