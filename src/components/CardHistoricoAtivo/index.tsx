@@ -20,6 +20,10 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     "ARQUIVO EXCLUÍDO": "bi bi-file-earmark-minus arquivo-excluido-icon",
     "EM MANUTENÇÃO": "bi bi bi-wrench-adjustable-circle em-manutencao-icon",
     "RETIRADO MANUTENÇÃO": "bi bi-wrench-adjustable-circle-fill retirado-manutencao-icon",
+    "SOLICITAÇÃO CRIADA": "bi bi-file-plus-fill solicitacao-criada-icon",
+    "SOLICITAÇÃO APROVADA": "bi bi-file-check-fill solicitacao-aprovada-icon",
+    "SOLICITAÇÃO RECUSADA": "bi bi-file-x-fill solicitacao-recusada-icon",
+    "SOLICITAÇÃO CANCELADA": "bi bi-folder-fill solicitacao-cancelada-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -32,9 +36,13 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DESCARTAR: "Ativo descartado",
     DEVOLVER: "Ativo devolvido",
     "ARQUIVO INSERIDO": "Arquivo(s) inserido(s)",
-    "ARQUIVO EXCLUÍDO": "Arquivo(s) excluído(s)",
+    "ARQUIVO EXCLUÍDO": "Arquivo excluído",
     "EM MANUTENÇÃO": "Ativo em manutenção",
     "RETIRADO MANUTENÇÃO": "Ativo retirado da manutenção",
+    "SOLICITAÇÃO CRIADA": "Solicitação criada",
+    "SOLICITAÇÃO APROVADA": "Solicitação aprovada",
+    "SOLICITAÇÃO RECUSADA": "Solicitação recusada",
+    "SOLICITAÇÃO CANCELADA": "Solicitação cancelada",
   };
 
   return (
@@ -45,7 +53,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
       <div className="historico-content">
         <span className="historico-content-title">{labels[element.operacao]}</span>
         <span className="historico-content-info">{formatarData(element.createdAt)}</span>
-        {element.operacao === "REGISTRO" && (
+        {(element.operacao === "REGISTRO" || element.operacao === "DEVOLVER") && (
           <>
             <span className="historico-content-info">Setor: {element.area ?? "Sem setor"}</span>
             <span className="historico-content-info">Localização: {element.localizacao ?? "Sem localização"}</span>

@@ -100,6 +100,16 @@ const Navbar = () => {
                     <i className="bi bi-bell-fill" />
                     <span>Notificações</span>
                   </Link>
+
+                  <Link to={"/gestao-inventario/usuario"} type="button" className="configuration-button">
+                    <i className="bi bi-person-lines-fill" />
+                    <span>Meus Ativos</span>
+                  </Link>
+
+                  <Link to={"/gestao-inventario/solicitacao"} type="button" className="configuration-button">
+                    <i className="bi bi-list-ul" />
+                    <span>Solicitações</span>
+                  </Link>
                 </div>
               </>
             )}

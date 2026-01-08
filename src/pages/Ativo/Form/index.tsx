@@ -890,7 +890,7 @@ const AtivoForm = () => {
         </Box>
       </Modal>
 
-      {/* Photo capture preview/confirm modal (native camera preview handled by Capacitor) */}
+      {/* MODAL PARA CAPTURA DE FOTO E PREVIEW (preview nativo da câmera gerenciado pelo Capacitor) */}
       <PhotoCaptureModal
         isOpen={photoModalOpen}
         photoBase64={photoBase64}

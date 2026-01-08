@@ -20,6 +20,7 @@
   --border-input-color: #6a6b6e;
   --border-color: #1a425a;
   --border-error-color: #e60109;
+  --border-card-color: #004e6e;
 
   --submit-button-color: #009fe3;
   --submit-button-hover-color: #006996;
@@ -59,6 +60,7 @@
   --border-input-color: #8e8e8f;
   --border-color: #8e8e8f;
   --border-error-color: #d8262c;
+  --border-card-color: #b3d7e6;
 
   --submit-button-color: #17c200;
   --submit-button-hover-color: #119600;

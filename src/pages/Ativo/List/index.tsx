@@ -687,7 +687,6 @@ const AtivoList = () => {
                   {paginatedData.length > 0 ? (
                     paginatedData
                       .filter((a) => !a.desabilitado)
-                      .filter((a) => !a.devolvido)
                       .map((a) => (
                         <tr
                           key={a.id}

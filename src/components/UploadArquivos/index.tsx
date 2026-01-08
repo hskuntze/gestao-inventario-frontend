@@ -123,7 +123,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
 
     try {
       await requestBackend({
-        url: "/imagens/upload-multiplo",
+        url: "/arquivos/upload-multiplo",
         method: "POST",
         data: formData,
         withCredentials: true,
@@ -162,7 +162,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
     try {
       if (confirm) {
         const requestParams: AxiosRequestConfig = {
-          url: `/imagens/delete/${file.id}`,
+          url: `/arquivos/delete/${file.id}`,
           method: "DELETE",
           withCredentials: true,
         };

@@ -100,3 +100,19 @@
 .retirado-manutencao-icon {
   background-color: #00a560;
 }
+
+.solicitacao-criada-icon {
+  background-color: #0076a5;
+}
+
+.solicitacao-aprovada-icon {
+  background-color: #046d16;
+}
+
+.solicitacao-recusada-icon {
+  background-color: #ff1629;
+}
+
+.solicitacao-cancelada-icon {
+  background-color: #530530;
+}

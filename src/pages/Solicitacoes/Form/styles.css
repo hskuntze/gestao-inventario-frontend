@@ -1,0 +1,39 @@
+.cadastro-solicitacao-sucesso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  width: 100%;
+  height: 200px;
+}
+
+.mensagem-cadastro-sucesso {
+  background-color: rgba(29, 192, 29, 0.349);
+  border: 1px solid green;
+  color: var(--text-color);
+  font-size: 17px;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.mensagem-info-sucesso {
+  color: var(--text-info-color);
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.botoes-cadastro-sucesso {
+  display: flex;
+  width: 260px;
+}
+
+.botoes-cadastro-sucesso button {
+  margin: 10px 5px;
+}

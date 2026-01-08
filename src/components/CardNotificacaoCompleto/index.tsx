@@ -19,6 +19,7 @@ const CardNotificacaoCompleto = ({ notificacao }: Props) => {
     ALERTA: "bi bi-exclamation-diamond",
     GARANTIA: "bi bi-calendar-event",
     EXPIRADO: "bi bi-calendar-x",
+    SOLICITACAO: "bi bi-bell",
   };
 
   const handleMakeAsRead = (notificacao: NotificacaoType) => {

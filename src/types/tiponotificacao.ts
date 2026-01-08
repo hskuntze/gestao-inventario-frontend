@@ -1,1 +1,1 @@
-export type TipoNotificacao = "EXPIRADO" | "ALERTA" | "GARANTIA";
+export type TipoNotificacao = "EXPIRADO" | "ALERTA" | "GARANTIA" | "SOLICITACAO";

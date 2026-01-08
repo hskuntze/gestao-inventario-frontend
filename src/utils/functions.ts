@@ -54,6 +54,21 @@ export function formatarDataParaMesAno(dataStr: string): string {
   }
 }
 
+export function formatarDataParaDiaMesAno(dataStr: string): string {
+  if (dataStr !== "" && dataStr !== "-") {
+    const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+    const data = new Date(dataStr);
+    const dia = data.getDay();
+    const mes = meses[data.getMonth()];
+    const ano = data.getFullYear();
+
+    return `${dia} ${mes}, ${ano}`;
+  } else {
+    return "-";
+  }
+}
+
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
     PERFIL_ADMIN: "Administrador do Sistema",

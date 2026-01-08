@@ -174,6 +174,11 @@ const Home = () => {
                 Gerar Relatório
               </button>
             </Link>
+            <Link to={"/gestao-inventario/solicitacao/formulario/create"}>
+              <button type="button" className="button general-button auto-width pd-2">
+                Solicitar Ativo
+              </button>
+            </Link>
           </>
         )}
         {(os === "Android" || os === "iOS") && (

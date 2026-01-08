@@ -1,7 +1,7 @@
 import { SetorType } from "./area";
 import { ContratoType } from "./contrato";
 import { FornecedorType } from "./fornecedor";
-import { Imagem } from "./imagem";
+import { Arquivo } from "./arquivo";
 import { LocalizacaoType } from "./localizacao";
 import { UsuarioResponsavelType } from "./usuario_responsavel";
 
@@ -33,7 +33,7 @@ export type AtivoType = {
   observacoesManutencao: string;
   razaoDesabilitado: string;
   observacoesDesabilitado: string;
-  imagens: Imagem[];
+  imagens: Arquivo[];
   dataDevolucaoPrevista?: string;
   dataDevolucaoRealizada?: string;
   termoParceria: string;
