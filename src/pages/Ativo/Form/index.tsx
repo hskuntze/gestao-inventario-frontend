@@ -124,7 +124,6 @@ const AtivoForm = () => {
 
   const {
     register: registerManutencao,
-    formState: { errors: errorsManutencao },
     handleSubmit: handleSubmitManutencao,
   } = useForm<FormDataManutencao>();
 
@@ -402,6 +401,7 @@ const AtivoForm = () => {
         setValue("localizacao", data.localizacao);
         setValue("contrato", data.contrato);
         setValue("fornecedor", data.fornecedor);
+        console.log("fornecedor", data.fornecedor);
         setValue("usuarioResponsavel", data.usuarioResponsavel);
 
         setValue("dataDevolucaoPrevista", data.dataDevolucaoPrevista ?? "");
@@ -607,6 +607,15 @@ const AtivoForm = () => {
             <Link to="/gestao-inventario/ativo" type="button" className="voltar-button">
               Voltar
             </Link>
+            {!isEditing && (
+              <div className="acoes-button">
+                <Link to="/gestao-inventario/ativo/formulario/lote/create">
+                  <button className="acoes-toggle auto-width" type="button">
+                    Adicionar em Lote
+                  </button>
+                </Link>
+              </div>
+            )}
             {isEditing && (
               <div className="acoes-button" ref={acoesDropdownRef}>
                 {!desabilitado && (
@@ -1293,7 +1302,7 @@ const AtivoForm = () => {
                             <span>Ativação realizada na Nuvem</span>
                             <input
                               type="checkbox"
-                              id="check-codigo-na"
+                              id="check-ativo-nuvem"
                               className={`checkbox-input-formulario`}
                               checked={codigoSerieAtivoNuvem}
                               onChange={(e) => {
