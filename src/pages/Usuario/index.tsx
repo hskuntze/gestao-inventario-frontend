@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx-js-style";
 import jsPDF from "jspdf";
 import { formatarData } from "@/utils/functions";
+import { toast } from "react-toastify";
 
 const tiposAtivo: { [key: string]: string } = {
   t: "TANGÍVEL",
@@ -200,7 +201,8 @@ const PageUsuario = () => {
           setAtivos(res.data as AtivoType[]);
         })
         .catch((err) => {
-          console.log(err);
+          const errorMsg = (err as Error).message || "Erro desconhecido ao carregar ativos";
+          toast.error(errorMsg);
         })
         .finally(() => {
           setLoading(false);

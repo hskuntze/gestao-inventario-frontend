@@ -55,6 +55,7 @@ type FormData = {
   dataDevolucaoPrevista: string;
   dataDevolucaoRealizada: string;
   termoParceria: string;
+  passivelEmprestimo: boolean;
 };
 
 type FormDataDesabilitar = {
@@ -94,6 +95,7 @@ const AtivoForm = () => {
 
   const [selectedSetor, setSelectedSetor] = useState<SetorType>();
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
+  const [checkPassivelEmprestimo, setCheckPassivelEmprestimo] = useState<boolean>(false);
   const [codigoSerieNA, setCodigoSerieNA] = useState<boolean>(false);
   const [codigoSerieAtivoNuvem, setCodigoSerieAtivoNuvem] = useState<boolean>(false);
 
@@ -388,6 +390,7 @@ const AtivoForm = () => {
 
         setDesabilitado(data.desabilitado);
         setGerarIdPatrimonial(data.gerarIdPatrimonial);
+        setCheckPassivelEmprestimo(data.passivelEmprestimo);
 
         setValue("tipoAtivo", data.tipoAtivo);
         setTipoForm(data.tipoAtivo as "t" | "i" | "tl");
@@ -418,6 +421,7 @@ const AtivoForm = () => {
         setValue("descricao", data.descricao);
         setValue("estadoConservacao", data.estadoConservacao);
         setValue("idPatrimonial", data.idPatrimonial);
+        setValue("passivelEmprestimo", data.passivelEmprestimo);
         setValue("observacoes", data.observacoes);
         setValue("gerarIdPatrimonial", data.gerarIdPatrimonial);
         setValue("termoParceria", data.termoParceria);
@@ -1223,7 +1227,29 @@ const AtivoForm = () => {
                           <div className="invalid-feedback d-block div-erro">{errors.numeroParte?.message}</div>
                         </div>
                       )}
-                      <div className="div-input-formulario"></div>
+                      <div className="row-input-fields">
+                        <div className="div-input-formulario div-input-checkbox">
+                          <span>Passível de Empréstimo</span>
+                          <Controller
+                            name="passivelEmprestimo"
+                            control={control}
+                            render={({ field }) => (
+                              <input
+                                type="checkbox"
+                                id="passivelEmprestimo"
+                                className={`checkbox-input-formulario ${errors.passivelEmprestimo ? "input-error" : ""}`}
+                                checked={checkPassivelEmprestimo}
+                                onChange={(e) => {
+                                  field.onChange(e.target.checked);
+                                  setCheckPassivelEmprestimo(!checkPassivelEmprestimo);
+                                }}
+                                disabled={isEditing}
+                              />
+                            )}
+                          />
+                          <span>Este ativo pode ser emprestado?</span>
+                        </div>
+                      </div>
                       <div className="row-input-fields w-100">
                         <div className="div-input-formulario">
                           <div>

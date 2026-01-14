@@ -37,4 +37,5 @@ export type AtivoType = {
   dataDevolucaoPrevista?: string;
   dataDevolucaoRealizada?: string;
   termoParceria: string;
+  passivelEmprestimo: boolean;
 };

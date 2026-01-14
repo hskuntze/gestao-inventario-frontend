@@ -271,8 +271,9 @@ const Home = () => {
           ) : recentes.length > 0 ? (
             recentes
               .sort((a, b) => b.id - a.id)
+              .filter((a) => !a.desabilitado)
               .slice(0, 3)
-              .map((r) => <CardAtivoRecente ativo={r} />)
+              .map((r) => <CardAtivoRecente key={r.id} ativo={r} />)
           ) : (
             <div className="section-subtitle">
               <span>Sem ativos recentes...</span>

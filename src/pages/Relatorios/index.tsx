@@ -1,10 +1,13 @@
-import "./styles.css";
+import { Route, Routes } from "react-router-dom";
+import RelatoriosLanding from "./Landing";
+import RelatorioMovimentacao from "./Movimentacao";
 
 const Relatorios = () => {
   return (
-    <div>
-      <div>relatório</div>
-    </div>
+    <Routes>
+      <Route path="/" element={<RelatoriosLanding />} />
+      <Route path="/movimentacao" element={<RelatorioMovimentacao />} />
+    </Routes>
   );
 };
 

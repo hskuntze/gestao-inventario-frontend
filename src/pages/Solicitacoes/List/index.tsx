@@ -15,12 +15,15 @@ import { fetchAllUsuariosResponsaveis, formatarData, formatarDataParaDiaMesAno }
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { toast } from "react-toastify";
 
+type StatusType = "PENDENTE" | "APROVADA" | "REPROVADA" | "CANCELADA";
+
 const SolicitacoesList = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoType[]>([]);
 
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
   const [selectedUsuarioResponsavel, setSelectedUsuarioResponsavel] = useState<UsuarioResponsavelType | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<StatusType | null>(null);
 
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -56,7 +59,9 @@ const SolicitacoesList = () => {
 
     const matchesUsuarioResponsavel = !selectedUsuarioResponsavel || s.usuarioResponsavel?.id === selectedUsuarioResponsavel.id;
 
-    return matchesSearch && matchesUsuarioResponsavel;
+    const matchesStatus = !selectedStatus || s.status === selectedStatus;
+
+    return matchesSearch && matchesUsuarioResponsavel && matchesStatus;
   });
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -189,7 +194,8 @@ const SolicitacoesList = () => {
         setSolicitacoes(res.data as SolicitacaoType[]);
       })
       .catch((err) => {
-        console.log(err);
+        const errorMsg = (err as Error).message || "Erro desconhecido ao carregar as solicitações";
+        toast.error(errorMsg);
       })
       .finally(() => {
         setLoading(false);
@@ -205,6 +211,7 @@ const SolicitacoesList = () => {
   };
 
   const handleClearFilters = () => {
+    setSelectedStatus(null);
     setSelectedUsuarioResponsavel(null);
     setFilter("");
   };
@@ -257,6 +264,28 @@ const SolicitacoesList = () => {
                 placeholder="Digite um termo para filtrar"
                 onChange={handleFilterChange}
               />
+            </div>
+            <div className="filtro-input-div form-floating">
+              <i className="bi bi-search" />
+              <select
+                name="por-status"
+                id="por-status"
+                className={`filtro-input`}
+                onChange={(e) => {
+                  let value = e.target.value;
+
+                  setSelectedStatus(value as StatusType);
+                }}
+                value={selectedStatus ? selectedStatus : ""}
+              >
+                <option key={"status-no-option"} value="">
+                  Selecione um status
+                </option>
+                <option value="PENDENTE">Pendente</option>
+                <option value="APROVADA">Aprovado</option>
+                <option value="REPROVADA">Reprovado</option>
+                <option value="CANCELADA">Cancelado</option>
+              </select>
             </div>
             <div className="filtro-input-div form-floating">
               <i className="bi bi-search" />

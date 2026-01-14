@@ -144,6 +144,7 @@ const SolicitacoesForm = () => {
                         ativos.length > 0 &&
                         ativos
                           .filter((a) => a.usuarioResponsavel === null)
+                          .filter((a) => a.passivelEmprestimo === true)
                           .map((a) => (
                             <option key={a.id} value={a.id}>
                               {a.descricao} - {a.idPatrimonial}
