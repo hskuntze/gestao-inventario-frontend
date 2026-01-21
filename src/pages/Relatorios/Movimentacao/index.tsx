@@ -224,7 +224,7 @@ const RelatorioMovimentacao = () => {
   }, []);
 
   return (
-    <div className="page">
+    <div className="relatorio">
       <div className="page-header">
         <div className="header-content">
           <h2 className="page-title">Relatório de Movimentação</h2>
@@ -239,7 +239,7 @@ const RelatorioMovimentacao = () => {
         </div>
         <span className="page-subtitle">Visualize, aprove ou reprove solicitações pendentes de ativos.</span>
       </div>
-      <div className="page-body w-100">
+      <div className="report-page-body">
         <div className="list-content-container pd-0">
           <div className="filtro-container" style={{ marginBottom: "10px" }}>
             <div className="filtro-input-div form-floating">

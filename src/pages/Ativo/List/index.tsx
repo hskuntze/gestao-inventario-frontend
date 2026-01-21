@@ -46,19 +46,26 @@ const AtivoList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
 
+  // Opções para filtro
   const [setores, setSetores] = useState<SetorType[]>([]);
   const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
   const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
 
+  // Elementos de filtro que foram selecionados
   const [selectedTipoAtivo, setSelectedTipoAtivo] = useState<"t" | "tl" | "i" | null>(null);
   const [selectedSetor, setSelectedSetor] = useState<SetorType | null>(null);
   const [selectedLocalizacao, setSelectedLocalizacao] = useState<LocalizacaoType | null>(null);
   const [selectedUsuarioResponsavel, setSelectedUsuarioResponsavel] = useState<UsuarioResponsavelType | null>(null);
   const [selectedContrato, setSelectedContrato] = useState<ContratoType | null>(null);
   const [selectedFornecedor, setSelectedFornecedor] = useState<FornecedorType | null>(null);
+  const [selectedMostrarPendentes, setSelectedMostrarPendentes] = useState<string | null>(null);
 
+  // Carrega os ativos pendentes de atribuição
+  const [pendenteAtribuicao, setPendenteAtribuicao] = useState<AtivoType[]>([]);
+
+  // Mostra as demais opções disponíveis na página
   const [openAcoes, setOpenAcoes] = useState<boolean>(false);
   const acoesDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +89,18 @@ const AtivoList = () => {
 
   const navigate = useNavigate();
 
+  /**
+   * Verifica se determinado ativo está atribuído.
+   * 
+   * Ativos que são passíveis de empréstimo não devem ser levados em consideração. Já que podem ficar pendentes de atribuição.
+   * @param ativo 
+   * @returns 
+   */
+  const verificarAtivoAtribuido = (ativo: AtivoType): boolean => {
+    return !!ativo && (ativo.usuarioResponsavel != null || ativo.area != null);
+  };
+
+  // Carrega os ativos
   const loadAtivos = useCallback(() => {
     setLoading(true);
 
@@ -95,6 +114,9 @@ const AtivoList = () => {
       .then((res) => {
         let data = res.data as AtivoType[];
         setAtivos(data);
+
+        let pendentes = data.filter((a) => !verificarAtivoAtribuido(a));
+        setPendenteAtribuicao(pendentes);
       })
       .catch((err) => {
         toast.error("Erro ao tentar carregar os ativos.");
@@ -139,6 +161,8 @@ const AtivoList = () => {
     // Filtro por tipo do ativo
     const matchesTipoAtivo = !selectedTipoAtivo || a.tipoAtivo === selectedTipoAtivo;
 
+    const matchesMostrarPendentes = !selectedMostrarPendentes || (a.usuarioResponsavel === null && a.area === null);
+
     // Filtro por setor
     const matchesSetor = !selectedSetor || a.area?.id === selectedSetor.id;
 
@@ -156,7 +180,14 @@ const AtivoList = () => {
 
     // ✔ Retorna verdadeiro somente se passar em todos
     return (
-      matchesTipoAtivo && matchesSearch && matchesSetor && matchesLocalizacao && matchesUsuarioResponsavel && matchesContrato && matchesFornecedor
+      matchesMostrarPendentes &&
+      matchesTipoAtivo &&
+      matchesSearch &&
+      matchesSetor &&
+      matchesLocalizacao &&
+      matchesUsuarioResponsavel &&
+      matchesContrato &&
+      matchesFornecedor
     );
   });
 
@@ -446,7 +477,12 @@ const AtivoList = () => {
               Exportar Excel
             </button>
             <Link to={"/gestao-inventario/ativo/formulario/create"}>
-              <button type="button" className="button submit-button auto-width pd-2">
+              <button
+                type="button"
+                className={`button submit-button auto-width pd-2 ${pendenteAtribuicao.length > 0 ? "disabled-field" : ""}`}
+                disabled={pendenteAtribuicao.length > 0}
+                title={pendenteAtribuicao.length > 0 ? "Existem ativos pendentes de atribuição." : ""}
+              >
                 Adicionar Ativo
               </button>
             </Link>
@@ -469,6 +505,31 @@ const AtivoList = () => {
                   placeholder="Digite um termo para filtrar"
                   onChange={handleFilterChange}
                 />
+              </div>
+              <div className="filtro-input-div form-floating">
+                <i className="bi bi-search" />
+                <select
+                  name="por-area"
+                  id="por-area"
+                  className={`filtro-input`}
+                  onChange={(e) => {
+                    let value = e.target.value;
+
+                    if (value) {
+                      setSelectedMostrarPendentes(value);
+                    } else {
+                      setSelectedMostrarPendentes(null);
+                    }
+                  }}
+                  value={selectedMostrarPendentes ? selectedMostrarPendentes : ""}
+                >
+                  <option key={"tipo-ativo-no-option"} value="">
+                    Mostrar todos os ativos
+                  </option>
+                  <option key={"tipo-ativo-tangivel"} value="pendentes">
+                    Pendentes de atribuição
+                  </option>
+                </select>
               </div>
               <div className="filtro-input-div form-floating">
                 <i className="bi bi-search" />
@@ -690,7 +751,9 @@ const AtivoList = () => {
                       .map((a) => (
                         <tr
                           key={a.id}
-                          className={`clickable-table-row ${selectedAtivos.includes(a.id) ? "row-selected" : ""}`}
+                          className={`clickable-table-row ${selectedAtivos.includes(a.id) ? "row-selected" : ""} ${
+                            verificarAtivoAtribuido(a) ? "" : "nao-atribuido"
+                          }`}
                           onClick={() => {
                             if (!loteMode) {
                               navigate(`/gestao-inventario/ativo/formulario/${a.id}`);

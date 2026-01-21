@@ -1,3 +1,9 @@
+.relatorio {
+  width: 100%;
+  padding: 13px;
+  border: 2px dashed var(--bg-progress-fill);
+}
+
 .col-usuario-mov {
   min-width: 310px;
   padding-right: 5px;

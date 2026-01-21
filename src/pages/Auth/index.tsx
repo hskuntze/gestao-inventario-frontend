@@ -46,6 +46,8 @@ const Auth = () => {
     requestBackend(requestParams)
       .then((res) => {
         let data = res.data as User;
+
+        console.log("userData", data);
         saveUserData(data);
 
         if (data.firstAccess) {
@@ -64,6 +66,8 @@ const Auth = () => {
 
     requestBackendLogin(formData)
       .then((res) => {
+
+        console.log("authData", res.data);
         saveAuthData(res.data);
 
         setAuthContextData({

@@ -191,9 +191,10 @@ const AtivoFormLote = () => {
     <div className="page">
       <div className="page-header">
         <div className="header-content">
-          <h2>
-            Detalhes do Ativo <span className="tag-cadastro-em-lote">Cadastro em Lote</span>
-          </h2>
+          <div className="header-title-form-lote">
+            <h2>Detalhes do Ativo</h2>
+            <span className="tag-cadastro-em-lote">Cadastro em Lote</span>
+          </div>
           <div className="header-content-buttons">
             <Link to="/gestao-inventario/ativo" type="button" className="voltar-button">
               Voltar
@@ -471,7 +472,10 @@ const AtivoFormLote = () => {
                       </div>
                     </div>
                     <div className="lote-container w-100">
-                      <h4>Ativos do Lote</h4>
+                      <div className="header-title-form-lote">
+                        <h4>Ativos do Lote</h4>
+                        <span className="tag-dados-unicos">Dados que não se repetem</span>
+                      </div>
                       <span className="contador-objeto-ativo">Total de ativos: {totalItens}</span>
                       {fields.map((field, index) => {
                         const gerarId = watch(`itens.${index}.gerarIdPatrimonial`);

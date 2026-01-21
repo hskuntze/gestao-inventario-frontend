@@ -87,25 +87,33 @@ const AtivoForm = () => {
   const [desabilitado, setDesabilitado] = useState<boolean>(false);
   const [os, setOs] = useState<string | null>(null);
 
+  // Opções
   const [setores, setSetores] = useState<SetorType[]>([]);
   const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([]);
   const [contratos, setContratos] = useState<ContratoType[]>([]);
   const [allFornecedores, setAllFornecedores] = useState<FornecedorType[]>([]);
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
 
+  // Seleção de opções
   const [selectedSetor, setSelectedSetor] = useState<SetorType>();
   const [gerarIdPatrimonial, setGerarIdPatrimonial] = useState<boolean>(false);
   const [checkPassivelEmprestimo, setCheckPassivelEmprestimo] = useState<boolean>(false);
   const [codigoSerieNA, setCodigoSerieNA] = useState<boolean>(false);
   const [codigoSerieAtivoNuvem, setCodigoSerieAtivoNuvem] = useState<boolean>(false);
 
+  // Estado dos modais (aberto ou não)
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openModalDesabilitar, setOpenModalDesabilitar] = useState<boolean>(false);
   const [openAcoes, setOpenAcoes] = useState<boolean>(false);
+
   const acoesDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Opções de tamanho do QRCode
+  const [selectedTamanhoQrCode, setSelectedTamanhoQrCode] = useState<"PP" | "P" | "M" | "G" | null>(null);
 
   const navigate = useNavigate();
 
+  // Form padrão (registro | edição)
   const {
     register,
     control,
@@ -115,6 +123,7 @@ const AtivoForm = () => {
     resetField,
   } = useForm<FormData>();
 
+  // Form para desabilitar ativo
   const {
     register: registerDesabilitar,
     control: controlDesabilitar,
@@ -122,14 +131,13 @@ const AtivoForm = () => {
     handleSubmit: handleSubmitDesabilitar,
   } = useForm<FormDataDesabilitar>();
 
-  const {
-    register: registerManutencao,
-    handleSubmit: handleSubmitManutencao,
-  } = useForm<FormDataManutencao>();
+  // Form para manutenção
+  const { register: registerManutencao, handleSubmit: handleSubmitManutencao } = useForm<FormDataManutencao>();
 
   // Photo capture hook + modal state
   const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, reset: resetPhoto } = usePhotoCapture();
 
+  // Auxiliares para tirar foto (app)
   const [photoModalOpen, setPhotoModalOpen] = useState<boolean>(false);
   const [confirmedPhoto, setConfirmedPhoto] = useState<PhotoCaptureResult | null>(null);
 
@@ -168,6 +176,9 @@ const AtivoForm = () => {
     setPhotoModalOpen(false);
   };
 
+  /**
+   * Trata a escolha do tipo de ativo
+   */
   const handleSelectTipoForm = (e: ChangeEvent<HTMLSelectElement>) => {
     let value = e.target.value;
 
@@ -180,6 +191,11 @@ const AtivoForm = () => {
     }
   };
 
+  /**
+   * Trata a ação de devolução do ativo
+   * 
+   * Endpoint: "/ativos/devolver"
+   */
   const handleDevolver = () => {
     let confirm = window.confirm("Deseja mesmo devolver este ativo? É uma operação irreversível.");
 
@@ -208,6 +224,13 @@ const AtivoForm = () => {
     navigate(0);
   };
 
+  /**
+   * onSubmit do formulário padrão (registro | edição). Caso a requisição seja realizada
+   * com sucesso o usuário é redirecionado para a página de edição do ativo que acabou de
+   * ser registrado. Isso acontece para que o usuário possa realizar o upload de arquivos,
+   * que só é habilitado para a edição de ativos. 
+   * @param formData: FormData 
+   */
   const onSubmit = (formData: FormData) => {
     setLoading(true);
 
@@ -267,6 +290,11 @@ const AtivoForm = () => {
     }
   };
 
+  /**
+   * onSubmit para o form de movimentação do ativo. Isso ativa o recarregamento das informações do ativo,
+   * bem como recarreg as informações de histórico do mesmo.
+   * @param formData 
+   */
   const onSubmitMovimentacao = (formData: FormData) => {
     const requestParams: AxiosRequestConfig = {
       url: "/ativos/movimentar",
@@ -293,6 +321,10 @@ const AtivoForm = () => {
       .finally(() => {});
   };
 
+  /**
+   * onSubmit para o form de desabilitar o ativo
+   * @param formData 
+   */
   const onSubmitDesabilitar = (formData: FormDataDesabilitar) => {
     let confirm = window.confirm("Deseja mesmo desabilitar este ativo? Trata-se de uma operação irreversível.");
 
@@ -319,6 +351,10 @@ const AtivoForm = () => {
     }
   };
 
+  /**
+   * onSubmit para o form de manutenção do ativo
+   * @param formData 
+   */
   const onSubmitManutencao = (formData: FormDataManutencao) => {
     let confirm = window.confirm("Deseja mesmo colocar este ativo em manutenção?");
 
@@ -344,6 +380,10 @@ const AtivoForm = () => {
     }
   };
 
+  /**
+   * onSubmit para o form que retira o ativo da manutenção
+   * @param formData 
+   */
   const onSubmitRetirarManutencao = () => {
     let confirm = window.confirm("Deseja mesmo retirar este ativo da manutenção?");
 
@@ -372,6 +412,9 @@ const AtivoForm = () => {
     handleSubmitDesabilitar(onSubmitDesabilitar)();
   };
 
+  /**
+   * Carrega as informações do ativo, setando os atributos para edição
+   */
   const loadInfo = useCallback(() => {
     setLoading(true);
 
@@ -434,6 +477,9 @@ const AtivoForm = () => {
       });
   }, [urlParams.id, setValue]);
 
+  /**
+   * Função responsável por carregar os dados de histórico do ativo
+   */
   const loadHistoricoInfo = useCallback(() => {
     const requestParams: AxiosRequestConfig = {
       url: `/historico/ativo/${urlParams.id}`,
@@ -451,6 +497,11 @@ const AtivoForm = () => {
       .finally(() => {});
   }, [urlParams.id]);
 
+  /**
+   * Função auxiliar que recebe o blob de pdf do QRCode gerado no back-end e ativa a função de imprimir
+   * com o conteúdo do blob.
+   * @param pdfBlob
+   */
   const imprimirPdf = (pdfBlob: Blob) => {
     const blobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: "application/pdf" }));
 
@@ -465,28 +516,37 @@ const AtivoForm = () => {
     };
   };
 
+  /**
+   * Função que chama o endpoint que gera o QRCode (tag) do ativo
+   * @param ativo
+   */
   const printQrCode = (ativo: AtivoType) => {
-    setLoadingPrint(true);
+    if (selectedTamanhoQrCode !== null) {
+      setLoadingPrint(true);
 
-    const urls: { [key: string]: string } = {
-      t: `/tangiveis/qrcode/${ativo.id}`,
-      i: `/intangiveis/qrcode/${ativo.id}`,
-      tl: `/tangiveis/locacao/qrcode/${ativo.id}`,
-    };
+      const urls: { [key: string]: string } = {
+        t: `/tangiveis/qrcode/${ativo.id}`,
+        i: `/intangiveis/qrcode/${ativo.id}`,
+        tl: `/tangiveis/locacao/qrcode/${ativo.id}`,
+      };
 
-    const requestParams: AxiosRequestConfig = {
-      url: urls[ativo.tipoAtivo],
-      method: "GET",
-      withCredentials: true,
-      responseType: "blob",
-    };
+      const requestParams: AxiosRequestConfig = {
+        url: urls[ativo.tipoAtivo],
+        method: "GET",
+        withCredentials: true,
+        responseType: "blob",
+        params: {
+          tamanho: selectedTamanhoQrCode,
+        },
+      };
 
-    requestBackend(requestParams)
-      .then((res) => {
-        imprimirPdf(res.data);
-      })
-      .catch((err) => {})
-      .finally(() => setLoadingPrint(false));
+      requestBackend(requestParams)
+        .then((res) => {
+          imprimirPdf(res.data);
+        })
+        .catch((err) => {})
+        .finally(() => setLoadingPrint(false));
+    }
   };
 
   useEffect(() => {
@@ -496,6 +556,9 @@ const AtivoForm = () => {
     }
   }, [isEditing, loadInfo, loadHistoricoInfo]);
 
+  /**
+   * FUNÇÕES AUXILIARES QUE CARREGAM AS OPÇÕES
+   */
   useEffect(() => {
     async function getSetores() {
       setSetores([]);
@@ -590,6 +653,7 @@ const AtivoForm = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Função auxiliar que carrega o sistema operacional (app)
   useEffect(() => {
     let sistemaOperacional = getOS();
 
@@ -913,6 +977,7 @@ const AtivoForm = () => {
         loading={photoLoading}
       />
 
+      {/* FORMULÁRIO DE REGISTRO | EDIÇÃO */}
       {loading ? (
         <AtivoFormLoaderSkeleton />
       ) : (
@@ -1158,22 +1223,6 @@ const AtivoForm = () => {
                             />
                             <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoPrevista?.message}</div>
                           </div>
-                          {/*
-                          * ============================================================================================================
-                          * ========== Este trecho de código será movido para o modal em que se realiza a ação de "devolução" ==========
-                          * ============================================================================================================
-                          <div className="div-input-formulario">
-                            <span>Data em que foi realizada a devolução</span>
-                            <input
-                              type="date"
-                              className={`input-formulario data-input ${errors.dataDevolucaoRealizada ? "input-error" : ""} ${
-                                desabilitado ? "disabled-field" : ""
-                              }`}
-                              {...register("dataDevolucaoRealizada")}
-                              disabled={desabilitado}
-                            />
-                            <div className="invalid-feedback d-block div-erro">{errors.dataDevolucaoRealizada?.message}</div>
-                          </div> */}
                         </>
                       )}
                       <div className="div-input-formulario">
@@ -1331,6 +1380,8 @@ const AtivoForm = () => {
                       </div>
                     </form>
                   </div>
+
+                  {/* SE ESTIVER EM MODO DE EDIÇÃO O COMPONENTE DE ANEXOS É EXIBIDO */}
                   {isEditing && (
                     <div className="content-container bg-card-container">
                       <span className="form-title">Anexos</span>
@@ -1396,6 +1447,8 @@ const AtivoForm = () => {
                     )}
                   </div>
                 </div>
+                
+                {/* SE ESTIVER EM MODO DE EDIÇÃO O COMPONENTE DE QRCODE (TAG) É EXIBIDO */}
                 {ativo && (
                   <div className="content-container qr-container">
                     {loadingPrint ? (
@@ -1403,9 +1456,37 @@ const AtivoForm = () => {
                         <Loader />
                       </div>
                     ) : (
-                      <button onClick={() => printQrCode(ativo)} type="button" className="print-button">
-                        <i className="bi bi-printer print-qr-code-icon" />
-                      </button>
+                      <>
+                        <div className={`tamanho-print-popup`}>
+                          <button
+                            className={`tamanho-print-opcao ${selectedTamanhoQrCode === "PP" ? "selected-tamanho-print" : ""}`}
+                            onClick={() => setSelectedTamanhoQrCode("PP")}
+                          >
+                            PP
+                          </button>
+                          <button
+                            className={`tamanho-print-opcao ${selectedTamanhoQrCode === "P" ? "selected-tamanho-print" : ""}`}
+                            onClick={() => setSelectedTamanhoQrCode("P")}
+                          >
+                            P
+                          </button>
+                          <button
+                            className={`tamanho-print-opcao ${selectedTamanhoQrCode === "M" ? "selected-tamanho-print" : ""}`}
+                            onClick={() => setSelectedTamanhoQrCode("M")}
+                          >
+                            M
+                          </button>
+                          <button
+                            className={`tamanho-print-opcao ${selectedTamanhoQrCode === "G" ? "selected-tamanho-print" : ""}`}
+                            onClick={() => setSelectedTamanhoQrCode("G")}
+                          >
+                            G
+                          </button>
+                        </div>
+                        <button onClick={() => printQrCode(ativo)} type="button" className="print-button">
+                          <i className="bi bi-printer print-qr-code-icon" />
+                        </button>
+                      </>
                     )}
                     <img className="qr-image" src={`data:image/png;base64,${ativo.qrCodeImage}`} alt="QRCode" />
                   </div>

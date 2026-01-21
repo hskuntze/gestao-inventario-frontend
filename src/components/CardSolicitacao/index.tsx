@@ -1,6 +1,6 @@
 import "./styles.css";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AxiosRequestConfig } from "axios";
 import { toast } from "react-toastify";
@@ -11,6 +11,12 @@ import { SolicitacaoType } from "@/types/solicitacao";
 
 import { requestBackend } from "@/utils/requests";
 import { formatarData, formatarDataParaDiaMesAno } from "@/utils/functions";
+import { useClickOutside } from "@/utils/hooks/useClickOutside";
+
+const parseLocalDate = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
 
 type FormData = {
   motivoReprovado: string;
@@ -36,6 +42,17 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [collapseReproval, setCollapseReproval] = useState<boolean>(false);
 
+  const [dropActions, setDropActions] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [solicitacaoVigente, setSolicitacaoVigente] = useState<boolean>(false);
+
+  const handleCloseDropdown = useCallback(() => {
+    setDropActions(false);
+  }, []);
+
+  useClickOutside(dropdownRef, handleCloseDropdown);
+
   const {
     register,
     formState: { errors },
@@ -46,6 +63,42 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
     setCollapseReproval(!collapseReproval);
   };
 
+  /**
+   * Verifica se a solicitação está vigente baseado na data de início e fim do período de solicitação.
+   * Para estar vigente, a solicitação precisa constar como 'APROVADA' ou 'PENDENTE'.
+   *
+   * Se não houver data de fim = vigente;
+   * Se a data de fim superar a data de hoje = não está vigente (expirou).
+   */
+  useEffect(() => {
+    const { dataFim, status } = solicitacao;
+
+    if (status === "DESISTENCIA") {
+      setSolicitacaoVigente(false);
+      return;
+    }
+
+    if (status !== "APROVADA" && status !== "PENDENTE") {
+      setSolicitacaoVigente(false);
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const fim = dataFim ? parseLocalDate(dataFim) : null;
+
+    let vigente = true;
+
+    if (fim && hoje > fim) {
+      vigente = false;
+    }
+
+    setSolicitacaoVigente(vigente);
+  }, [solicitacao]);
+
+  /**
+   * Aprovação da solicitação
+   */
   const handleApproval = () => {
     if (!window.confirm("Deseja aprovar esta solicitação?")) return;
 
@@ -71,6 +124,9 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
       });
   };
 
+  /**
+   * Cancelamento da solicitação
+   */
   const handleCancel = () => {
     let confirm = window.confirm("Deseja cancelar esta solicitação?");
 
@@ -94,6 +150,90 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
           setLoading(false);
         });
     }
+  };
+
+  /**
+   * Desistência da solicitação
+   */
+  const handleWaiver = () => {
+    if (!solicitacaoVigente) return;
+
+    let confirm = window.confirm("Deseja realizar a desistência desta solicitação?");
+
+    if (!confirm) return;
+
+    const requestParams: AxiosRequestConfig = {
+      url: `/solicitacoes/desistir/${solicitacao.id}`,
+      method: "POST",
+      withCredentials: true,
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        toast.success("Desistência confirmada.");
+        onUpdate(res.data);
+      })
+      .catch((err) => {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao tentar realizar a desistência da solicitação";
+        toast.error(errorMsg);
+      });
+  };
+
+  /**
+   * Finaliza a solicitação
+   */
+  const handleConclude = () => {
+    if (solicitacao.status !== "APROVADA") return;
+
+    let confirm = window.confirm("Deseja finalizar esta solicitação?");
+
+    if (!confirm) return;
+
+    const requestParams: AxiosRequestConfig = {
+      url: `/solicitacoes/finalizar/${solicitacao.id}`,
+      method: "POST",
+      withCredentials: true,
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        toast.success("Sucesso ao finalizar a solicitação");
+        onUpdate(res.data);
+      })
+      .catch((err) => {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao tentar finalizar a solicitação";
+        toast.error(errorMsg);
+      });
+  };
+
+  /**
+   * Realiza a recusa da solicitação enviando o motivo da recusa
+   */
+  const onSubmit = (formData: FormData) => {
+    setLoading(true);
+
+    const requestParams: AxiosRequestConfig = {
+      url: `/solicitacoes/recusar/${solicitacao.id}`,
+      method: "POST",
+      withCredentials: true,
+      params: {
+        motivoRecusa: formData.motivoReprovado,
+      },
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        toast.success("Solicitação reprovada.");
+        onUpdate(res.data);
+        collapseReprovalSection();
+      })
+      .catch((err) => {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao tentar reprovar a solicitação";
+        toast.error(errorMsg);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleDownloadTermoCautela = () => {
@@ -126,33 +266,6 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
       });
   };
 
-  const onSubmit = (formData: FormData) => {
-    setLoading(true);
-
-    const requestParams: AxiosRequestConfig = {
-      url: `/solicitacoes/recusar/${solicitacao.id}`,
-      method: "POST",
-      withCredentials: true,
-      params: {
-        motivoRecusa: formData.motivoReprovado,
-      },
-    };
-
-    requestBackend(requestParams)
-      .then((res) => {
-        toast.success("Solicitação reprovada.");
-        onUpdate(res.data);
-        collapseReprovalSection();
-      })
-      .catch((err) => {
-        const errorMsg = (err as Error).message || "Erro desconhecido ao tentar reprovar a solicitação";
-        toast.error(errorMsg);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
   return (
     <div className="card-solicitacao-container">
       <div className="card-solicitacao-data">
@@ -173,9 +286,21 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
             <span className="ativo">{solicitacao.ativo.descricao}</span>
           </div>
           <span className="motivo">{solicitacao.motivoSolicitacao}</span>
-          <span className="periodo">De {formatarData(solicitacao.dataInicio)} até {formatarData(solicitacao.dataFim)}</span>
+          <span className="periodo">
+            De {formatarData(solicitacao.dataInicio)} até {formatarData(solicitacao.dataFim)}
+          </span>
         </div>
         <div className="card-solicitacao-actions">
+          <div className="return-element-info">
+            <button
+              className="return-element-button"
+              style={{ display: solicitacao.status === "APROVADA" ? "" : "none" }}
+              onClick={handleConclude}
+              title="Finalizar solicitação/dar baixa"
+            >
+              <i className="bi bi-unlock" />
+            </button>
+          </div>
           <div className="file-info">
             <button
               className="file-button"
@@ -223,14 +348,30 @@ const CardSolicitacao = ({ solicitacao, onUpdate }: Props) => {
                 >
                   <span>Reprovar</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleCancel()}
-                  className={`cancelar-button ${solicitacao.status !== "PENDENTE" ? "desabilitado" : ""}`}
-                  disabled={solicitacao.status !== "PENDENTE"}
-                >
-                  <i className="bi bi-ban" />
-                </button>
+                <div className="solicitacao-actions-dropdown-button" ref={dropdownRef} onClick={() => setDropActions((prev) => !prev)}>
+                  <div className="dropdown-trigger">Outras Ações</div>
+
+                  {dropActions && (
+                    <div className="dropdown-menu">
+                      <button
+                        type="button"
+                        onClick={() => handleWaiver()}
+                        className={`desistir-button ${solicitacaoVigente ? "" : "desabilitado"}`}
+                        disabled={!solicitacaoVigente}
+                      >
+                        Desistência
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCancel()}
+                        className={`cancelar-button ${solicitacao.status !== "PENDENTE" ? "desabilitado" : ""}`}
+                        disabled={solicitacao.status !== "PENDENTE"}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
         </div>

@@ -24,6 +24,8 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     "SOLICITAÇÃO APROVADA": "bi bi-file-check-fill solicitacao-aprovada-icon",
     "SOLICITAÇÃO RECUSADA": "bi bi-file-x-fill solicitacao-recusada-icon",
     "SOLICITAÇÃO CANCELADA": "bi bi-folder-fill solicitacao-cancelada-icon",
+    "SOLICITAÇÃO FINALIZADA": "bi bi-file-check-fill solicitacao-finalizada-icon",
+    "SOLICITAÇÃO DESISTÊNCIA": "bi bi-file-check-fill solicitacao-desistencia-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -43,6 +45,8 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     "SOLICITAÇÃO APROVADA": "Solicitação aprovada",
     "SOLICITAÇÃO RECUSADA": "Solicitação recusada",
     "SOLICITAÇÃO CANCELADA": "Solicitação cancelada",
+    "SOLICITAÇÃO FINALIZADA": "Solicitação finalizada",
+    "SOLICITAÇÃO DESISTÊNCIA": "Desistência da solicitação",
   };
 
   return (

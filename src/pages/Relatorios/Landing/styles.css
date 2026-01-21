@@ -1,3 +1,22 @@
+.page-relatorio {
+  display: flex;
+  width: 100%;
+}
+
+.page-menu-lateral {
+  width: 320px;
+  margin-right: 20px;
+}
+
+.page-relatorio-conteudo {
+  width: calc(100% - 340px);
+}
+
+.active {
+  background-color: var(--bg-card-hover) !important;
+  box-shadow: 0 0 12px 2px var(--bg-card-hover);
+}
+
 .tipo-relatorio-card {
   background-color: var(--bg-card);
   border-radius: 10px;

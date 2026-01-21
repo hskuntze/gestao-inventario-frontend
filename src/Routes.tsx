@@ -106,12 +106,19 @@ const Routes = () => {
     }, []);
 
     useEffect(() => {
-      const isUsuario = hasAnyRoles([{ id: 3, autorizacao: "PERFIL_USUARIO" }]);
+      const isGerente = hasAnyRoles([{ id: 3, autorizacao: "PERFIL_GERENTE" }]);
+      const isUsuario = hasAnyRoles([{ id: 4, autorizacao: "PERFIL_USUARIO" }]);
+
+      if (isGerente) {
+        navigate("/gestao-inventario/solicitacao", { replace: true });
+        return;
+      }
 
       if (isUsuario) {
-        navigate("/gestao-inventario/usuario");
+        navigate("/gestao-inventario/usuario", { replace: true });
+        return;
       }
-    });
+    }, []);
 
     return (
       <>
@@ -163,7 +170,7 @@ const Routes = () => {
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                  { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -178,7 +185,7 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                  { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -193,7 +200,7 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                  { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -222,7 +229,6 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_GERENTE" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >

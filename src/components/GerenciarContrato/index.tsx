@@ -36,6 +36,14 @@ const GerenciarContrato = () => {
 
   const [fornecedores, setFornecedores] = useState<FornecedorType[]>([]);
 
+  const [modalEncerrarContrato, setModalEncerrarContrato] = useState<boolean>(false);
+  const [confirmarEncerramento, setConfirmarEncerramento] = useState<boolean>(false);
+  const [selectedContrato, setSelectedContrato] = useState<ContratoType | null>(null);
+
+  const [textoConfirmacao, setTextoConfirmacao] = useState("");
+
+  const confirmou = textoConfirmacao.trim().toLowerCase() === "confirmar";
+
   const user = getUserData();
 
   const {
@@ -181,6 +189,33 @@ const GerenciarContrato = () => {
     setValue("fornecedor", contrato.fornecedor);
   };
 
+  const handleEncerrarContrato = (contrato: ContratoType) => {
+    setModalEncerrarContrato(true);
+    setConfirmarEncerramento(false);
+    setSelectedContrato(contrato);
+  };
+
+  const submitEncerramentoContrato = () => {
+    if (selectedContrato !== null && selectedContrato !== undefined) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/contratos/encerrar/${selectedContrato.id}`,
+        method: "POST",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Contrato foi encerrado com sucesso.");
+          loadContratos();
+          setModalEncerrarContrato(false);
+        })
+        .catch((err) => {
+          const message = err.response?.data?.message || "Erro ao tentar atualizar o contrato.";
+          toast.error(message);
+        });
+    }
+  };
+
   const handleToggleModal = () => {
     reset();
     setOpenModal(true);
@@ -270,7 +305,10 @@ const GerenciarContrato = () => {
                   <th scope="col">Número do Contrato</th>
                   <th scope="col">Objeto do Contrato</th>
                   <th scope="col">Data de assinatura do contrato</th>
-                  <th scope="col">Fim da vigência</th>
+                  <th scope="col">
+                    Fim da vigência
+                    <span className="obrigatorio-ast">*</span>
+                  </th>
                   <th scope="col">Ações</th>
                 </tr>
               </thead>
@@ -292,6 +330,15 @@ const GerenciarContrato = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
+                          <button
+                            type="button"
+                            onClick={() => handleEncerrarContrato(a)}
+                            disabled={a.desabilitado}
+                            className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Encerrar contrato"
+                          >
+                            <i className="bi bi-file-earmark-lock2" />
+                          </button>
                           <button
                             disabled={a.desabilitado}
                             onClick={() => handleEditContrato(a)}
@@ -355,6 +402,8 @@ const GerenciarContrato = () => {
                         spacer: "pagination-spacer",
                       }}
                     />
+
+                    <span className="obrigatorio-ast">* Fim da vigência é válido somente para Contratos (CT)</span>
                   </td>
                 </tr>
               </tfoot>
@@ -362,6 +411,7 @@ const GerenciarContrato = () => {
           </div>
         </AccordionDetails>
       </Accordion>
+
       <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container">
         <Box className="modal-content">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
@@ -547,6 +597,112 @@ const GerenciarContrato = () => {
               </div>
             )}
           </form>
+        </Box>
+      </Modal>
+
+      <Modal open={modalEncerrarContrato} onClose={() => setModalEncerrarContrato(false)} className="modal-container">
+        <Box className={`modal-warning-content ${confirmarEncerramento ? "alert" : "warning"}`}>
+          {confirmarEncerramento ? (
+            <div className="modal-encerramento-contrato-content">
+              <div className="modal-encerramento-alert-topo">
+                <div className="alert-icon">
+                  <i className="bi bi-exclamation-triangle-fill" />
+                </div>
+                <div className="alert-step-info">
+                  <h5>Confirmação Final</h5>
+                  <div>
+                    <span>PASSO 2 DE 2</span>
+                    <div className="red-dot"></div>
+                    <span>AÇÃO CRÍTICA</span>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-encerramento-alert-content">
+                <span>
+                  Esta ação é <span className="red-underline">irreversível</span>. Deseja continuar?
+                </span>
+                <span className="alert-content-text">
+                  Todos os dados vinculados a este contrato, incluindo os históricos de movimentação, deixarão de ser visíveis. Recomenda-se uma
+                  extração de relatório dos ativos vinculados a este contrato antes de realizar esta ação.
+                </span>
+              </div>
+              <div className="modal-encerramento-alert-field">
+                <div>
+                  <span>Para evitar encerramentos acidentais, digite </span>
+                  <span className="confirmar-encerramento-label">confirmar</span>
+                  <span> no campo abaixo:</span>
+                </div>
+                <input
+                  type="text"
+                  className="confirmar-encerramento-input-field"
+                  placeholder="Digite aqui..."
+                  value={textoConfirmacao}
+                  onChange={(e) => setTextoConfirmacao(e.target.value)}
+                />
+              </div>
+              <div className="modal-encerramento-footer">
+                <button
+                  className="modal-encerramento-cancelar-button"
+                  onClick={() => {
+                    setModalEncerrarContrato(false);
+                    setSelectedContrato(null);
+                    setConfirmarEncerramento(false);
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className={`modal-encerramento-confirmar-button ${!confirmou ? "disabled-field" : ""}`}
+                  onClick={() => submitEncerramentoContrato()}
+                  disabled={!confirmou}
+                >
+                  <i className="bi bi-ban" /> Sim, encerrar contrato
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="modal-encerramento-contrato-content">
+              <div className="warning-icon">
+                <i className="bi bi-exclamation-triangle-fill" />
+              </div>
+              <div className="confirmation-steps">
+                <div className="confirmation-labels">
+                  <span>PASSO 1 DE 2</span>
+                  <span>50%</span>
+                </div>
+                <div className="confirmation-bar">
+                  <div className="confirmation-bar-progress"></div>
+                </div>
+              </div>
+              <div className="confirmation-content">
+                <h4>Encerrar Contrato?</h4>
+                <span>Você tem certeza que deseja encerrar este contrato?</span>
+                <span>Encerrar o contrato significa desabilitar o contrato e todos os ativos associados a ele.</span>
+              </div>
+              <div className="confirmation-buttons">
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={() => {
+                    setModalEncerrarContrato(false);
+                    setSelectedContrato(null);
+                    setConfirmarEncerramento(false);
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button type="button" className="confirm-button" onClick={() => setConfirmarEncerramento(true)}>
+                  Encerrar
+                </button>
+              </div>
+              <div className="confirmation-footer">
+                <span>
+                  <i className="bi bi-lock-fill" />
+                  Esta ação requer privilégios de analista de inventário
+                </span>
+              </div>
+            </div>
+          )}
         </Box>
       </Modal>
     </div>

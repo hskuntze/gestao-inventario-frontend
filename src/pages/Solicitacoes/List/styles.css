@@ -15,3 +15,25 @@
   color: var(--text-color);
   letter-spacing: 0.05rem;
 }
+
+.filtro-range-data {
+  position: relative;
+}
+
+.label-range-data {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--text-color);
+  left: 7px;
+  top: 4px;
+  z-index: 10;
+}
+
+.filtro-range-data i {
+  top: 5px;
+}
+
+.filtro-range-data input {
+  position: abrelative;
+}

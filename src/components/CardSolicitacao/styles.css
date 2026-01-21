@@ -186,6 +186,18 @@
   border: 1px solid #737373;
 }
 
+.status.finalizada {
+  color: #8316ff;
+  background-color: #781ae235;
+  border: 1px solid #771ae2;
+}
+
+.status.desistencia {
+  color: #cf7928;
+  background-color: #cf79284f;
+  border: 1px solid #cf7928;
+}
+
 .status .icone {
   font-size: 6px;
   margin-right: 4px;
@@ -200,7 +212,8 @@
   justify-content: space-between;
 }
 
-.actions-buttons button {
+.actions-buttons button,
+.actions-buttons .solicitacao-actions-dropdown-button {
   height: inherit;
   min-width: 120px;
   font-size: 14px;
@@ -225,17 +238,6 @@
 
 .reprovar-button:hover {
   background-color: #c73030;
-}
-
-.cancelar-button {
-  font-size: 20px !important;
-  border: 1px solid #737373;
-  background-color: #73737344;
-  transition: background-color 0.3s ease-in-out;
-}
-
-.cancelar-button:hover {
-  background-color: #737373c2;
 }
 
 .actions-buttons .desabilitado {
@@ -285,4 +287,48 @@
 .reproval-form .form-bottom .form-buttons button {
   min-width: 100px;
   margin-left: 10px;
+}
+
+.solicitacao-actions-dropdown-button {
+  background-color: var(--bg-progress-fill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-trigger {
+  background-color: var(--bg-progress-fill);
+  cursor: pointer;
+  user-select: none;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background-color: var(--bg-progress-fill);
+  border-radius: 4px;
+  min-width: 140px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  height: 45px;
+  border-radius: 0;
+  font-size: 14px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f5f5f5;
+}
+
+.cancelar-button {
+  background-color: #737373;
+}
+
+.desistir-button {
+  background-color: #cf7928ee;
 }

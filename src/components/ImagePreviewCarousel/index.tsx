@@ -29,7 +29,7 @@ const ImagePreviewCarousel = ({ blobs }: ImageCarouselProps) => {
   }, [blobs]);
 
   if (urls.length === 0) {
-    return <p className="text-info">Nenhuma imagem disponível</p>;
+    return <p className="text-info">Nenhuma pré-visualização disponível</p>;
   }
 
   const total = urls.length;

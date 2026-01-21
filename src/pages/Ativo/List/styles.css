@@ -115,6 +115,10 @@
   margin-left: 10px;
 }
 
+.nao-atribuido {
+  background-color: #ff0000ad;
+}
+
 @media (min-width: 992px) {
   .page-title {
     margin-top: 0;

@@ -214,7 +214,7 @@ export function base64ToBlob(base64: string, nome: string): Blob {
 
     let mimeType = "";
 
-    if(nome.includes(".pdf")) {
+    if (nome.includes(".pdf")) {
       mimeType = "application/pdf";
     } else {
       mimeType = "image/jpg";
@@ -226,4 +226,29 @@ export function base64ToBlob(base64: string, nome: string): Blob {
     console.error("Erro ao converter base64 para Blob:", error);
     throw error;
   }
+}
+
+export function isSolicitacaoVigenteNoPeriodo(
+  dataInicio: string,
+  dataFim: string | null,
+  filtroInicio: string | null,
+  filtroFim: string | null
+): boolean {
+  if (!filtroInicio && !filtroFim) return true;
+
+  const inicioSolicitacao = new Date(dataInicio);
+  const fimSolicitacao = dataFim ? new Date(dataFim) : null;
+
+  const inicioFiltro = filtroInicio ? new Date(filtroInicio) : null;
+  const fimFiltro = filtroFim ? new Date(filtroFim) : null;
+
+  if (inicioFiltro && fimSolicitacao && fimSolicitacao < inicioFiltro) {
+    return false;
+  }
+
+  if (fimFiltro && inicioSolicitacao > fimFiltro) {
+    return false;
+  }
+
+  return true;
 }

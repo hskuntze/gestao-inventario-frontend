@@ -11,11 +11,11 @@ import CardSolicitacao from "@/components/CardSolicitacao";
 import { SolicitacaoType } from "@/types/solicitacao";
 
 import { requestBackend } from "@/utils/requests";
-import { fetchAllUsuariosResponsaveis, formatarData, formatarDataParaDiaMesAno } from "@/utils/functions";
+import { fetchAllUsuariosResponsaveis, formatarData, formatarDataParaDiaMesAno, isSolicitacaoVigenteNoPeriodo } from "@/utils/functions";
 import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { toast } from "react-toastify";
 
-type StatusType = "PENDENTE" | "APROVADA" | "REPROVADA" | "CANCELADA";
+type StatusType = "PENDENTE" | "APROVADA" | "REPROVADA" | "CANCELADA" | "FINALIZADA" | "DESISTENCIA";
 
 const SolicitacoesList = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -24,6 +24,9 @@ const SolicitacoesList = () => {
   const [usuariosResponsaveis, setUsuariosResponsaveis] = useState<UsuarioResponsavelType[]>([]);
   const [selectedUsuarioResponsavel, setSelectedUsuarioResponsavel] = useState<UsuarioResponsavelType | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<StatusType | null>(null);
+
+  const [dataInicioFiltro, setDataInicioFiltro] = useState<string | null>(null);
+  const [dataFimFiltro, setDataFimFiltro] = useState<string | null>(null);
 
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -61,7 +64,9 @@ const SolicitacoesList = () => {
 
     const matchesStatus = !selectedStatus || s.status === selectedStatus;
 
-    return matchesSearch && matchesUsuarioResponsavel && matchesStatus;
+    const matchesPeriodo = isSolicitacaoVigenteNoPeriodo(s.dataInicio, s.dataFim, dataInicioFiltro, dataFimFiltro);
+
+    return matchesSearch && matchesUsuarioResponsavel && matchesStatus && matchesPeriodo;
   });
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -213,6 +218,8 @@ const SolicitacoesList = () => {
   const handleClearFilters = () => {
     setSelectedStatus(null);
     setSelectedUsuarioResponsavel(null);
+    setDataInicioFiltro(null);
+    setDataFimFiltro(null);
     setFilter("");
   };
 
@@ -275,6 +282,7 @@ const SolicitacoesList = () => {
                   let value = e.target.value;
 
                   setSelectedStatus(value as StatusType);
+                  setPage(0);
                 }}
                 value={selectedStatus ? selectedStatus : ""}
               >
@@ -285,6 +293,8 @@ const SolicitacoesList = () => {
                 <option value="APROVADA">Aprovado</option>
                 <option value="REPROVADA">Reprovado</option>
                 <option value="CANCELADA">Cancelado</option>
+                <option value="FINALIZADA">Finalizado</option>
+                <option value="DESISTENCIA">Desistência</option>
               </select>
             </div>
             <div className="filtro-input-div form-floating">
@@ -294,6 +304,7 @@ const SolicitacoesList = () => {
                 id="por-usuario-responsavel"
                 className={`filtro-input`}
                 onChange={(e) => {
+                  setPage(0);
                   let value = e.target.value;
 
                   let ur = usuariosResponsaveis.find((ur) => ur.id === Number(value));
@@ -315,6 +326,34 @@ const SolicitacoesList = () => {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="filtro-input-div filtro-range-data">
+              <span className="label-range-data">Data inicio</span>
+              <i className="bi bi-calendar3-range" />
+              <input
+                type="date"
+                className="filtro-input"
+                value={dataInicioFiltro ?? ""}
+                onChange={(e) => {
+                  setDataInicioFiltro(e.target.value || null);
+                  setPage(0);
+                }}
+                style={{ minWidth: "150px", width: "150px" }}
+              />
+            </div>
+            <div className="filtro-input-div filtro-range-data">
+              <span className="label-range-data">Data fim</span>
+              <i className="bi bi-calendar3-range-fill" />
+              <input
+                type="date"
+                className="filtro-input"
+                value={dataFimFiltro ?? ""}
+                onChange={(e) => {
+                  setDataFimFiltro(e.target.value || null);
+                  setPage(0);
+                }}
+                style={{ minWidth: "150px", width: "150px" }}
+              />
             </div>
             <button className="button general-button auto-width pd-3" type="button" onClick={handleClearFilters}>
               <i className="bi bi-x-lg" />

@@ -13,6 +13,10 @@
   margin-bottom: 20px;
 }
 
+.select-tipo-ativo {
+  margin-top: 20px;
+}
+
 .select-tipo-ativo select {
   background-color: var(--bg-card);
 }
@@ -100,6 +104,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-direction: column;
 }
 
 .header-content-buttons {
@@ -107,6 +112,11 @@
   flex-direction: row-reverse;
   justify-content: space-between;
   width: fit-content;
+}
+
+.header-buttons {
+  margin: 10px auto;
+  display: flex;
 }
 
 .voltar-button {
@@ -351,6 +361,41 @@
   margin-bottom: 0;
 }
 
+.tamanho-print-popup {
+  background-color: var(--bg-input);
+  min-width: 200px;
+  height: 30px;
+  border-radius: 10px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-bottom: 10px;
+}
+
+.tamanho-print-opcao {
+  background-color: var(--bg-progress-bar);
+  color: var(--text-color);
+  font-size: 12px;
+  font-family: 700;
+  text-align: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transition: background-color 0.4s ease-in-out;
+}
+
+.tamanho-print-opcao:hover {
+  background-color: var(--bg-progress-fill);
+}
+
+.selected-tamanho-print {
+  background-color: var(--bg-progress-fill);
+}
+
 @media (min-width: 576px) {
   .row-input-fields {
     display: flex;
@@ -386,6 +431,24 @@
     width: 85vw;
     padding: 20px 0 20px 20px;
     border-radius: 10px;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
+  }
+
+  .header-content-buttons {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    width: fit-content;
+  }
+
+  .select-tipo-ativo {
+    margin-top: 0;
   }
 }
 
@@ -431,6 +494,11 @@
 
   .modal-content {
     width: 80vw;
+  }
+
+  .header-buttons {
+    display: inline;
+    margin: unset;
   }
 }
 

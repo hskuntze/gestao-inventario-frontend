@@ -34,6 +34,7 @@ const Home = () => {
   const [qtdAtivos, setQtdAtivos] = useState<QuantidadeAtivosType>();
   const [notificacoes, setNotificacoes] = useState<NotificacaoType[]>([]);
   const [recentes, setRecentes] = useState<AtivoType[]>([]);
+  const [pendentesAtribuicao, setPendentesAtribuicao] = useState<AtivoType[]>([]);
 
   // Photo Capture Hook
   const { photoBase64, loading: photoLoading, capturePhoto, captureLocation, capturePhotoWithLocation, reset: resetPhoto } = usePhotoCapture();
@@ -63,6 +64,22 @@ const Home = () => {
       })
       .finally(() => {
         setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    const requestParams: AxiosRequestConfig = {
+      url: "/ativos/all/pendente/atribuicao",
+      method: "GET",
+      withCredentials: true,
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        setPendentesAtribuicao(res.data as AtivoType[]);
+      })
+      .catch((err) => {
+        toast.error("Erro ao tentar carregar informações de ativos pendentes.");
       });
   }, []);
 
@@ -165,7 +182,12 @@ const Home = () => {
         {os !== "Android" && os !== "iOS" && (
           <>
             <Link to={"/gestao-inventario/ativo/formulario/create"}>
-              <button type="button" className="button submit-button auto-width pd-2">
+              <button
+                type="button"
+                className={`button submit-button auto-width pd-2 ${pendentesAtribuicao.length > 0 ? "disabled-field" : ""}`}
+                disabled={pendentesAtribuicao.length > 0}
+                title={pendentesAtribuicao.length > 0 ? "Existem ativos pendentes de atribuição." : ""}
+              >
                 Adicionar Ativo
               </button>
             </Link>
