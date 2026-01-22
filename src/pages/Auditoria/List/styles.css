@@ -1,0 +1,149 @@
+.page-auditoria {
+  display: flex;
+  margin: 0 auto;
+}
+
+.page-auditoria-content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.nova-campanha-auditoria {
+  background-color: #009fe3;
+  height: 40px;
+  min-width: 100px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.025rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  transition: background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+}
+
+.nova-campanha-auditoria:hover {
+  background-color: #02b3ff;
+  box-shadow: 0 0 12px 4px #02b3ff48;
+}
+
+.nova-campanha-auditoria i {
+  margin-right: 6px;
+  font-size: 19px;
+}
+
+.menu-lateral-auditorias {
+  width: 240px;
+  min-height: calc(100vh - 71px);
+  background-color: var(--bg-card);
+  border-right: 1px solid #025077;
+  display: flex;
+  flex-direction: column;
+  padding-left: 20px;
+  padding-top: 20px;
+}
+
+.auditoria-ano-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #658290;
+  margin-bottom: 10px;
+  padding-left: 8px;
+}
+
+.menu-quadrimestre-item {
+  width: 80%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  color: #b3c1c8;
+  padding-left: 10px;
+  font-size: 14px;
+  text-align: start;
+  cursor: pointer;
+  margin: 10px 0;
+  font-weight: 700;
+
+  transition: background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.4s ease-in-out;
+}
+
+.menu-quadrimestre-item.active {
+  background-color: #004666;
+  border: 1px solid #009fe3;
+  color: #009fe3;
+}
+
+.menu-quadrimestre-item i {
+  margin-right: 10px;
+  font-size: 17px;
+}
+
+.menu-quadrimestre-item:hover {
+  background-color: #004666;
+  border: 1px solid #009fe3;
+  color: #009fe3;
+}
+
+.card-progresso-auditoria {
+  background-color: #092431;
+  /* 80px + 20px (padding-top) + 20px (padding-bottom) + 1px + 1px (borda top e bottom) = 142px de altura */
+  height: 100px;
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #0c3549;
+}
+
+.cp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cp-header-left i {
+  margin-right: 10px;
+  font-size: 22px;
+  color: #009640;
+}
+
+.cp-header-left span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cp-header-percentage {
+  font-size: 20px;
+  font-weight: 800;
+  color: #009640;
+  letter-spacing: 0.04rem;
+}
+
+.cp-progress-bar {
+  height: 15px;
+  margin-top: 20px;
+  width: 100%;
+  background-color: #223a46;
+  border-radius: 12px;
+}
+
+.cp-progress-fill {
+  height: 100%;
+  background-color: #009640;
+  border-radius: 12px;
+  transition: width 0.5s ease;
+}
+
+.cp-footer {
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-info-color);
+}

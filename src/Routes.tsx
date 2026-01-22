@@ -20,6 +20,7 @@ import TrocarSenha from "./pages/TrocarSenha";
 import EsqueciMinhaSenha from "./pages/EsqueciMinhaSenha";
 import Relatorios from "./pages/Relatorios";
 import SolicitacoesPage from "./pages/Solicitacoes";
+import Auditoria from "./pages/Auditoria";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -248,6 +249,20 @@ const Routes = () => {
                 isFirstAccess={isFirstAccess}
               >
                 <SolicitacoesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/auditoria/*"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <Auditoria />
               </PrivateRoute>
             }
           />

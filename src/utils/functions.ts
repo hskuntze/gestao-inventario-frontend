@@ -7,6 +7,7 @@ import { LocalizacaoType } from "@/types/localizacao";
 import { NotificacaoType } from "@/types/notificacao";
 import { ContratoType } from "@/types/contrato";
 import { AtivoType } from "@/types/ativo";
+import { AuditoriaAtivoType } from "@/types/auditoriaativo";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -232,7 +233,7 @@ export function isSolicitacaoVigenteNoPeriodo(
   dataInicio: string,
   dataFim: string | null,
   filtroInicio: string | null,
-  filtroFim: string | null
+  filtroFim: string | null,
 ): boolean {
   if (!filtroInicio && !filtroFim) return true;
 
@@ -252,3 +253,19 @@ export function isSolicitacaoVigenteNoPeriodo(
 
   return true;
 }
+
+export const calcularPercentualConferencia = (ativos: AuditoriaAtivoType[]): number => {
+  if (!ativos.length) return 0;
+
+  const verificados = ativos.filter((a) => a.status !== "PENDENTE").length;
+
+  return Math.round((verificados / ativos.length) * 100);
+};
+
+export const calcularQuantidadeConferidos = (ativos: AuditoriaAtivoType[]): number => {
+  if (!ativos.length) return 0;
+
+  const verificados = ativos.filter((a) => a.status !== "PENDENTE").length;
+
+  return verificados;
+};
