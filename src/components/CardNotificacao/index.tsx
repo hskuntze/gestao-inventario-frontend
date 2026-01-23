@@ -1,6 +1,7 @@
 import { TipoAtivoType } from "@/types/tipoativo";
 import "./styles.css";
 import { TipoNotificacao } from "@/types/tiponotificacao";
+import { Link } from "react-router-dom";
 
 interface Props {
   idAtivo: number;
@@ -15,18 +16,33 @@ const CardNotificacao = ({ idAtivo, mensagem, tipo, tipoAtivo, titulo }: Props) 
     ALERTA: "bi bi-exclamation-diamond",
     GARANTIA: "bi bi-calendar-event",
     EXPIRADO: "bi bi-calendar-x",
+    SOLICITACAO: "bi bi-bell",
   };
 
   return (
-    <div className="card-notificacao-container">
-      <div className="card-icon">
-        <i className={iconeAtivo[tipo]} />
-      </div>
-      <div className="card-info">
-        <span className="card-title">{titulo}</span>
-        <span className="card-message">{mensagem}</span>
-      </div>
-    </div>
+    <>
+      {(tipoAtivo === "CONTRATO" || tipo === "SOLICITACAO") ? (
+        <div className="card-notificacao-container">
+          <div className="card-icon">
+            <i className={iconeAtivo[tipo]} />
+          </div>
+          <div className="card-info">
+            <span className="card-title">{titulo}</span>
+            <span className="card-message">{mensagem}</span>
+          </div>
+        </div>
+      ) : (
+        <Link to={`/gestao-inventario/ativo/formulario/${idAtivo}`} className="card-notificacao-container">
+          <div className="card-icon">
+            <i className={iconeAtivo[tipo]} />
+          </div>
+          <div className="card-info">
+            <span className="card-title">{titulo}</span>
+            <span className="card-message">{mensagem}</span>
+          </div>
+        </Link>
+      )}
+    </>
   );
 };
 

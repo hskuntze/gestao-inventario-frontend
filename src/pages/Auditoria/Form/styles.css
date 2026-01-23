@@ -1,0 +1,161 @@
+.card-detalhes-ativo-auditoria {
+  margin-top: 20px;
+  height: 120px;
+  padding: 20px;
+  border: 1px solid #0b496ba6;
+  background-color: #003d5c;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cda-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cda-info-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02rem;
+  color: #009cdf;
+  text-transform: uppercase;
+}
+
+.cda-info-ativo-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.cda-info-ativo-title span:last-of-type {
+  margin-left: 25px;
+}
+
+.cda-info-id-patrimonio {
+  font-size: 14px;
+  font-weight: 500;
+  color: #009cdf;
+}
+
+.cda-info-footer {
+  margin-top: 15px;
+  display: flex;
+}
+
+.cda-if-detalhe {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  margin-right: 40px;
+}
+
+.cda-if-detalhe span:first-of-type {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888d97;
+  text-transform: uppercase;
+  letter-spacing: 0.02rem;
+  margin-bottom: 5px;
+}
+
+.cda-if-detalhe span:last-of-type {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-color);
+  text-transform: uppercase;
+}
+
+.cda-icone {
+  height: 100%;
+  width: 25%;
+  background: -webkit-linear-gradient(270deg, #0f2736, #003d5c);
+  background: linear-gradient(270deg, #0f2736, #003d5c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.cda-icone i {
+  font-size: 5rem;
+  color: #0f4059;
+}
+
+.auditar-form {
+  margin-top: 20px;
+}
+
+.auditar-form .div-input-formulario {
+  margin: 20px 0;
+}
+
+.form-auditoria-ativo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.auditoria-form-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auditoria-form-buttons {
+  width: 100%;
+}
+
+.auditoria-form-buttons button {
+  cursor: pointer;
+}
+
+.salvar-conferencia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #009640;
+  width: calc(50%);
+  height: 40px;
+  padding: 10px;
+  margin: 20px 0 10px 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+
+  transition: background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+}
+
+.salvar-conferencia:hover {
+  background-color: #00d85e;
+  box-shadow: 0 0 8px 3px #00d85e2c;
+}
+
+.salvar-conferencia i {
+  margin-right: 8px;
+}
+
+.cancelar-conferencia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  width: calc(50%);
+  height: 40px;
+  padding: 10px;
+  color: var(--text-info-color);
+  font-size: 13px;
+  border-radius: 10px;
+
+  transition: box-shadow 0.4s ease-in-out, color 0.4s ease-in-out;
+}
+
+.cancelar-conferencia:hover {
+  color: var(--text-color);
+  box-shadow: inset 0px 0px 7px 5px #00000025;
+}

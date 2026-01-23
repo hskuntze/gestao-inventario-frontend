@@ -1,7 +1,7 @@
 import "./styles.css";
 
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { AxiosRequestConfig } from "axios";
@@ -46,6 +46,8 @@ const Auth = () => {
     requestBackend(requestParams)
       .then((res) => {
         let data = res.data as User;
+
+        console.log("userData", data);
         saveUserData(data);
 
         if (data.firstAccess) {
@@ -64,6 +66,8 @@ const Auth = () => {
 
     requestBackendLogin(formData)
       .then((res) => {
+
+        console.log("authData", res.data);
         saveAuthData(res.data);
 
         setAuthContextData({
@@ -73,7 +77,7 @@ const Auth = () => {
 
         loadUserInfo();
       })
-      .catch(() => toast.error("Não foi possível realizar o login."))
+      .catch((err) => {})
       .finally(() => setLoading(false));
   };
 
@@ -90,7 +94,7 @@ const Auth = () => {
           <input
             type="text"
             id="login-username"
-            placeholder="Nome de usuário do SAFE"
+            placeholder="Nome de usuário"
             className={`input-element login-input ${errors.username ? "input-error" : ""}`}
             {...register("username", {
               required: "Campo obrigatório",
@@ -103,7 +107,7 @@ const Auth = () => {
           <input
             type={show ? "text" : "password"}
             id="login-password"
-            placeholder="Sua senha do SAFE"
+            placeholder="Sua senha"
             className={`input-element login-input ${errors.password ? "input-error" : ""}`}
             {...register("password", {
               required: "Campo obrigatório",
@@ -127,6 +131,11 @@ const Auth = () => {
             </div>
           </>
         )}
+        <div className="esqueci-minha-senha-div">
+          <Link to={"/gestao-inventario/recuperacao-senha"} className="esqueci-minha-senha-button" type="button">
+            Esqueci minha senha
+          </Link>
+        </div>
       </form>
     </div>
   );

@@ -1,20 +1,25 @@
 import GerenciarContrato from "@/components/GerenciarContrato";
 import "./styles.css";
 import GerenciarArea from "@/components/GerenciarArea";
-import GerenciarUsuario from "@/components/GerenciarUsuario";
 import GerenciarUsuarioResponsavel from "@/components/GerenciarUsuarioResponsavel";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import GerenciarFornecedor from "@/components/GerenciarFornecedor";
 
 const AdminCadastros = () => {
+  const navigate = useNavigate();
+
+  const handleReloadPage = () => {
+    navigate(0);
+  }
+
   return (
     <div className="page">
       <div className="page-header">
         <div className="header-content">
           <div>
-            <h2 className="page-title">Gerenciamento de Cadastros Auxiliares</h2>
+            <h2 className="page-title">Cadastros Auxiliares</h2>
             <span className="page-subtitle">
-              Adicione, edite ou remova usuários de sistema, usuários responsáveis, contratos, fornecedores e setores.
+              Adicione, edite ou remova usuários, contratos, fornecedores e setores.
             </span>
           </div>
           <div className="header-content-buttons">
@@ -26,10 +31,9 @@ const AdminCadastros = () => {
       </div>
       <div className="page-body w-100">
         <GerenciarArea />
-        <GerenciarUsuarioResponsavel />
-        <GerenciarFornecedor />
+        <GerenciarUsuarioResponsavel reloadPage={handleReloadPage} />
+        <GerenciarFornecedor reloadPage={handleReloadPage} />
         <GerenciarContrato />
-        <GerenciarUsuario />
       </div>
     </div>
   );

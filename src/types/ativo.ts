@@ -1,7 +1,7 @@
 import { SetorType } from "./area";
 import { ContratoType } from "./contrato";
 import { FornecedorType } from "./fornecedor";
-import { Imagem } from "./imagem";
+import { Arquivo } from "./arquivo";
 import { LocalizacaoType } from "./localizacao";
 import { UsuarioResponsavelType } from "./usuario_responsavel";
 
@@ -18,6 +18,7 @@ export type AtivoType = {
   contrato: ContratoType;
   dataAquisicao: string;
   codigoSerie: string;
+  numeroParte: string;
   observacoes: string;
   linkDocumento: string;
   estadoConservacao: string;
@@ -25,9 +26,16 @@ export type AtivoType = {
   qrCodeImage: string;
   tipoAtivo: string;
   desabilitado: boolean;
+  descartado: boolean;
+  devolvido: boolean;
+  estoque: boolean;
+  manutencao: boolean;
+  observacoesManutencao: string;
   razaoDesabilitado: string;
-  imagens: Imagem[];
+  observacoesDesabilitado: string;
+  imagens: Arquivo[];
   dataDevolucaoPrevista?: string;
   dataDevolucaoRealizada?: string;
   termoParceria: string;
+  passivelEmprestimo: boolean;
 };

@@ -19,7 +19,6 @@ type FormData = {
 const GerenciarArea = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [setores, setSetores] = useState<SetorType[]>([]);
-  const [_reload, _setReload] = useState<boolean>(false);
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -104,36 +103,34 @@ const GerenciarArea = () => {
       });
   };
 
-  const onSubmit = (formData: FormData) => {
-    const requestParams: AxiosRequestConfig = {
-      url: isEditing ? `/areas/update/${areaId}` : "/areas/register",
-      method: isEditing ? "PUT" : "POST",
-      withCredentials: true,
-      data: {
-        nome: formData.nome,
-        responsavel: formData.responsavel,
-        localizacoes: formData.localizacoes.map((loc) => ({
-          id: loc.id,
-          nome: loc.nome,
-        })),
-      },
-    };
+  // const onSubmit = (formData: FormData) => {
+  //   const requestParams: AxiosRequestConfig = {
+  //     url: isEditing ? `/areas/update/${areaId}` : "/areas/register",
+  //     method: isEditing ? "PUT" : "POST",
+  //     withCredentials: true,
+  //     data: {
+  //       nome: formData.nome,
+  //       responsavel: formData.responsavel,
+  //       localizacoes: formData.localizacoes.map((loc) => ({
+  //         id: loc.id,
+  //         nome: loc.nome,
+  //       })),
+  //     },
+  //   };
 
-    requestBackend(requestParams)
-      .then((res) => {
-        toast.success(`Setor ${isEditing ? "editado" : "criado"} com sucesso.`);
-        loadSetores();
-        handleToggleModal();
-      })
-      .catch((err) => {
-        const message = err.response?.data?.message || "Erro ao tentar atualizar o setor.";
-        toast.error(message);
-        handleToggleModal();
-      })
-      .finally(() => {});
-  };
-
-  const handleDeleteArea = (id: number) => {};
+  //   requestBackend(requestParams)
+  //     .then((res) => {
+  //       toast.success(`Setor ${isEditing ? "editado" : "criado"} com sucesso.`);
+  //       loadSetores();
+  //       handleToggleModal();
+  //     })
+  //     .catch((err) => {
+  //       const message = err.response?.data?.message || "Erro ao tentar atualizar o setor.";
+  //       toast.error(message);
+  //       handleToggleModal();
+  //     })
+  //     .finally(() => {});
+  // };
 
   const handleEditArea = (area: SetorType) => {
     setOpenModal(true);
@@ -206,6 +203,7 @@ const GerenciarArea = () => {
               <thead>
                 <tr key={"tr-head-area-list-table"}>
                   <th scope="col">Nome</th>
+                  <th scope="col">Sigla</th>
                   <th scope="col">Responsável</th>
                   <th scope="col">Ações</th>
                 </tr>
@@ -218,12 +216,15 @@ const GerenciarArea = () => {
                         <div>{a.nome}</div>
                       </td>
                       <td>
+                        <div>{a.sigla}</div>
+                      </td>
+                      <td>
                         <div>{a.responsavel ?? "-"}</div>
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditArea(a)} className="button action-button nbr">
-                            <i className="bi bi-pencil" />
+                          <button onClick={() => handleEditArea(a)} className="button action-button nbr" title="Visualizar setor">
+                            <i className="bi bi-eye" />
                           </button>
                           {/* <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
                             <i className="bi bi-trash3" />
@@ -234,7 +235,7 @@ const GerenciarArea = () => {
                   ))
                 ) : (
                   <tr>
-                    <td className="no-data-on-table" colSpan={3}>
+                    <td className="no-data-on-table" colSpan={4}>
                       Sem dados a serem exibidos
                     </td>
                   </tr>
@@ -242,7 +243,7 @@ const GerenciarArea = () => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={3}>
+                  <td colSpan={4}>
                     <TablePagination
                       className="table-pagination-container"
                       component="div"
@@ -255,6 +256,8 @@ const GerenciarArea = () => {
                       labelDisplayedRows={({ from, to, count }) => {
                         return `${from} - ${to} de ${count}`;
                       }}
+                      showFirstButton={true}
+                      showLastButton={true}
                       classes={{
                         selectLabel: "pagination-select-label",
                         displayedRows: "pagination-displayed-rows-label",

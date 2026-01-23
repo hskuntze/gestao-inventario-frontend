@@ -1,0 +1,10 @@
+.esqueci-minha-senha-buttons {
+  display: flex;
+  flex-direction: row;
+  max-height: 45px;
+  min-height: 45px;
+}
+
+.esqueci-minha-senha-buttons button {
+  margin: 0 10px;
+}

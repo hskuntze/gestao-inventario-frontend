@@ -4,10 +4,16 @@ import axios, { AxiosRequestConfig } from "axios";
 import { getAuthData } from "./storage";
 
 /**
- * LOCALHOST
+ * LOCALHOST TESTE
+ */
+// export const BASE_URL =
+//   process.env.REACT_APP_BACKEND_URL ?? "http://172.20.71.101:9005/gestaoinventario/api";
+
+/**
+ * LOCALHOST DEV
  */
 export const BASE_URL =
-  process.env.REACT_APP_BACKEND_URL ?? "http://172.20.71.103:9005/gestaoinventario/api";
+  process.env.REACT_APP_BACKEND_URL ?? "http://172.20.71.101:9006/gestaoinventario/api";
 
 /**
  * HOMOL

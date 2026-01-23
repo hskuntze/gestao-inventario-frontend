@@ -1,4 +1,4 @@
-export type Imagem = {
+export type Arquivo = {
   id: number;
   nome: string;
   conteudo: string;

@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig } from "axios";
 import { requestBackend } from "./requests";
 import { SetorType } from "@/types/area";
 import { FornecedorType } from "@/types/fornecedor";
@@ -6,9 +6,8 @@ import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import { LocalizacaoType } from "@/types/localizacao";
 import { NotificacaoType } from "@/types/notificacao";
 import { ContratoType } from "@/types/contrato";
-import { HistoricoType } from "@/types/historico";
 import { AtivoType } from "@/types/ativo";
-import { NavigateFunction } from "react-router-dom";
+import { AuditoriaAtivoType } from "@/types/auditoriaativo";
 
 /**
  * Função que recebe uma data (em string) no formato 'yyyy-mm-dd' e formata para 'dd/mm/yyyy'
@@ -56,11 +55,27 @@ export function formatarDataParaMesAno(dataStr: string): string {
   }
 }
 
+export function formatarDataParaDiaMesAno(dataStr: string): string {
+  if (dataStr !== "" && dataStr !== "-") {
+    const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+    const data = new Date(dataStr);
+    const dia = data.getDay();
+    const mes = meses[data.getMonth()];
+    const ano = data.getFullYear();
+
+    return `${dia} ${mes}, ${ano}`;
+  } else {
+    return "-";
+  }
+}
+
 export function formatarPerfil(perfil: string): string {
   const perfis: { [key: string]: string } = {
-    PERFIL_ADMIN: "Administrador",
+    PERFIL_ADMIN: "Administrador do Sistema",
     PERFIL_ADMIN_TP: "Analista de Inventário",
-    PERFIL_USUARIO: "Usuário",
+    PERFIL_GERENTE: "Gerente",
+    PERFIL_USUARIO: "Usuário de Sistema",
   };
 
   return perfis[perfil] ?? "Sem perfil definido";
@@ -77,11 +92,11 @@ export async function fetchAllSetores(): Promise<SetorType[]> {
     const res = await requestBackend(requestParams);
     return res.data as SetorType[];
   } catch (err) {
-    throw new Error("Falha ao buscar ps setores.");
+    throw new Error("Falha ao buscar os setores.");
   }
 }
 
-export async function fetchAllFornecedoresByAreaId(id: number): Promise<LocalizacaoType[]> {
+export async function fetchAllLocalizacoesByAreaId(id: number): Promise<LocalizacaoType[]> {
   const requestParams: AxiosRequestConfig = {
     url: `/localizacoes/all/${id}`,
     method: "GET",
@@ -186,28 +201,7 @@ export async function fetchAllContratos(): Promise<ContratoType[]> {
   }
 }
 
-export const setupInterceptors = (navigate: NavigateFunction) => {
-  axios.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error.response) {
-        const status = error.response.status;
-
-        if (status === 404) {
-          // redireciona para a tela de "não encontrado"
-          navigate("/gestao-inventario/nao-encontrado");
-        } else if (status === 401) {
-          // token inválido → volta pro login
-          navigate("/gestao-inventario/login");
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
-};
-
-export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
+export function base64ToBlob(base64: string, nome: string): Blob {
   try {
     // Remove quebras de linha e espaços que possam ter vindo do banco
     const cleanedBase64 = base64.replace(/[\r\n\s]/g, "");
@@ -219,6 +213,14 @@ export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
 
+    let mimeType = "";
+
+    if (nome.includes(".pdf")) {
+      mimeType = "application/pdf";
+    } else {
+      mimeType = "image/jpg";
+    }
+
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: mimeType });
   } catch (error) {
@@ -226,3 +228,44 @@ export function base64ToBlob(base64: string, mimeType = "image/png"): Blob {
     throw error;
   }
 }
+
+export function isSolicitacaoVigenteNoPeriodo(
+  dataInicio: string,
+  dataFim: string | null,
+  filtroInicio: string | null,
+  filtroFim: string | null,
+): boolean {
+  if (!filtroInicio && !filtroFim) return true;
+
+  const inicioSolicitacao = new Date(dataInicio);
+  const fimSolicitacao = dataFim ? new Date(dataFim) : null;
+
+  const inicioFiltro = filtroInicio ? new Date(filtroInicio) : null;
+  const fimFiltro = filtroFim ? new Date(filtroFim) : null;
+
+  if (inicioFiltro && fimSolicitacao && fimSolicitacao < inicioFiltro) {
+    return false;
+  }
+
+  if (fimFiltro && inicioSolicitacao > fimFiltro) {
+    return false;
+  }
+
+  return true;
+}
+
+export const calcularPercentualConferencia = (ativos: AuditoriaAtivoType[]): number => {
+  if (!ativos.length) return 0;
+
+  const verificados = ativos.filter((a) => a.status !== "PENDENTE").length;
+
+  return Math.round((verificados / ativos.length) * 100);
+};
+
+export const calcularQuantidadeConferidos = (ativos: AuditoriaAtivoType[]): number => {
+  if (!ativos.length) return 0;
+
+  const verificados = ativos.filter((a) => a.status !== "PENDENTE").length;
+
+  return verificados;
+};

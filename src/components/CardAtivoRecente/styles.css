@@ -8,6 +8,11 @@
   align-items: center;
   border-radius: 10px;
   margin-bottom: 15px;
+  transition: background-color 0.5s ease-in-out;
+}
+
+.card-ativo-recente-container:hover {
+  background-color: var(--bg-card-hover);
 }
 
 .card-ativo-recente-container:first-of-type {

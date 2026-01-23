@@ -17,6 +17,15 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DESCARTAR: "bi bi-trash3 descartar-icon",
     DEVOLVER: "bi bi-sign-turn-left devolver-icon",
     "ARQUIVO INSERIDO": "bi bi-file-earmark-arrow-up arquivo-inserido-icon",
+    "ARQUIVO EXCLUÍDO": "bi bi-file-earmark-minus arquivo-excluido-icon",
+    "EM MANUTENÇÃO": "bi bi bi-wrench-adjustable-circle em-manutencao-icon",
+    "RETIRADO MANUTENÇÃO": "bi bi-wrench-adjustable-circle-fill retirado-manutencao-icon",
+    "SOLICITAÇÃO CRIADA": "bi bi-file-plus-fill solicitacao-criada-icon",
+    "SOLICITAÇÃO APROVADA": "bi bi-file-check-fill solicitacao-aprovada-icon",
+    "SOLICITAÇÃO RECUSADA": "bi bi-file-x-fill solicitacao-recusada-icon",
+    "SOLICITAÇÃO CANCELADA": "bi bi-folder-fill solicitacao-cancelada-icon",
+    "SOLICITAÇÃO FINALIZADA": "bi bi-file-check-fill solicitacao-finalizada-icon",
+    "SOLICITAÇÃO DESISTÊNCIA": "bi bi-file-check-fill solicitacao-desistencia-icon",
   };
 
   const labels: { [key: string]: string } = {
@@ -29,6 +38,15 @@ const CardHistoricoAtivo = ({ element }: Props) => {
     DESCARTAR: "Ativo descartado",
     DEVOLVER: "Ativo devolvido",
     "ARQUIVO INSERIDO": "Arquivo(s) inserido(s)",
+    "ARQUIVO EXCLUÍDO": "Arquivo excluído",
+    "EM MANUTENÇÃO": "Ativo em manutenção",
+    "RETIRADO MANUTENÇÃO": "Ativo retirado da manutenção",
+    "SOLICITAÇÃO CRIADA": "Solicitação criada",
+    "SOLICITAÇÃO APROVADA": "Solicitação aprovada",
+    "SOLICITAÇÃO RECUSADA": "Solicitação recusada",
+    "SOLICITAÇÃO CANCELADA": "Solicitação cancelada",
+    "SOLICITAÇÃO FINALIZADA": "Solicitação finalizada",
+    "SOLICITAÇÃO DESISTÊNCIA": "Desistência da solicitação",
   };
 
   return (
@@ -39,7 +57,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
       <div className="historico-content">
         <span className="historico-content-title">{labels[element.operacao]}</span>
         <span className="historico-content-info">{formatarData(element.createdAt)}</span>
-        {element.operacao === "REGISTRO" && (
+        {(element.operacao === "REGISTRO" || element.operacao === "DEVOLVER") && (
           <>
             <span className="historico-content-info">Setor: {element.area ?? "Sem setor"}</span>
             <span className="historico-content-info">Localização: {element.localizacao ?? "Sem localização"}</span>
@@ -51,6 +69,10 @@ const CardHistoricoAtivo = ({ element }: Props) => {
             <span className="historico-content-info">Setor: {element.area}</span>
             <span className="historico-content-info">Localização: {element.localizacao}</span>
           </>
+        )}
+        {element.operacao === "ARQUIVO EXCLUÍDO" && <span className="historico-content-info">Realizado por: {element.userNome}</span>}
+        {(element.operacao === "EM MANUTENÇÃO" || element.operacao === "RETIRADO MANUTENÇÃO") && (
+          <span className="historico-content-info">Realizado por: {element.userNome}</span>
         )}
       </div>
     </div>

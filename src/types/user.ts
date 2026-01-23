@@ -9,6 +9,9 @@ export type User = {
   userUuid: string;
   firstAccess: boolean;
   userState: number;
+  userEnabled: boolean;
+  expired: boolean;
+  locked: boolean;
   termoParceria: string;
   perfis: Perfil[];
   usuarioResponsavel: UsuarioResponsavelType;

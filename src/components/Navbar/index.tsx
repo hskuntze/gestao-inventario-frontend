@@ -1,13 +1,14 @@
 import "./styles.css";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { getUserData } from "@/utils/storage";
 
 import CtceaLogoEscuro from "@/assets/images/Marca_Principal_Escuro.png";
 import CtceaLogoClaro from "@/assets/images/Marca_Principal_Claro.png";
 import { hasAnyRoles } from "@/utils/auth";
 import { AuthContext } from "@/utils/contexts/AuthContext";
+import { useClickOutside } from "@/utils/hooks/useClickOutside";
 
 const Navbar = () => {
   const { setAuthContextData } = useContext(AuthContext);
@@ -18,9 +19,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const userData = getUserData();
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdminTp, setIsAdminTp] = useState(false);
+  const isAdmin = hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]);
+  const isAdminTp = hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ADMIN_TP" }]);
+  const isGerente = hasAnyRoles([{ id: 3, autorizacao: "PERFIL_GERENTE" }]);
+  const isUsuario = hasAnyRoles([{ id: 4, autorizacao: "PERFIL_USUARIO" }]);
 
+  // Observa as mudanças de tema (claro | escuro) no site
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const currentTheme = document.documentElement.getAttribute("data-theme") as "light" | "dark";
@@ -33,21 +37,13 @@ const Navbar = () => {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+  const handleCloseDropdown = useCallback(() => {
+    setDropdown(false);
   }, []);
 
-  useEffect(() => {
-    setIsAdmin(hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]));
-    setIsAdminTp(hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ADMIN_TP" }]));
-  }, []);
+  useClickOutside(dropdownRef, handleCloseDropdown);
 
+  // Exclui os elementos salvos no localStorage
   const handleLogout = () => {
     localStorage.removeItem("authData");
     localStorage.removeItem("userData");
@@ -62,6 +58,8 @@ const Navbar = () => {
 
   return (
     <nav className="navbar-container">
+
+      {/* Caso seja o primeiro acesso do usuário, o logo não é link */}
       {userData.firstAccess ? (
         <div className="navbar-div-left">
           <img src={theme === "light" ? CtceaLogoClaro : CtceaLogoEscuro} alt="Logotipo CTCEA" className="navbar-img" />
@@ -76,30 +74,52 @@ const Navbar = () => {
         </Link>
       )}
       <div className="navbar-div-right">
+
+        {/* Componente que muda o tema do site */}
         <ThemeSwitcher />
         <button className="navbar-button" onClick={() => setDropdown((prev) => !prev)}>
           <i className="bi bi-person" />
         </button>
 
         {dropdown && (
-          <div className="user-dropdown">
+          <div className="user-dropdown" ref={dropdownRef}>
             <div className="user-info">
               <strong>{userData.nome}</strong>
               <span>{userData.email}</span>
             </div>
-            {!userData.firstAccess && (isAdmin || isAdminTp) && (
+            {!userData.firstAccess && (
               <>
                 <div className="dropdown-divider"></div>
-                <div className="configurations">
-                  <Link to={"/gestao-inventario/admin/cadastros"} type="button" className="configuration-button">
-                    <i className="bi bi-gear-fill" />
-                    <span>Cadastros</span>
-                  </Link>
 
-                  <Link to={"/gestao-inventario/admin/notificacoes"} type="button" className="configuration-button">
-                    <i className="bi bi-bell-fill" />
-                    <span>Notificações</span>
-                  </Link>
+                {/* Mostra as opções do menu de acordo com o perfil do usuário */}
+                <div className="configurations">
+                  {(isAdmin || isAdminTp) && (
+                    <>
+                      <Link to="/gestao-inventario/admin/cadastros" className="configuration-button">
+                        <i className="bi bi-gear-fill" />
+                        <span>Cadastros</span>
+                      </Link>
+
+                      <Link to="/gestao-inventario/admin/notificacoes" className="configuration-button">
+                        <i className="bi bi-bell-fill" />
+                        <span>Notificações</span>
+                      </Link>
+                    </>
+                  )}
+
+                  {(isAdmin || isAdminTp || isUsuario) && (
+                    <Link to="/gestao-inventario/usuario" className="configuration-button">
+                      <i className="bi bi-person-lines-fill" />
+                      <span>Meus Ativos</span>
+                    </Link>
+                  )}
+
+                  {isGerente && (
+                    <Link to="/gestao-inventario/solicitacao" className="configuration-button">
+                      <i className="bi bi-list-ul" />
+                      <span>Solicitações</span>
+                    </Link>
+                  )}
                 </div>
               </>
             )}

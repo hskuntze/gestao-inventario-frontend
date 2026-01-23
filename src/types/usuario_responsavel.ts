@@ -5,4 +5,5 @@ export type UsuarioResponsavelType = {
   nome: string;
   email: string;
   area: SetorType; //área = setor (mudança de nomenclatura)
+  desabilitado: boolean;
 };

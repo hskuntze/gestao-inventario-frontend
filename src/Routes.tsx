@@ -10,9 +10,17 @@ import Admin from "./pages/Admin";
 import {} from "react-toastify";
 import { Modal, Box } from "@mui/material";
 import NaoEncontrado from "./pages/NaoEncontrado";
-import { setupInterceptors } from "./utils/functions";
 import PrimeiroAcesso from "./pages/PrimeiroAcesso";
 import { getUserData } from "./utils/storage";
+import { setupInterceptors } from "./utils/interceptor";
+import NaoAutorizado from "./pages/NaoAutorizado";
+import PageUsuario from "./pages/Usuario";
+import { hasAnyRoles } from "./utils/auth";
+import TrocarSenha from "./pages/TrocarSenha";
+import EsqueciMinhaSenha from "./pages/EsqueciMinhaSenha";
+import Relatorios from "./pages/Relatorios";
+import SolicitacoesPage from "./pages/Solicitacoes";
+import Auditoria from "./pages/Auditoria";
 
 /**
  * Componente que controla as rotas da aplicação.
@@ -98,6 +106,21 @@ const Routes = () => {
       setIsFirstAccess(userData.firstAccess);
     }, []);
 
+    useEffect(() => {
+      const isGerente = hasAnyRoles([{ id: 3, autorizacao: "PERFIL_GERENTE" }]);
+      const isUsuario = hasAnyRoles([{ id: 4, autorizacao: "PERFIL_USUARIO" }]);
+
+      if (isGerente) {
+        navigate("/gestao-inventario/solicitacao", { replace: true });
+        return;
+      }
+
+      if (isUsuario) {
+        navigate("/gestao-inventario/usuario", { replace: true });
+        return;
+      }
+    }, []);
+
     return (
       <>
         <Modal open={showExitConfirm} onClose={() => setShowExitConfirm(false)}>
@@ -138,18 +161,21 @@ const Routes = () => {
           <Route path="/" element={<Navigate to="/gestao-inventario" />} />
           <Route path="/gestao-inventario/*" element={<Auth />} />
           <Route path="/gestao-inventario/nao-encontrado" element={<NaoEncontrado />} />
+          <Route path="/gestao-inventario/nao-autorizado" element={<NaoAutorizado />} />
+          <Route path="/gestao-inventario/primeiro-acesso" element={<PrimeiroAcesso />} />
+          <Route path="/gestao-inventario/recuperar-senha" element={<TrocarSenha />} />
+          <Route path="/gestao-inventario/recuperacao-senha" element={<EsqueciMinhaSenha />} />
           <Route
-            path="/gestao-inventario/primeiro-acesso"
+            path="/gestao-inventario/usuario"
             element={
               <PrivateRoute
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
-                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                  { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
-                <PrimeiroAcesso />
+                <PageUsuario />
               </PrivateRoute>
             }
           />
@@ -160,7 +186,7 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                  { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -175,7 +201,7 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
-                  { id: 3, autorizacao: "PERFIL_USUARIO" },
+                  { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -194,6 +220,49 @@ const Routes = () => {
                 isFirstAccess={isFirstAccess}
               >
                 <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/relatorios/*"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <Relatorios />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/solicitacao/*"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                  { id: 3, autorizacao: "PERFIL_GERENTE" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <SolicitacoesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gestao-inventario/auditoria/*"
+            element={
+              <PrivateRoute
+                roles={[
+                  { id: 1, autorizacao: "PERFIL_ADMIN" },
+                  { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                ]}
+                isFirstAccess={isFirstAccess}
+              >
+                <Auditoria />
               </PrivateRoute>
             }
           />

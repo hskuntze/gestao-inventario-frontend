@@ -1,12 +1,17 @@
 import "./styles.css";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Modal, TablePagination } from "@mui/material";
-import { useEffect, useState } from "react";
-import { AxiosRequestConfig } from "axios";
-import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { AxiosRequestConfig } from "axios";
+import { cnpj } from "cpf-cnpj-validator";
+
+import { requestBackend } from "@/utils/requests";
+
 import { FornecedorType } from "@/types/fornecedor";
+
 import Loader from "../Loader";
+
+import { Accordion, AccordionDetails, AccordionSummary, Box, Modal, TablePagination } from "@mui/material";
 
 type FormData = {
   nome: string;
@@ -16,7 +21,33 @@ type FormData = {
   cnpj: string;
 };
 
-const GerenciarFornecedor = () => {
+function maskCNPJ(value: string): string {
+  return value
+    .replace(/\D/g, "")
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2")
+    .slice(0, 18);
+}
+
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.length <= 10) {
+    // telefone fixo
+    return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d{1,4})$/, "$1-$2");
+  }
+
+  // celular (9 dígitos)
+  return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2");
+}
+
+interface Props {
+  reloadPage: () => void;
+}
+
+const GerenciarFornecedor = ({ reloadPage }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [fornecedor, setFornecedor] = useState<FornecedorType[]>([]);
   const [filter, setFilter] = useState("");
@@ -32,16 +63,15 @@ const GerenciarFornecedor = () => {
     formState: { errors },
     handleSubmit,
     setValue,
+    watch,
+    reset,
   } = useForm<FormData>();
 
-  const handleToggleModal = () => {
-    setOpenModal(!openModal);
+  const cnpjValue = watch("cnpj");
 
-    setValue("nome", "");
-    setValue("cnpj", "");
-    setValue("contatoEmail", "");
-    setValue("contatoNome", "");
-    setValue("contatoTelefone", "");
+  const handleToggleModal = () => {
+    reset();
+    setOpenModal(true);
   };
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
@@ -64,10 +94,10 @@ const GerenciarFornecedor = () => {
 
     return (
       f.nome.toLowerCase().includes(searchTerm) ||
-      (f.cnpj.toLowerCase().includes(searchTerm) ?? false) ||
-      (f.contatoNome.toLowerCase().includes(searchTerm) ?? false) ||
-      (f.contatoEmail.toLowerCase().includes(searchTerm) ?? false) ||
-      (f.contatoTelefone.toLowerCase().includes(searchTerm) ?? false)
+      ((f.cnpj ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((f.contatoNome ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((f.contatoEmail ?? "-").toLowerCase().includes(searchTerm) ?? false) ||
+      ((f.contatoTelefone ?? "-").toLowerCase().includes(searchTerm) ?? false)
     );
   });
 
@@ -103,7 +133,7 @@ const GerenciarFornecedor = () => {
       method: isEditing ? "PUT" : "POST",
       withCredentials: true,
       data: {
-        nome: formData.nome,
+        nome: formData.nome.toUpperCase(),
         cnpj: formData.cnpj,
         contatoNome: formData.contatoNome,
         contatoEmail: formData.contatoEmail,
@@ -114,23 +144,62 @@ const GerenciarFornecedor = () => {
     requestBackend(requestParams)
       .then((res) => {
         toast.success(`Fornecedor ${isEditing ? "editado" : "criado"} com sucesso.`);
-        loadFornecedores();
-        handleToggleModal();
+        //loadFornecedores(); se estamos fazendo o "reloadPage" não precisa chamar aqui. Vai ser invocado no reload.
+        setOpenModal(false);
+        reloadPage();
       })
       .catch((err) => {
         const message = err.response?.data?.message || "Erro ao tentar atualizar o fornecedor.";
         toast.error(message);
-        handleToggleModal();
       })
       .finally(() => {
         setLoading(false);
       });
   };
 
-  const handleDeleteArea = (id: number) => {};
+  const handleDeleteFornecedor = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja excluir este fornecedor?");
 
-  const handleEditUsuario = (f: FornecedorType) => {
-    setOpenModal(true);
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/fornecedores/delete/${id}`,
+        method: "DELETE",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Deletado com sucesso.");
+          //loadFornecedores(); se estamos fazendo o "reloadPage" não precisa chamar aqui. Vai ser invocado no reload.
+          reloadPage();
+        })
+        .catch((err) => {})
+        .finally(() => {});
+    }
+  };
+
+  const handleDisableFornecedor = (id: number) => {
+    let confirm = window.confirm("Esta é uma operação irreversível. Tem certeza que deseja desabilitar este fornecedor?");
+
+    if (confirm) {
+      const requestParams: AxiosRequestConfig = {
+        url: `/fornecedores/desabilitar/${id}`,
+        method: "POST",
+        withCredentials: true,
+      };
+
+      requestBackend(requestParams)
+        .then((res) => {
+          toast.success("Desabilitado com sucesso.");
+          //loadFornecedores(); se estamos fazendo o "reloadPage" não precisa chamar aqui. Vai ser invocado no reload.
+          reloadPage();
+        })
+        .catch((err) => {})
+        .finally(() => {});
+    }
+  };
+
+  const handleEditFornecedor = (f: FornecedorType) => {
     setIsEditing(true);
     setFornecedorId(f.id);
 
@@ -139,6 +208,8 @@ const GerenciarFornecedor = () => {
     setValue("contatoNome", f.contatoNome);
     setValue("contatoTelefone", f.contatoTelefone);
     setValue("cnpj", f.cnpj);
+
+    setOpenModal(true);
   };
 
   useEffect(() => {
@@ -175,7 +246,14 @@ const GerenciarFornecedor = () => {
               </div>
             </div>
             <div>
-              <button onClick={handleToggleModal} type="button" className="button submit-button auto-width pd-2">
+              <button
+                onClick={() => {
+                  handleToggleModal();
+                  setIsEditing(false);
+                }}
+                type="button"
+                className="button submit-button auto-width pd-2"
+              >
                 <i className="bi bi-plus" />
                 Adicionar Fornecedor
               </button>
@@ -185,7 +263,7 @@ const GerenciarFornecedor = () => {
             <table className="fornecedor-list-table">
               <thead>
                 <tr key={"tr-head-fornecedor-list-table"}>
-                  <th scope="col">Nome</th>
+                  <th scope="col">Empresa</th>
                   <th scope="col">CNPJ</th>
                   <th scope="col">Contato nome</th>
                   <th scope="col">Contato e-mail</th>
@@ -196,7 +274,7 @@ const GerenciarFornecedor = () => {
               <tbody>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((a) => (
-                    <tr key={a.id}>
+                    <tr key={a.id} className={`${a.desabilitado ? "tr-desabilitado" : ""}`}>
                       <td>
                         <div>{a.nome}</div>
                       </td>
@@ -214,10 +292,30 @@ const GerenciarFornecedor = () => {
                       </td>
                       <td>
                         <div className="table-action-buttons">
-                          <button onClick={() => handleEditUsuario(a)} className="button action-button nbr">
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleEditFornecedor(a)}
+                            className={`button action-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Editar fornecedor"
+                          >
                             <i className="bi bi-pencil" />
                           </button>
-                          <button onClick={() => handleDeleteArea(a.id)} type="button" className="button action-button delete-button nbr">
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleDisableFornecedor(a.id)}
+                            type="button"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Desabilitar fornecedor"
+                          >
+                            <i className="bi bi-x-circle" />
+                          </button>
+                          <button
+                            disabled={a.desabilitado}
+                            onClick={() => handleDeleteFornecedor(a.id)}
+                            type="button"
+                            className={`button action-button delete-button nbr ${a.desabilitado ? "disabled-button" : ""}`}
+                            title="Excluir fornecedor"
+                          >
                             <i className="bi bi-trash3" />
                           </button>
                         </div>
@@ -247,6 +345,8 @@ const GerenciarFornecedor = () => {
                       labelDisplayedRows={({ from, to, count }) => {
                         return `${from} - ${to} de ${count}`;
                       }}
+                      showFirstButton={true}
+                      showLastButton={true}
                       classes={{
                         selectLabel: "pagination-select-label",
                         displayedRows: "pagination-displayed-rows-label",
@@ -262,11 +362,14 @@ const GerenciarFornecedor = () => {
           </div>
         </AccordionDetails>
       </Accordion>
-      <Modal open={openModal} onClose={handleToggleModal} className="modal-container">
+      <Modal open={openModal} onClose={() => setOpenModal(false)} className="modal-container">
         <Box className="modal-content">
           <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
             <div className="div-input-formulario">
-              <span>Nome</span>
+              <div>
+                <span>Empresa</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.nome ? "input-error" : ""}`}
@@ -276,17 +379,28 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.nome?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>CNPJ</span>
+              <div>
+                <span>CNPJ</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.cnpj ? "input-error" : ""}`}
-                {...register("cnpj", { required: "Campo obrigatório" })}
-                maxLength={255}
+                {...register("cnpj", { required: "Campo obrigatório", validate: (v) => cnpj.isValid(cnpj.strip(v)) || "CNPJ inválido" })}
+                maxLength={18}
+                value={cnpjValue}
+                onChange={(e) => {
+                  const masked = maskCNPJ(e.target.value);
+                  setValue("cnpj", masked, { shouldValidate: true });
+                }}
               />
               <div className="invalid-feedback d-block div-erro">{errors.cnpj?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Contato nome</span>
+              <div>
+                <span>Contato nome</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoNome ? "input-error" : ""}`}
@@ -296,22 +410,44 @@ const GerenciarFornecedor = () => {
               <div className="invalid-feedback d-block div-erro">{errors.contatoNome?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Contato e-mail</span>
+              <div>
+                <span>Contato e-mail</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoEmail ? "input-error" : ""}`}
-                {...register("contatoEmail", { required: "Campo obrigatório" })}
+                {...register("contatoEmail", {
+                  required: "Campo obrigatório",
+                  pattern: {
+                    value: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+                    message: "E-mail inválido",
+                  },
+                })}
                 maxLength={255}
               />
               <div className="invalid-feedback d-block div-erro">{errors.contatoEmail?.message}</div>
             </div>
             <div className="div-input-formulario">
-              <span>Contato telefone</span>
+              <div>
+                <span>Contato telefone</span>
+                <span className="obrigatorio-ast">*</span>
+              </div>
               <input
                 type="text"
                 className={`input-formulario ${errors.contatoTelefone ? "input-error" : ""}`}
-                {...register("contatoTelefone", { required: "Campo obrigatório" })}
-                maxLength={255}
+                {...register("contatoTelefone", {
+                  required: "Campo obrigatório",
+                  pattern: {
+                    value: /^(\+55\s?)?(\(?\d{2}\)?\s?)\d{4,5}-\d{4}$/,
+                    message: "Telefone inválido — tente usar DDD e o dígito 9 (se aplicável) (ex.: (61) 99999-9999)",
+                  },
+                })}
+                onChange={(e) => {
+                  const masked = maskTelefone(e.target.value);
+                  setValue("contatoTelefone", masked, { shouldValidate: true });
+                }}
+                maxLength={16}
               />
               <div className="invalid-feedback d-block div-erro">{errors.contatoTelefone?.message}</div>
             </div>
@@ -321,8 +457,11 @@ const GerenciarFornecedor = () => {
                 <Loader />
               </div>
             ) : (
-              <div className="form-buttons">
-                <button className="button submit-button">Salvar</button>
+              <div className="form-bottom">
+                <div className="legenda">* Campos obrigatórios</div>
+                <div className="form-buttons">
+                  <button className="button submit-button">Salvar</button>
+                </div>
               </div>
             )}
           </form>

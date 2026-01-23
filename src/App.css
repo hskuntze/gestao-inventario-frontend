@@ -20,6 +20,7 @@
   --border-input-color: #6a6b6e;
   --border-color: #1a425a;
   --border-error-color: #e60109;
+  --border-card-color: #004e6e;
 
   --submit-button-color: #009fe3;
   --submit-button-hover-color: #006996;
@@ -59,9 +60,10 @@
   --border-input-color: #8e8e8f;
   --border-color: #8e8e8f;
   --border-error-color: #d8262c;
+  --border-card-color: #b3d7e6;
 
-  --submit-button-color: #007aff;
-  --submit-button-hover-color: #1877dd;
+  --submit-button-color: #17c200;
+  --submit-button-hover-color: #119600;
   --button-color: #a1a1a1;
   --button-hover-color: #c0c0c0;
   --action-button-color: #007aff;
@@ -73,11 +75,14 @@
   --bg-card: #d3d3d3;
   --bg-card-hover: #b7b7b7;
   --bg-no-data: #e06969;
+  --bg-input: #b1afaf;
   --bg-filter-input: #2a2a2a;
   --bg-disabled-field: #b1afaf;
 
   --skeleton-loading: #c2c2c2;
   --skeleton-gradient: #dfdfdf;
+  --skeleton-element: #5a5a5a;
+
   --hist-line: #0000001f;
 }
 
@@ -118,3 +123,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 html[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+
+/* input[type="text" i] {
+  padding-block: 0;
+  padding-inline: 0;
+} */

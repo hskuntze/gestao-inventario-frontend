@@ -33,10 +33,11 @@ interface UploadArquivosProps {
   tipoAtivo: string;
   idAtivo?: string;
   ativoDesabilitado: boolean;
-  reloadPage: () => void;
+  reloadPage?: () => void;
+  submitParentForm?: () => void;
 }
 
-const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilitado, reloadPage }: UploadArquivosProps) => {
+const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilitado, reloadPage, submitParentForm }: UploadArquivosProps) => {
   const { control, handleSubmit, setValue, watch } = useForm<FormData>();
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -122,7 +123,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
 
     try {
       await requestBackend({
-        url: "/imagens/upload-multiplo",
+        url: "/arquivos/upload-multiplo",
         method: "POST",
         data: formData,
         withCredentials: true,
@@ -135,7 +136,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
     }
 
     alert("Upload finalizado!");
-    reloadPage();
+    reloadPage?.();
   };
 
   const handleRemoveFile = (fileName: string) => {
@@ -161,7 +162,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
     try {
       if (confirm) {
         const requestParams: AxiosRequestConfig = {
-          url: `/imagens/delete/${file.id}`,
+          url: `/arquivos/delete/${file.id}`,
           method: "DELETE",
           withCredentials: true,
         };
@@ -170,7 +171,7 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
           .then(() => {
             setFilePreviews((prev) => prev.filter((f) => f.name !== fileName));
             toast.success("Deletado");
-            reloadPage();
+            reloadPage?.();
           })
           .catch(() => {
             toast.error("Erro ao tentar excluir a imagem");
@@ -195,7 +196,8 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
     setValue("file", droppedFiles);
   };
 
-  const imageBlobs = defaultFiles?.filter((f) => /\.(jpg|jpeg|png|gif)$/i.test(f.nome)).map((f) => base64ToBlob(f.conteudo)) ?? [];
+  // const imageBlobs = defaultFiles?.filter((f) => /\.(jpg|jpeg|png|gif)$/i.test(f.nome)).map((f) => base64ToBlob(f.conteudo)) ?? [];
+  const imageBlobs = defaultFiles?.map((f) => base64ToBlob(f.conteudo, f.nome)) ?? [];
 
   return (
     <>
@@ -262,7 +264,15 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
           })}
         </div>
         <div className="form-buttons">
-          <button disabled={ativoDesabilitado} className={`button submit-button ${ativoDesabilitado ? "disabled-field" : ""}`}>
+          <button
+            disabled={ativoDesabilitado}
+            type="button"
+            onClick={() => {
+              handleSubmit(onSubmit)();
+              submitParentForm?.();
+            }}
+            className={`button submit-button ${ativoDesabilitado ? "disabled-field" : ""}`}
+          >
             Salvar
           </button>
         </div>

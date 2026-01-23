@@ -1,0 +1,50 @@
+.page-relatorio {
+  display: flex;
+  width: 100%;
+}
+
+.page-menu-lateral {
+  width: 320px;
+  margin-right: 20px;
+}
+
+.page-relatorio-conteudo {
+  width: calc(100% - 340px);
+}
+
+.active {
+  background-color: var(--bg-card-hover) !important;
+  box-shadow: 0 0 12px 2px var(--bg-card-hover);
+}
+
+.tipo-relatorio-card {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-card-color);
+  min-width: 250px;
+  max-width: 300px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.tipo-relatorio-card:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.tipo-relatorio-card h4 {
+  font-size: 20px;
+  margin: 10px 0;
+}
+
+.tipo-relatorio-card span {
+  font-size: 14px;
+  letter-spacing: 0.015rem;
+  color: var(--text-info-color);
+  font-weight: 300;
+  text-align: center;
+}

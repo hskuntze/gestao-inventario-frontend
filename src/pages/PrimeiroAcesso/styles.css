@@ -2,3 +2,81 @@
   width: 87vw;
   margin: 0 auto;
 }
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip-icon {
+  position: absolute;
+  top: 196%;
+  right: 1%;
+  z-index: 10;
+  cursor: help;
+}
+
+.tooltip-icon i {
+  color: #979797;
+  display: block;
+  position: relative;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+}
+
+.tooltip-box {
+  display: none;
+  position: absolute;
+  top: 25px;
+  left: 0;
+  background: #1b1b1bda;
+  color: #fff;
+  padding: 10px;
+  width: auto;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  z-index: 10;
+}
+
+.tooltip-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.tooltip-box ul li {
+  margin: 2px 0;
+}
+
+.tooltip-wrapper:hover .tooltip-box {
+  display: block;
+}
+
+.password-strength {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.password-strength span {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.password-strength .weak {
+  color: #d9534f;
+}
+
+.password-strength .medium {
+  color: #f0ad4e;
+}
+
+.password-strength .strong {
+  color: #5cb85c;
+}
+
+@media (min-width: 768px) {
+  .tooltip-box {
+    left: 101%;
+    min-width: 230px;
+  }
+}
