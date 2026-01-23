@@ -280,7 +280,7 @@
 .disabled-field {
   background-color: var(--bg-disabled-field) !important;
   color: var(--text-disabled-color) !important;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
   opacity: 0.6 !important;
 }
 

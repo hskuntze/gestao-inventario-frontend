@@ -37,6 +37,33 @@
   font-size: 19px;
 }
 
+.finalizar-campanha-auditoria {
+  background-color: #009fe31a;
+  height: 40px;
+  min-width: 100px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.025rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  transition: background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+
+  margin-right: 15px;
+}
+
+.finalizar-campanha-auditoria i {
+  margin-right: 6px;
+  font-size: 19px;
+}
+
+.finalizar-campanha-auditoria:hover {
+  background-color: #009fe333;
+}
+
 .menu-lateral-auditorias {
   width: 240px;
   min-height: calc(100vh - 71px);

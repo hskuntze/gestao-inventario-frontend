@@ -18,12 +18,14 @@ import { UsuarioResponsavelType } from "@/types/usuario_responsavel";
 import Loader from "@/components/Loader";
 import { TablePagination } from "@mui/material";
 import { SyncLoader } from "react-spinners";
+import { useSearchParams } from "react-router-dom";
 
 type StatusType = "PENDENTE" | "CONFERIDO" | "NAO_LOCALIZADO" | "DIVERGENTE" | "SOB_MANUTENCAO";
 
 const AuditoriaList = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingNewCampaing, setLoadingNewCampaing] = useState<boolean>(false);
+  const [loadingFinishCampaing, setLoadingFinishCampaing] = useState<boolean>(false);
   const [auditorias, setAuditorias] = useState<AuditoriaType[]>([]);
   const [auditoriaSelecionada, setAuditoriaSelecionada] = useState<AuditoriaType | null>(null);
 
@@ -39,6 +41,8 @@ const AuditoriaList = () => {
   const [filter, setFilter] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, pageNumber: number) => {
     setPage(pageNumber);
@@ -69,6 +73,8 @@ const AuditoriaList = () => {
       return 0;
     }
   };
+
+  const auditoriaIdParam = searchParams.get("auditoriaId");
 
   const loadAuditorias = useCallback(() => {
     setLoading(true);
@@ -166,6 +172,29 @@ const AuditoriaList = () => {
       });
   };
 
+  const finishCampaing = () => {
+    setLoadingFinishCampaing(true);
+
+    const requestParams: AxiosRequestConfig = {
+      url: `/auditoria/encerrar/${auditoriaSelecionada?.id}`,
+      method: "POST",
+      withCredentials: true,
+    };
+
+    requestBackend(requestParams)
+      .then((res) => {
+        toast.success("Campanha " + auditoriaSelecionada?.ano + " - " + auditoriaSelecionada?.quadrimestre + " foi encerrada com sucesso.");
+        loadAuditorias();
+      })
+      .catch((err) => {
+        const errorMsg = (err as Error).message || "Erro desconhecido ao tentar finalizar a campanha de auditoria";
+        toast.error(errorMsg);
+      })
+      .finally(() => {
+        setLoadingFinishCampaing(false);
+      });
+  };
+
   useEffect(() => {
     async function getUsuariosResponsaveis() {
       setUsuariosResponsaveis([]);
@@ -216,6 +245,20 @@ const AuditoriaList = () => {
     getLocalizacoes();
   }, [selectedSetor]);
 
+  useEffect(() => {
+    if (!auditoriaIdParam) return;
+    if (auditorias.length === 0) return;
+
+    // Evita sobrescrever seleção manual
+    if (auditoriaSelecionada) return;
+
+    const auditoriaEncontrada = auditorias.find((a) => String(a.id) === auditoriaIdParam);
+
+    if (auditoriaEncontrada) {
+      setAuditoriaSelecionada(auditoriaEncontrada);
+    }
+  }, [auditoriaIdParam, auditorias, auditoriaSelecionada]);
+
   return (
     <div className="page page-auditoria">
       <div className="menu-lateral-auditorias">
@@ -228,7 +271,10 @@ const AuditoriaList = () => {
                 <button
                   key={auditoria.id}
                   className={`menu-quadrimestre-item ${auditoriaSelecionada?.id === auditoria.id ? "active" : ""}`}
-                  onClick={() => setAuditoriaSelecionada(auditoria)}
+                  onClick={() => {
+                    setAuditoriaSelecionada(auditoria);
+                    setSearchParams({ auditoriaId: String(auditoria.id) });
+                  }}
                 >
                   <i className="bi bi-calendar" /> {ano} - {auditoria.quadrimestre}
                 </button>
@@ -243,16 +289,33 @@ const AuditoriaList = () => {
             <h2 className="page-title">
               Auditoria {auditoriaSelecionada ? auditoriaSelecionada.ano + " - " + auditoriaSelecionada.quadrimestre : ""}
             </h2>
-            {loadingNewCampaing ? (
-              <div className="loader-div" style={{ width: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <SyncLoader color="#02b3ff" loading={true} size={10} />
-              </div>
-            ) : (
-              <button className="nova-campanha-auditoria" type="button" onClick={() => handleNewCampaing()}>
-                <i className="bi bi-plus-circle-dotted" />
-                Nova campanha de auditoria
-              </button>
-            )}
+            <div style={{ display: "flex", flexDirection: "row-reverse" }}>
+              {loadingNewCampaing ? (
+                <div className="loader-div" style={{ width: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <SyncLoader color="#02b3ff" loading={true} size={10} />
+                </div>
+              ) : (
+                <button className="nova-campanha-auditoria" type="button" onClick={() => handleNewCampaing()}>
+                  <i className="bi bi-plus-circle-dotted" />
+                  Nova campanha de auditoria
+                </button>
+              )}
+              {loadingFinishCampaing ? (
+                <div className="loader-div" style={{ width: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <SyncLoader color="#02b3ff" loading={true} size={10} />
+                </div>
+              ) : (
+                <button
+                  className={`finalizar-campanha-auditoria ${auditoriaSelecionada === null ? "disabled-field" : ""}`}
+                  type="button"
+                  disabled={auditoriaSelecionada === null}
+                  onClick={() => finishCampaing()}
+                >
+                  <i className="bi bi-lock-fill"></i>
+                  Encerrar campanha de auditoria
+                </button>
+              )}
+            </div>
           </div>
           <span className="page-subtitle">Confira todos os processos de auditoria</span>
         </div>
@@ -413,7 +476,7 @@ const AuditoriaList = () => {
           ) : auditoriaSelecionada ? (
             <div className="lista-ativos">
               {paginatedData.map((ativo) => (
-                <CardAuditoriaAtivo key={ativo.id} ativo={ativo} />
+                <CardAuditoriaAtivo key={ativo.id} idAuditoria={auditoriaSelecionada.id} ativo={ativo} />
               ))}
             </div>
           ) : (

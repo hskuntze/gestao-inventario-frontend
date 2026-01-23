@@ -1,8 +1,10 @@
 import { AuditoriaAtivoType } from "@/types/auditoriaativo";
 import "./styles.css";
+import { Link } from "react-router-dom";
 
 interface Props {
   ativo: AuditoriaAtivoType;
+  idAuditoria: number;
 }
 
 const iconeAtivo: { [key: string]: string } = {
@@ -14,7 +16,15 @@ const iconeAtivo: { [key: string]: string } = {
   SOFTWARE: "bi bi-terminal",
 };
 
-const CardAuditoriaAtivo = ({ ativo }: Props) => {
+const tratarStatus: { [key: string]: string } = {
+  NAO_LOCALIZADO: "NÃO LOCALIZADO",
+  SOB_MANUTENCAO: "SOB MANUTENÇÃO",
+  CONFERIDO: "CONFERIDO",
+  PENDENTE: "PENDENTE",
+  DIVERGENTE: "DIVERGENTE",
+};
+
+const CardAuditoriaAtivo = ({ ativo, idAuditoria }: Props) => {
   return (
     <div className="card-auditoria-ativo-container">
       <div className="caa-esquerdo">
@@ -35,12 +45,16 @@ const CardAuditoriaAtivo = ({ ativo }: Props) => {
         </div>
       </div>
       <div className="caa-direito">
-        <div className={`tag-status-auditoria ${ativo.status.toLowerCase()}`}>
-          <span>{ativo.status}</span>
+        <div className={`tag-status-auditoria ${ativo.status.replace("_", "-").toLowerCase()}`}>
+          <span>{tratarStatus[ativo.status]}</span>
         </div>
-        <button className="botao-redirecionar-auditoria" type="button">
+        <Link
+          className={`botao-redirecionar-auditoria ${ativo.status !== "PENDENTE" ? "disabled-field" : ""}`}
+          type="button"
+          to={ativo.status === "PENDENTE" ? `/gestao-inventario/auditoria/ativo/${ativo.id}?auditoriaId=${idAuditoria}` : "#"}
+        >
           <i className="bi bi-card-checklist" />
-        </button>
+        </Link>
       </div>
     </div>
   );

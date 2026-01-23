@@ -89,6 +89,28 @@
   margin-right: 15px;
 }
 
+.tag-status-auditoria.conferido {
+  background-color: #0cb82341;
+  color: #0cb823;
+  border: 1px solid #0cb82341;
+  margin-right: 15px;
+}
+
+.tag-status-auditoria.nao-localizado {
+  background-color: #d8000086;
+  color: #501010;
+  border: 1px solid #d8000086;
+  margin-right: 15px;
+}
+
+.tag-status-auditoria.divergente {
+  background-color: #03a87145;
+  color: #03a871;
+  border: 1px solid #03a87145;
+  margin-right: 15px;
+}
+
+
 .botao-redirecionar-auditoria {
   background-color: #00964150;
   height: 50px;
