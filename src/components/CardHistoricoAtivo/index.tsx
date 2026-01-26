@@ -56,7 +56,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
       </div>
       <div className="historico-content">
         <span className="historico-content-title">{labels[element.operacao]}</span>
-        <span className="historico-content-info">{formatarData(element.createdAt)}</span>
+        <span className="historico-content-info">{formatarData(element.createdAt, true)}</span>
         {(element.operacao === "REGISTRO" || element.operacao === "DEVOLVER") && (
           <>
             <span className="historico-content-info">Setor: {element.area ?? "Sem setor"}</span>
@@ -70,10 +70,7 @@ const CardHistoricoAtivo = ({ element }: Props) => {
             <span className="historico-content-info">Localização: {element.localizacao}</span>
           </>
         )}
-        {element.operacao === "ARQUIVO EXCLUÍDO" && <span className="historico-content-info">Realizado por: {element.userNome}</span>}
-        {(element.operacao === "EM MANUTENÇÃO" || element.operacao === "RETIRADO MANUTENÇÃO") && (
-          <span className="historico-content-info">Realizado por: {element.userNome}</span>
-        )}
+        <span className="historico-content-info">Realizado por: {element.userNome}</span>
       </div>
     </div>
   );

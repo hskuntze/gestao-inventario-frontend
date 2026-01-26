@@ -8,6 +8,7 @@ import { requestBackend } from "@/utils/requests";
 import { toast } from "react-toastify";
 import Loader from "@/components/Loader";
 import { SolicitacaoType } from "@/types/solicitacao";
+import { Autocomplete, TextField } from "@mui/material";
 
 type FormData = {
   ativo: AtivoType;
@@ -120,6 +121,7 @@ const SolicitacoesForm = () => {
       .then((res) => {
         toast.success("Solicitação cadastrada.");
         setShowMensagemSucesso(true);
+        setMostrarPreview(false);
       })
       .catch((err) => {})
       .finally(() => {
@@ -137,7 +139,7 @@ const SolicitacoesForm = () => {
     <div className="page">
       <div className="page-header">
         <div className="header-content">
-          <h2>Solicitação de Ativo</h2>
+          <h2>Empréstimo de Ativo</h2>
           <div className="header-content-buttons">
             <Link to="/gestao-inventario/solicitacoes" type="button" className="voltar-button">
               Voltar
@@ -149,7 +151,7 @@ const SolicitacoesForm = () => {
         <div className="page-content">
           {showMensagemSucesso ? (
             <div className="cadastro-solicitacao-sucesso">
-              <span className="mensagem-cadastro-sucesso">Solicitação cadastrada com sucesso. Aguarde a avaliação.</span>
+              <span className="mensagem-cadastro-sucesso">Solicitação de empréstimo cadastrada com sucesso. Aguarde a avaliação.</span>
               <span className="mensagem-info-sucesso">Deseja realizar outra solicitação?</span>
               <div className="botoes-cadastro-sucesso">
                 <button type="button" className="button general-button pd-2" onClick={() => navigate("/gestao-inventario")}>
@@ -174,39 +176,45 @@ const SolicitacoesForm = () => {
                     control={control}
                     rules={{ required: "Campo obrigatório" }}
                     render={({ field }) => (
-                      <select
-                        id="ativo"
-                        className={`input-formulario ${errors.ativo ? "input-error" : ""}`}
-                        {...field}
-                        value={field.value?.id || ""}
-                        onChange={(e) => {
-                          const selectedId = Number(e.target.value);
-                          const ativoSelecionado = ativos.find((a) => a.id === selectedId) || null;
+                      <Autocomplete
+                        options={ativos.filter((a) => a.passivelEmprestimo)}
+                        getOptionLabel={(option) => `${option.descricao} - ${option.idPatrimonial}`}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        value={field.value || null}
+                        onChange={(_, newValue) => {
+                          field.onChange(newValue);
 
-                          if (ativoSelecionado !== null) {
-                            field.onChange(ativoSelecionado);
-                            setAtivoSelecionado(ativoSelecionado);
+                          if (newValue) {
+                            setAtivoSelecionado(newValue);
                             setMostrarPreview(true);
                           } else {
                             setMostrarPreview(false);
-
-                            setTimeout(() => {
-                              setAtivoSelecionado(null);
-                            }, 500);
+                            setAtivoSelecionado(null);
                           }
                         }}
-                      >
-                        <option value="">Selecione um ativo</option>
-                        {ativos &&
-                          ativos.length > 0 &&
-                          ativos
-                            .filter((a) => a.passivelEmprestimo === true)
-                            .map((a) => (
-                              <option key={a.id} value={a.id}>
-                                {a.descricao} - {a.idPatrimonial}
-                              </option>
-                            ))}
-                      </select>
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            padding: 0,
+                            border: "none",
+                            minHeight: "50px",
+                          },
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#fff",
+                            borderRadius: "10px",
+                            border: 0,
+                            fontSize: "14px",
+                            fontFamily: "Inter, sans-serif",
+                            minHeight: "50px",
+                          },
+                        }}
+                        classes={{
+                          root: `input-formulario ${errors.ativo ? "input-error" : ""}`,
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
                     )}
                   />
                   <div className="invalid-feedback d-block div-erro">{errors.ativo?.message}</div>
@@ -275,7 +283,7 @@ const SolicitacoesForm = () => {
             </div>
           )}
         </div>
-        <div className={`page-side ${mostrarPreview  ? "show" : ""}`}>
+        <div className={`page-side ${mostrarPreview ? "show" : ""}`}>
           <div className="solicitacao-ativo-pre-visualizacao">
             <div className="pre-vis-header">
               <i className={`${iconeAtivo[ativoSelecionado ? ativoSelecionado.categoria : "DEFAULT"]}`}></i>

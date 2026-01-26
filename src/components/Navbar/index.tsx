@@ -20,7 +20,13 @@ const Navbar = () => {
   const userData = getUserData();
 
   const isAdmin = hasAnyRoles([{ id: 1, autorizacao: "PERFIL_ADMIN" }]);
-  const isAdminTp = hasAnyRoles([{ id: 2, autorizacao: "PERFIL_ADMIN_TP" }]);
+  const isAnalista = hasAnyRoles([
+    { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+    { id: 5, autorizacao: "PERFIL_ANALISTA_TI" },
+    { id: 6, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_I" },
+    { id: 7, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_II" },
+    { id: 8, autorizacao: "PERFIL_ANALISTA_DOC" },
+  ]);
   const isGerente = hasAnyRoles([{ id: 3, autorizacao: "PERFIL_GERENTE" }]);
   const isUsuario = hasAnyRoles([{ id: 4, autorizacao: "PERFIL_USUARIO" }]);
 
@@ -58,7 +64,6 @@ const Navbar = () => {
 
   return (
     <nav className="navbar-container">
-
       {/* Caso seja o primeiro acesso do usuário, o logo não é link */}
       {userData.firstAccess ? (
         <div className="navbar-div-left">
@@ -74,7 +79,6 @@ const Navbar = () => {
         </Link>
       )}
       <div className="navbar-div-right">
-
         {/* Componente que muda o tema do site */}
         <ThemeSwitcher />
         <button className="navbar-button" onClick={() => setDropdown((prev) => !prev)}>
@@ -93,7 +97,7 @@ const Navbar = () => {
 
                 {/* Mostra as opções do menu de acordo com o perfil do usuário */}
                 <div className="configurations">
-                  {(isAdmin || isAdminTp) && (
+                  {(isAdmin || isAnalista) && (
                     <>
                       <Link to="/gestao-inventario/admin/cadastros" className="configuration-button">
                         <i className="bi bi-gear-fill" />
@@ -107,7 +111,7 @@ const Navbar = () => {
                     </>
                   )}
 
-                  {(isAdmin || isAdminTp || isUsuario) && (
+                  {(isAdmin || isAnalista || isUsuario) && (
                     <Link to="/gestao-inventario/usuario" className="configuration-button">
                       <i className="bi bi-person-lines-fill" />
                       <span>Meus Ativos</span>

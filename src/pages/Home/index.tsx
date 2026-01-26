@@ -198,7 +198,7 @@ const Home = () => {
             </Link>
             <Link to={"/gestao-inventario/solicitacao/formulario/create"}>
               <button type="button" className="button general-button auto-width pd-2">
-                Solicitar Ativo
+                Empréstimo de Ativo
               </button>
             </Link>
           </>

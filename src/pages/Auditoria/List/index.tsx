@@ -287,7 +287,7 @@ const AuditoriaList = () => {
         <div className="page-header">
           <div className="header-content">
             <h2 className="page-title">
-              Auditoria {auditoriaSelecionada ? auditoriaSelecionada.ano + " - " + auditoriaSelecionada.quadrimestre : ""}
+              Auditoria de Inventário {auditoriaSelecionada ? auditoriaSelecionada.ano + " - " + auditoriaSelecionada.quadrimestre : ""}
             </h2>
             <div style={{ display: "flex", flexDirection: "row-reverse" }}>
               {loadingNewCampaing ? (
@@ -297,7 +297,7 @@ const AuditoriaList = () => {
               ) : (
                 <button className="nova-campanha-auditoria" type="button" onClick={() => handleNewCampaing()}>
                   <i className="bi bi-plus-circle-dotted" />
-                  Nova campanha de auditoria
+                  Nova campanha de auditoria de inventário
                 </button>
               )}
               {loadingFinishCampaing ? (
@@ -312,7 +312,7 @@ const AuditoriaList = () => {
                   onClick={() => finishCampaing()}
                 >
                   <i className="bi bi-lock-fill"></i>
-                  Encerrar campanha de auditoria
+                  Encerrar campanha de auditoria de inventário
                 </button>
               )}
             </div>
@@ -369,7 +369,7 @@ const AuditoriaList = () => {
                 <option value="CONFERIDO">Conferido</option>
                 <option value="NAO_LOCALIZADO">Não Localizado</option>
                 <option value="DIVERGENTE">Divergente</option>
-                {/* <option value="SOB_MANUTENCAO">Sob Manutenção</option> */}
+                <option value="SOB_MANUTENCAO">Sob Manutenção</option>
               </select>
             </div>
             <div className="filtro-input-div form-floating">

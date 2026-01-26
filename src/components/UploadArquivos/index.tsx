@@ -37,6 +37,10 @@ interface UploadArquivosProps {
   submitParentForm?: () => void;
 }
 
+const isArquivoImutavel = (file: FilePreview) => {
+  return file.name.toUpperCase().includes("TERMO_CAUTELA") && file.name.toLowerCase().endsWith(".pdf");
+};
+
 const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilitado, reloadPage, submitParentForm }: UploadArquivosProps) => {
   const { control, handleSubmit, setValue, watch } = useForm<FormData>();
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
@@ -142,6 +146,11 @@ const UploadArquivos = ({ defaultFiles = [], tipoAtivo, idAtivo, ativoDesabilita
   const handleRemoveFile = (fileName: string) => {
     const file = filePreviews.find((f) => f.name === fileName);
     if (!file) return;
+
+    if (isArquivoImutavel(file)) {
+      toast.warn("Este arquivo é um Termo de Cautela e não pode ser excluído.");
+      return;
+    }
 
     // Se é arquivo novo (preview), só remove da lista
     if (file.isNew) {

@@ -197,6 +197,8 @@ const AtivoList = () => {
     if (filteredData) {
       const wb = XLSX.utils.book_new();
 
+      console.log(filteredData);
+
       const ativosProcessados = filteredData.map((a) => ({
         "ID Patrimonial": a.idPatrimonial,
         Categoria: a.categoria,
@@ -205,11 +207,11 @@ const AtivoList = () => {
         Localização: a.localizacao ? a.localizacao.nome : "-",
         "Usuário Responsável": a.usuarioResponsavel ? a.usuarioResponsavel.nome : "-",
         Contrato: a.contrato.numeroContrato,
-        Fornecedor: a.fornecedor.nome,
+        Fornecedor: a.fornecedor ? a.fornecedor.nome : "-",
         "Data de Aquisição": formatarData(a.dataAquisicao),
         "Data de devolução prevista": a.dataDevolucaoPrevista ? formatarData(a.dataDevolucaoPrevista) : "N/A",
         "Data de devolução realizada": a.dataDevolucaoRealizada ? formatarData(a.dataDevolucaoRealizada) : "N/A",
-        "Número de parte": a.numeroParte ?? "-",
+        "Número de parte": a.numeroParte === "" ? "-" : a.numeroParte,
         "Número de série": a.codigoSerie,
         "Estado de conservação": a.estadoConservacao ?? "N/A",
       }));
@@ -289,7 +291,7 @@ const AtivoList = () => {
         ["Data de Aquisição", formatarData(a.dataAquisicao)],
         ["Data de devolução prevista", a.dataDevolucaoPrevista ? formatarData(a.dataDevolucaoPrevista) : "N/A"],
         ["Data de devolução realizada", a.dataDevolucaoRealizada ? formatarData(a.dataDevolucaoRealizada) : "N/A"],
-        ["Número de parte", a.numeroParte ?? "-"],
+        ["Número de parte", a.numeroParte === "" ? "-" : a.numeroParte],
         ["Número de série", a.codigoSerie],
         ["Estado de conservação", a.estadoConservacao],
       ];

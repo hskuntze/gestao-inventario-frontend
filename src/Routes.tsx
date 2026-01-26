@@ -186,6 +186,10 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                  { id: 5, autorizacao: "PERFIL_ANALISTA_TI" },
+                  { id: 6, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_I" },
+                  { id: 7, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_II" },
+                  { id: 8, autorizacao: "PERFIL_ANALISTA_DOC" },
                   { id: 4, autorizacao: "PERFIL_USUARIO" },
                 ]}
                 isFirstAccess={isFirstAccess}
@@ -202,6 +206,10 @@ const Routes = () => {
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
                   { id: 4, autorizacao: "PERFIL_USUARIO" },
+                  { id: 5, autorizacao: "PERFIL_ANALISTA_TI" },
+                  { id: 6, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_I" },
+                  { id: 7, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_II" },
+                  { id: 8, autorizacao: "PERFIL_ANALISTA_DOC" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -230,6 +238,10 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                  { id: 5, autorizacao: "PERFIL_ANALISTA_TI" },
+                  { id: 6, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_I" },
+                  { id: 7, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_II" },
+                  { id: 8, autorizacao: "PERFIL_ANALISTA_DOC" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -245,6 +257,10 @@ const Routes = () => {
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
                   { id: 3, autorizacao: "PERFIL_GERENTE" },
+                  { id: 5, autorizacao: "PERFIL_ANALISTA_TI" },
+                  { id: 6, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_I" },
+                  { id: 7, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_II" },
+                  { id: 8, autorizacao: "PERFIL_ANALISTA_DOC" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >
@@ -259,6 +275,10 @@ const Routes = () => {
                 roles={[
                   { id: 1, autorizacao: "PERFIL_ADMIN" },
                   { id: 2, autorizacao: "PERFIL_ADMIN_TP" },
+                  { id: 5, autorizacao: "PERFIL_ANALISTA_TI" },
+                  { id: 6, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_I" },
+                  { id: 7, autorizacao: "PERFIL_ANALISTA_ADMINISTRACAO_II" },
+                  { id: 8, autorizacao: "PERFIL_ANALISTA_DOC" },
                 ]}
                 isFirstAccess={isFirstAccess}
               >

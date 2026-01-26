@@ -249,7 +249,7 @@ const AuditoriaForm = () => {
                     <option value="CONFERIDO">Conferido</option>
                     <option value="NAO_LOCALIZADO">Não Localizado</option>
                     <option value="DIVERGENTE">Divergente</option>
-                    <option value="SOB_MANUTENCAO">Sob Manutenção</option>
+                    <option value="SOB_MANUTENCAO">Em Manutenção</option>
                   </select>
                 )}
               />

@@ -191,35 +191,6 @@ const AtivoForm = () => {
     }
   };
 
-  /**
-   * Trata a ação de devolução do ativo
-   * 
-   * Endpoint: "/ativos/devolver"
-   */
-  const handleDevolver = () => {
-    let confirm = window.confirm("Deseja mesmo devolver este ativo? É uma operação irreversível.");
-
-    if (confirm) {
-      const requestParams: AxiosRequestConfig = {
-        url: "/ativos/devolver",
-        method: "POST",
-        withCredentials: true,
-        params: {
-          id: urlParams.id,
-        },
-      };
-
-      requestBackend(requestParams)
-        .then(() => {
-          toast.success("Ativo foi devolvido.");
-          navigate("/gestao-inventario/ativo");
-        })
-        .catch(() => {
-          toast.error("Erro ao tentar devolver este ativo.");
-        });
-    }
-  };
-
   const handleReload = () => {
     navigate(0);
   };
@@ -228,8 +199,8 @@ const AtivoForm = () => {
    * onSubmit do formulário padrão (registro | edição). Caso a requisição seja realizada
    * com sucesso o usuário é redirecionado para a página de edição do ativo que acabou de
    * ser registrado. Isso acontece para que o usuário possa realizar o upload de arquivos,
-   * que só é habilitado para a edição de ativos. 
-   * @param formData: FormData 
+   * que só é habilitado para a edição de ativos.
+   * @param formData: FormData
    */
   const onSubmit = (formData: FormData) => {
     setLoading(true);
@@ -293,7 +264,7 @@ const AtivoForm = () => {
   /**
    * onSubmit para o form de movimentação do ativo. Isso ativa o recarregamento das informações do ativo,
    * bem como recarreg as informações de histórico do mesmo.
-   * @param formData 
+   * @param formData
    */
   const onSubmitMovimentacao = (formData: FormData) => {
     const requestParams: AxiosRequestConfig = {
@@ -323,7 +294,7 @@ const AtivoForm = () => {
 
   /**
    * onSubmit para o form de desabilitar o ativo
-   * @param formData 
+   * @param formData
    */
   const onSubmitDesabilitar = (formData: FormDataDesabilitar) => {
     let confirm = window.confirm("Deseja mesmo desabilitar este ativo? Trata-se de uma operação irreversível.");
@@ -353,7 +324,7 @@ const AtivoForm = () => {
 
   /**
    * onSubmit para o form de manutenção do ativo
-   * @param formData 
+   * @param formData
    */
   const onSubmitManutencao = (formData: FormDataManutencao) => {
     let confirm = window.confirm("Deseja mesmo colocar este ativo em manutenção?");
@@ -382,7 +353,7 @@ const AtivoForm = () => {
 
   /**
    * onSubmit para o form que retira o ativo da manutenção
-   * @param formData 
+   * @param formData
    */
   const onSubmitRetirarManutencao = () => {
     let confirm = window.confirm("Deseja mesmo retirar este ativo da manutenção?");
@@ -698,11 +669,6 @@ const AtivoForm = () => {
                             Desabilitar
                           </button>
                         )}
-                        {ativo?.tipoAtivo === "tl" && (
-                          <button type="button" className="devolver-button" onClick={handleDevolver}>
-                            Devolver
-                          </button>
-                        )}
                       </div>
                     )}
                   </>
@@ -737,7 +703,6 @@ const AtivoForm = () => {
               <option value="MOVIMENTAR">Movimentação</option>
               {!ativo?.manutencao && <option value="MANUTENÇÃO">Manutenção</option>}
               {ativo?.manutencao && <option value="RETIRAR MANUTENÇÃO">Retirar da Manutenção</option>}
-              <option value="ESTOQUE">Estoque</option>
             </select>
           </div>
           {tipoMovimentar === "MOVIMENTAR" && (
@@ -1441,13 +1406,15 @@ const AtivoForm = () => {
                   <span className="form-title">Histórico do Ativo</span>
                   <div className="historico-body">
                     {ativo && historicoAtivo ? (
-                      historicoAtivo.map((h) => <CardHistoricoAtivo key={h.id} element={h} />)
+                      [...historicoAtivo]
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .map((h) => <CardHistoricoAtivo key={h.id} element={h} />)
                     ) : (
                       <div className="no-info">Sem histórico a ser exibido</div>
                     )}
                   </div>
                 </div>
-                
+
                 {/* SE ESTIVER EM MODO DE EDIÇÃO O COMPONENTE DE QRCODE (TAG) É EXIBIDO */}
                 {ativo && (
                   <div className="content-container qr-container">

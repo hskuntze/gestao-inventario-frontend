@@ -226,7 +226,7 @@ const PageUsuario = () => {
             </button>
             <Link to={"/gestao-inventario/ativo/solicitacao/formulario/create"}>
               <button type="button" className="button submit-button auto-width pd-2">
-                Solicitar Ativo
+                Empréstimo de Ativo
               </button>
             </Link>
           </div>

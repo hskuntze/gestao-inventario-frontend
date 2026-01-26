@@ -18,7 +18,7 @@ const iconeAtivo: { [key: string]: string } = {
 
 const tratarStatus: { [key: string]: string } = {
   NAO_LOCALIZADO: "NÃO LOCALIZADO",
-  SOB_MANUTENCAO: "SOB MANUTENÇÃO",
+  SOB_MANUTENCAO: "EM MANUTENÇÃO",
   CONFERIDO: "CONFERIDO",
   PENDENTE: "PENDENTE",
   DIVERGENTE: "DIVERGENTE",
@@ -45,7 +45,10 @@ const CardAuditoriaAtivo = ({ ativo, idAuditoria }: Props) => {
         </div>
       </div>
       <div className="caa-direito">
-        <div className={`tag-status-auditoria ${ativo.status.replace("_", "-").toLowerCase()}`}>
+        <div
+          className={`tag-status-auditoria ${ativo.status.replace("_", "-").toLowerCase()}`}
+          title={ativo.status === "SOB_MANUTENCAO" ? "Retire o ativo da manutenção" : ""}
+        >
           <span>{tratarStatus[ativo.status]}</span>
         </div>
         <Link

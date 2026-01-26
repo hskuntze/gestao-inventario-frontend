@@ -14,25 +14,40 @@ import { AuditoriaAtivoType } from "@/types/auditoriaativo";
  * @param date - String
  * @returns String formatada
  */
-export const formatarData = (date: string) => {
-  if (date && date !== "-" && date !== "00:00:00") {
-    let containsT = date.includes("T");
-    let containsSpace = date.includes(" ");
-    if (containsSpace) {
-      const [dt, time] = date.split(" ");
-      const [year, month, day] = dt.split("-");
-      return `${day}/${month}/${year}`;
-    } else if (!containsT) {
-      const [year, month, day] = date.split("-"); // Divide a string em ano, mês e dia
-      return `${day}/${month}/${year}`;
-    } else {
-      let aux = date.split("T");
-      const [year, month, day] = aux[0].split("-");
-      return `${day}/${month}/${year}`;
-    }
-  } else {
+export const formatarData = (date: string, mostrarHora: boolean = false) => {
+  if (!date || date === "-" || date === "00:00:00") {
     return "-";
   }
+
+  let dataParte = "";
+  let horaParte = "";
+
+  // Caso: yyyy-MM-dd HH:mm:ss
+  if (date.includes(" ")) {
+    const [dt, time] = date.split(" ");
+    dataParte = dt;
+    horaParte = time;
+  }
+  // Caso: yyyy-MM-ddTHH:mm:ss
+  else if (date.includes("T")) {
+    const [dt, time] = date.split("T");
+    dataParte = dt;
+    horaParte = time;
+  }
+  // Caso: yyyy-MM-dd
+  else {
+    dataParte = date;
+  }
+
+  const [year, month, day] = dataParte.split("-");
+  let dataFormatada = `${day}/${month}/${year}`;
+
+  if (mostrarHora && horaParte) {
+    const [hora, minuto] = horaParte.split(":");
+    dataFormatada += ` ${hora}:${minuto}`;
+  }
+
+  return dataFormatada;
 };
 
 export const tiposAtivo: { [key: string]: string } = {

@@ -110,6 +110,12 @@
   margin-right: 15px;
 }
 
+.tag-status-auditoria.sob-manutencao {
+  background-color: #ffffff3a;
+  color: #fff;
+  border: 1px solid #ffffff3a;
+  margin-right: 15px;
+}
 
 .botao-redirecionar-auditoria {
   background-color: #00964150;
